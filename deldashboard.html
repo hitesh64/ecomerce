@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KICKS | Partner App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        
+        /* Smooth GPU Animations */
+        .slide-up { 
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            will-change: transform, opacity;
+            transform: translateZ(0); /* Hardware Acceleration */
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .status-btn { transition: all 0.2s; }
+        .status-btn:active { transform: scale(0.95); }
+        
+        /* Sidebar Animations */
+        #sidebar-overlay { transition: opacity 0.3s ease; }
+        #sidebar-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Profile Edit Styles */
+        .profile-input:disabled { background-color: transparent; border-color: transparent; color: #111827; }
+        .profile-input:enabled { background-color: #fff; border-color: #e5e7eb; }
+        
+        /* Tabs */
+        .tab-active { background-color: black; color: white; }
+        .tab-inactive { background-color: #f3f4f6; color: #6b7280; }
+        
+        /* Utility */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        input:focus, textarea:focus { font-size: 16px; } /* Prevents iOS zoom */
+    </style>
+</head>
+<body class="h-screen flex flex-col text-gray-900 overflow-hidden">
+
+    <div id="auth-view" class="fixed inset-0 z-50 bg-white flex flex-col p-8 justify-center overflow-y-auto">
+        <div class="max-w-sm mx-auto w-full text-center">
+            <div class="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-xl">
+                <i data-lucide="truck" class="w-10 h-10 text-white"></i>
+            </div>
+            <h1 class="text-3xl font-black mb-2">Delivery Partner</h1>
+            
+            <div id="login-form-container">
+                <p class="text-gray-500 font-medium mb-6">Login to start your shift</p>
+              <div id="g_id_onload" data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com" ...>
+                <div class="g_id_signin mb-6" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
+
+                <div class="relative flex py-2 items-center mb-6">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Email</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <form onsubmit="handleManualLogin(event)" class="space-y-4">
+                    <input type="email" id="login-email" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Email" required>
+                    <input type="password" id="login-pass" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Password" required>
+                    <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Login</button>
+                </form>
+                <p id="login-error" class="mt-4 text-xs text-red-600 font-bold hidden"></p>
+                <p class="mt-4 text-xs text-gray-400">New user? <button onclick="toggleAuthMode('register')" class="text-blue-600 font-bold underline">Register Here</button></p>
+            </div>
+
+            <div id="register-form-container" class="hidden">
+                <p class="text-gray-500 font-medium mb-6">Create a new account</p>
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <input type="text" id="reg-name" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Full Name" required>
+                    <input type="email" id="reg-email" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Email Address" required>
+                    <input type="password" id="reg-pass" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Create Password" required>
+                    <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Create Account</button>
+                </form>
+                <p class="mt-4 text-xs text-gray-400">Already have an account? <button onclick="toggleAuthMode('login')" class="text-blue-600 font-bold underline">Login Here</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="setup-view" class="fixed inset-0 z-[60] bg-white hidden flex flex-col p-8 justify-center">
+        <div class="max-w-sm mx-auto w-full overflow-y-auto max-h-screen custom-scroll">
+            <button onclick="handleLogout()" class="mb-6 flex items-center gap-2 text-gray-500 font-bold text-sm hover:text-black transition group">
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                </div>
+                Back to Login
+            </button>
+            <h2 class="text-2xl font-black mb-2">Complete Profile</h2>
+            <p class="text-gray-500 text-sm mb-6">We need your details to approve your application.</p>
+            
+            <form onsubmit="submitProfile(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Full Name</label>
+                    <input type="text" id="setup-name" class="w-full p-3 bg-gray-50 border rounded-2xl font-bold outline-none" required>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Mobile Number</label>
+                    <input type="tel" id="setup-mobile" pattern="[0-9]{10}" class="w-full p-3 bg-gray-50 border rounded-2xl font-bold outline-none" placeholder="9876543210" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase ml-1">State</label>
+                        <select id="setup-state" class="w-full p-3 bg-gray-50 border rounded-2xl font-bold outline-none" required>
+                            <option value="">Select</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="UP">Uttar Pradesh</option>
+                            <option value="Gujarat">Gujarat</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase ml-1">City</label>
+                        <input type="text" id="setup-city" class="w-full p-3 bg-gray-50 border rounded-2xl font-bold outline-none" placeholder="e.g. Pune" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">Vehicle Type</label>
+                    <select id="setup-vehicle" class="w-full p-3 bg-gray-50 border rounded-2xl font-bold outline-none">
+                        <option value="Bike">Bike / Scooter</option>
+                        <option value="Cycle">Bicycle</option>
+                        <option value="Electric">Electric Scooter</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-1">About Me (Bio)</label>
+                    <textarea id="setup-bio" rows="2" class="w-full p-3 bg-gray-50 border rounded-2xl font-bold outline-none text-sm" placeholder="Brief description (e.g. 2 years experience)..."></textarea>
+                </div>
+                <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg mt-4 status-btn">Submit Application</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="waiting-view" class="fixed inset-0 z-[60] bg-gray-50 hidden flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 animate-pulse">
+            <i data-lucide="hourglass" class="w-10 h-10"></i>
+        </div>
+        <h2 class="text-2xl font-black mb-2">Verification Pending</h2>
+        <p class="text-gray-500 text-sm max-w-xs mb-8">Your profile is under review by the KICKS Admin team. You will be notified once approved.</p>
+        <button onclick="handleLogout()" class="px-6 py-2 border-2 border-gray-200 rounded-full font-bold text-gray-500 hover:bg-white">Check Again Later</button>
+    </div>
+
+    <div id="sidebar-container" class="fixed inset-0 z-[80] hidden">
+        <div id="sidebar-overlay" class="absolute inset-0 bg-black/50 opacity-0" onclick="toggleSidebar(false)"></div>
+        <div id="sidebar-panel" class="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl transform -translate-x-full flex flex-col">
+            <div class="p-6 bg-black text-white">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold" id="sidebar-avatar">D</div>
+                    <div>
+                        <h3 class="font-bold text-lg" id="sidebar-name">Partner</h3>
+                        <p class="text-xs text-gray-400" id="sidebar-email">email@test.com</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-bold bg-gray-800 p-2 rounded-lg">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    Status: Online
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-4">
+                <nav class="space-y-1 px-4">
+                    <button onclick="toggleSidebar(false)" class="w-full flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-xl transition font-bold text-sm">
+                        <i data-lucide="home" class="w-5 h-5 text-gray-500"></i> Home Dashboard
+                    </button>
+                    <button onclick="openShiftModal(); toggleSidebar(false)" class="w-full flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-xl transition font-bold text-sm">
+                        <i data-lucide="clock" class="w-5 h-5 text-gray-500"></i> Book Slots
+                    </button>
+                    <button onclick="toggleSidebar(false); openProfileModal()" class="w-full flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-xl transition font-bold text-sm">
+                        <i data-lucide="user-circle" class="w-5 h-5 text-gray-500"></i> My Profile
+                    </button>
+                    <button onclick="toggleSidebar(false); openHistoryModal()" class="w-full flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-xl transition font-bold text-sm">
+                        <i data-lucide="package-check" class="w-5 h-5 text-gray-500"></i> Delivery History
+                    </button>
+                    <button onclick="toggleSidebar(false); openEarningsModal()" class="w-full flex items-center gap-4 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-xl transition font-bold text-sm">
+                        <i data-lucide="wallet" class="w-5 h-5 text-gray-500"></i> Earn History
+                    </button>
+                </nav>
+            </div>
+
+            <div class="p-6 border-t border-gray-100">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                </button>
+                <p class="text-center text-[10px] text-gray-300 mt-4 font-bold">VERSION 1.3.1 (Stable)</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-layout" class="hidden flex flex-col h-full max-w-md mx-auto w-full bg-gray-50 shadow-2xl relative">
+        <header class="bg-white px-5 py-4 sticky top-0 z-20 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="toggleSidebar(true)" class="p-2 -ml-2 rounded-full hover:bg-gray-100 transition">
+                    <i data-lucide="menu" class="w-6 h-6 text-gray-800"></i>
+                </button>
+                <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition" onclick="openProfileModal()">
+                    <div class="text-right">
+                        <h2 class="font-black text-sm" id="header-name">Partner</h2>
+                    </div>
+                    <div class="w-9 h-9 bg-black rounded-full flex items-center justify-center text-white font-bold shadow-md" id="header-avatar">D</div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-900 text-white p-4 rounded-xl flex justify-between items-center shadow-lg">
+                <div>
+                    <p class="text-gray-400 text-xs font-bold uppercase">Today's Wallet</p>
+                    <h3 class="text-2xl font-black mt-1" id="today-earnings">₹0</h3>
+                </div>
+                <div class="text-right">
+                    <p class="text-gray-400 text-xs font-bold uppercase">Rate</p>
+                    <p class="text-sm font-bold text-green-400">₹20 / Job</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="px-4 mt-4">
+            <div class="bg-gray-200/80 p-1 rounded-2xl flex font-bold text-sm">
+                <button onclick="switchTab('active')" id="tab-active" class="flex-1 py-2.5 rounded-xl bg-white shadow-sm transition text-black w-full">My Deliveries</button>
+                <button onclick="switchTab('pool')" id="tab-pool" class="hidden flex-1 py-2.5 rounded-xl text-gray-500 hover:text-black transition">New Orders</button>
+            </div>
+        </div>
+
+        <main class="flex-1 overflow-y-auto p-4 pb-24 relative" id="main-scroll-area">
+            <div id="view-active" class="space-y-6">
+                <div id="my-orders-list" class="space-y-5"></div>
+                <div id="my-orders-empty" class="hidden flex flex-col items-center justify-center py-10 text-center opacity-60">
+                    <i data-lucide="package-open" class="w-12 h-12 text-gray-300 mb-2"></i>
+                    <h3 class="font-bold text-gray-900 text-sm">No Active Assignments</h3>
+                    <p class="text-xs text-gray-500">Wait for Admin to assign orders.</p>
+                </div>
+            </div>
+
+            <div id="view-pool" class="hidden space-y-4">
+                <div class="flex justify-between items-end px-1">
+                    <h3 class="font-bold text-xs uppercase text-gray-400 tracking-wider">Available Jobs</h3>
+                    <button onclick="refreshData(true)" class="text-blue-600 text-xs font-bold flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh</button>
+                </div>
+                <div id="pool-list" class="space-y-3"></div>
+                <div id="pool-empty" class="hidden text-center py-20 text-gray-400">No new orders found.</div>
+            </div>
+        </main>
+    </div>
+
+    <div id="shift-modal" class="fixed inset-0 z-[90] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeShiftModal()"></div>
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative z-10 m-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Book Slot</h2>
+                <button onclick="closeShiftModal()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Select Shift</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="selectShiftType(this, 'Morning')" class="shift-type-btn p-3 border rounded-xl text-sm font-bold hover:border-black">Morning</button>
+                        <button onclick="selectShiftType(this, 'Evening')" class="shift-type-btn p-3 border rounded-xl text-sm font-bold hover:border-black">Evening</button>
+                        <button onclick="selectShiftType(this, 'Night')" class="shift-type-btn p-3 border rounded-xl text-sm font-bold hover:border-black">Night</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Work Hours</label>
+                    <select id="shift-hours" class="w-full p-3 bg-gray-50 border rounded-xl font-bold text-sm outline-none">
+                        <option>Select Shift First</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="saveShift()" class="w-full py-3 bg-black text-white font-bold rounded-xl status-btn">Confirm Slot</button>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="fixed inset-0 z-[90] hidden flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeProfileModal()"></div>
+        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-6 relative z-10 sm:m-4 shadow-2xl slide-up">
+            <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <div class="flex justify-between items-start mb-6">
+                <h2 class="text-2xl font-black">My Profile</h2>
+                <div class="flex gap-2">
+                    <button onclick="toggleProfileEditMode()" id="btn-edit-profile" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 text-blue-600"><i data-lucide="pencil" class="w-5 h-5"></i></button>
+                    <button onclick="closeProfileModal()" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center mb-6">
+                <div class="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center text-3xl font-bold mb-3 shadow-lg" id="profile-avatar">D</div>
+                <h3 class="font-bold text-xl" id="profile-name">Name</h3>
+                <p class="text-sm text-gray-500" id="profile-email">email@example.com</p>
+                <span class="mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full"></span> Active Partner</span>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">State</span>
+                        <input id="profile-state" class="profile-input font-bold text-sm w-full border rounded p-1" disabled value="State">
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">City</span>
+                        <input id="profile-city" class="profile-input font-bold text-sm w-full border rounded p-1" disabled value="City">
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">Vehicle</span>
+                        <select id="profile-vehicle" class="profile-input font-bold text-sm w-full border rounded p-1" disabled>
+                            <option value="Bike">Bike</option>
+                            <option value="Cycle">Cycle</option>
+                            <option value="Electric">Electric</option>
+                        </select>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">Mobile</span>
+                        <input id="profile-phone" class="profile-input font-bold text-sm w-full border rounded p-1" disabled value="Mobile">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">My Description (Bio)</label>
+                    <textarea id="profile-bio" rows="3" class="w-full p-3 bg-white border-2 border-gray-100 rounded-xl font-medium text-sm focus:border-black outline-none transition" placeholder="Tell us about yourself..."></textarea>
+                </div>
+            </div>
+
+            <button onclick="saveProfileChanges()" id="btn-save-profile" class="w-full mt-6 py-3 bg-black text-white font-bold rounded-xl shadow-lg status-btn">Save Changes</button>
+        </div>
+    </div>
+
+    <div id="history-modal" class="fixed inset-0 z-[90] hidden flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeHistoryModal()"></div>
+        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-6 relative z-10 sm:m-4 shadow-2xl h-[85vh] flex flex-col slide-up">
+            <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-black flex items-center gap-2"><i data-lucide="package-check" class="w-6 h-6"></i> History</h2>
+                <button onclick="closeHistoryModal()" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="flex rounded-xl bg-gray-100 p-1 mb-4 font-bold text-xs">
+                <button onclick="switchHistoryTab('completed')" id="hist-tab-completed" class="flex-1 py-2 rounded-lg tab-active transition">Delivered</button>
+                <button onclick="switchHistoryTab('returned')" id="hist-tab-returned" class="flex-1 py-2 rounded-lg tab-inactive transition">Returned</button>
+                <button onclick="switchHistoryTab('pending')" id="hist-tab-pending" class="flex-1 py-2 rounded-lg tab-inactive transition">Pending</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scroll" id="history-list-container">
+                </div>
+        </div>
+    </div>
+
+    <div id="earnings-modal" class="fixed inset-0 z-[90] hidden flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 bg-black/60" onclick="closeEarningsModal()"></div>
+        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-6 relative z-10 sm:m-4 shadow-2xl h-[80vh] flex flex-col slide-up">
+            <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black flex items-center gap-2"><i data-lucide="wallet" class="w-6 h-6"></i> Earnings History</h2>
+                <button onclick="closeEarningsModal()" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="bg-black text-white p-4 rounded-xl mb-6 shadow-lg">
+                 <p class="text-gray-400 text-xs font-bold uppercase">Total Lifetime Earnings</p>
+                 <h3 class="text-3xl font-black mt-1" id="lifetime-earnings">₹0</h3>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scroll">
+                <h3 class="font-bold text-xs text-gray-400 uppercase mb-3">Transaction History</h3>
+                <div id="earnings-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="driver-bill-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] slide-up">
+            <div class="p-5 border-b flex justify-between items-center bg-gray-50">
+                <div>
+                    <h3 class="font-black text-xl text-gray-900">Order Invoice</h3>
+                    <p class="text-xs text-gray-500" id="bill-order-id">#ID</p>
+                </div>
+                <button onclick="closeDriverBill()" class="p-2 hover:bg-gray-200 rounded-full transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            
+            <div id="driver-bill-content" class="p-6 overflow-y-auto custom-scroll space-y-6 bg-white">
+                </div>
+
+            <div class="p-4 border-t bg-gray-50">
+                <button onclick="closeDriverBill()" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Close Invoice</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+ const API_URL = 'https://ecomerce-mocha-one.vercel.app/api';
+    const DB_SESSION = 'kicks_del_session'; 
+    const DELIVERY_RATE = 20; 
+    
+    // Stability Variables
+    let globalOrdersCache = []; 
+    let lastOrdersHash = ""; // To prevent unnecessary re-renders
+    let currentUser = null;
+    let isEditingProfile = false;
+
+    // --- INIT & AUTH ---
+    async function init() {
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+        
+        const session = localStorage.getItem(DB_SESSION);
+        if(session) {
+            currentUser = JSON.parse(session);
+            try {
+                // Initial check
+                const res = await fetch(`${API_URL}/driver/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: currentUser.email, password: currentUser.password })
+                });
+
+                if(res.ok) {
+                    const dbUser = await res.json();
+                    currentUser = dbUser;
+                    localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
+                    routeUser(currentUser);
+                } else {
+                    handleLogout();
+                }
+            } catch(e) {
+                console.error("Connection Error", e);
+                // Allow offline usage if session exists but network fails? 
+                // For now, let's just proceed with cached user but try to route.
+                routeUser(currentUser);
+            }
+        } else {
+            document.getElementById('auth-view').classList.remove('hidden');
+        }
+    }
+
+    function routeUser(user) {
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('setup-view').classList.add('hidden');
+        document.getElementById('waiting-view').classList.add('hidden');
+        document.getElementById('app-layout').classList.add('hidden');
+
+        if(user.status === 'inactive') user.status = 'pending'; 
+
+        if (!user.mobile && !user.phone) { 
+            document.getElementById('setup-name').value = user.name || "";
+            document.getElementById('setup-view').classList.remove('hidden');
+        } 
+        else if (user.status === 'pending' || user.status === 'Pending') {
+            document.getElementById('waiting-view').classList.remove('hidden');
+        } 
+        else if (user.status === 'active' || user.status === 'Active') {
+            document.getElementById('app-layout').classList.remove('hidden');
+            document.getElementById('header-name').innerText = user.name;
+            document.getElementById('header-avatar').innerText = user.name[0].toUpperCase();
+            
+            // Sidebar Data
+            document.getElementById('sidebar-name').innerText = user.name;
+            document.getElementById('sidebar-email').innerText = user.email;
+            document.getElementById('sidebar-avatar').innerText = user.name[0].toUpperCase();
+
+            refreshData(true); // Force first load
+            // Polling - Adjusted to 4 seconds to reduce load
+            window.orderInterval = setInterval(() => refreshData(false), 4000);
+        } else if (user.status === 'blocked') {
+            alert("Your account has been suspended by Admin.");
+            handleLogout();
+        } else {
+             document.getElementById('waiting-view').classList.remove('hidden');
+        }
+    }
+
+    // --- SIDEBAR LOGIC ---
+    function toggleSidebar(show) {
+        const container = document.getElementById('sidebar-container');
+        const overlay = document.getElementById('sidebar-overlay');
+        const panel = document.getElementById('sidebar-panel');
+        if (show) {
+            container.classList.remove('hidden');
+            setTimeout(() => { overlay.classList.remove('opacity-0'); panel.classList.remove('-translate-x-full'); }, 10);
+        } else {
+            overlay.classList.add('opacity-0'); panel.classList.add('-translate-x-full');
+            setTimeout(() => { container.classList.add('hidden'); }, 300);
+        }
+    }
+
+    // --- EARNINGS LOGIC ---
+    function openEarningsModal() { document.getElementById('earnings-modal').classList.remove('hidden'); renderEarningsHistory(); }
+    function closeEarningsModal() { document.getElementById('earnings-modal').classList.add('hidden'); }
+
+    function renderEarningsHistory() {
+        const list = document.getElementById('earnings-list');
+        const totalDisplay = document.getElementById('lifetime-earnings');
+        
+        if(!globalOrdersCache || globalOrdersCache.length === 0) { 
+            list.innerHTML = '<p class="text-center text-gray-400 py-10">Loading...</p>'; 
+            return; 
+        }
+        
+        // Filter Orders for Current Driver
+        const myJobs = globalOrdersCache.filter(o => o.assignedTo === currentUser.email);
+
+        let totalPaid = 0;
+        let totalPending = 0;
+        let historyHTML = '';
+
+        if(myJobs.length === 0) {
+            list.innerHTML = '<p class="text-center text-gray-400 py-10 text-xs">No earnings recorded yet.</p>';
+            totalDisplay.innerText = "₹0";
+            return;
+        }
+
+        // Sort by date (latest first)
+        myJobs.reverse().forEach(o => {
+            const s = o.status;
+            // --- ENTRY 1: DELIVERY DROP (₹20) ---
+            // If Delivered or returned, delivery phase is done
+            const deliveryDone = ['Delivered', 'Return Requested', 'Return Approved', 'Return Assigned', 'Pickup Assigned', 'Return Picked Up', 'Return Completed', 'Returned', 'Return Rejected', 'Return Cancelled'].includes(s);
+            
+            if (deliveryDone || o.isDeliveryVerified) {
+                const isPaid = o.isDeliveryVerified;
+                
+                if (isPaid) totalPaid += DELIVERY_RATE;
+                else totalPending += DELIVERY_RATE;
+
+                const badgeColor = isPaid ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-800";
+                const statusText = isPaid ? "CREDITED" : "PENDING VERIFICATION";
+                const amountColor = isPaid ? "text-green-600" : "text-gray-400";
+
+                historyHTML += `
+                <div class="bg-white p-4 rounded-xl flex justify-between items-center border border-gray-100 shadow-sm mb-3">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-bold text-sm">Order #${o.id || String(o._id).substr(-6)}</span>
+                            <span class="text-[10px] ${badgeColor} px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                ${isPaid ? '<i data-lucide="check-circle" class="w-3 h-3"></i>' : '<i data-lucide="clock" class="w-3 h-3"></i>'} ${statusText}
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wide text-green-600">Type: Delivery Drop</p>
+                        <p class="text-[10px] text-gray-400 font-medium">${o.date || 'Date N/A'}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-lg font-black ${amountColor}">+₹${DELIVERY_RATE}</span>
+                    </div>
+                </div>`;
+            }
+
+            // --- ENTRY 2: RETURN PICKUP (₹20) ---
+            const returnDone = ['Return Completed', 'Returned'].includes(s); 
+
+            if (returnDone || o.isReturnVerified) { 
+                const isReturnPaid = o.isReturnVerified; 
+
+                if (isReturnPaid) totalPaid += DELIVERY_RATE;
+                else totalPending += DELIVERY_RATE;
+
+                const badgeColor = isReturnPaid ? "bg-blue-100 text-blue-700" : "bg-yellow-100 text-yellow-800";
+                const statusText = isReturnPaid ? "CREDITED" : "PENDING VERIFICATION";
+                const amountColor = isReturnPaid ? "text-blue-600" : "text-gray-400";
+
+                historyHTML += `
+                <div class="bg-blue-50/50 p-4 rounded-xl flex justify-between items-center border border-blue-100 shadow-sm mb-3">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-bold text-sm">Order #${o.id || String(o._id).substr(-6)}</span>
+                            <span class="text-[10px] ${badgeColor} px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                ${isReturnPaid ? '<i data-lucide="check-circle" class="w-3 h-3"></i>' : '<i data-lucide="clock" class="w-3 h-3"></i>'} ${statusText}
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wide">Type: Return Pickup</p>
+                        <p class="text-[10px] text-gray-400 font-medium">${o.date || 'Date N/A'}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-lg font-black ${amountColor}">+₹${DELIVERY_RATE}</span>
+                    </div>
+                </div>`;
+            }
+        });
+
+        // Update UI
+        list.innerHTML = historyHTML || '<p class="text-center text-gray-400 py-10">No earnings found.</p>';
+        
+        // Total Wallet Display
+        totalDisplay.innerHTML = `₹${totalPaid}`;
+        
+        // Show pending if exists
+        if(totalPending > 0) {
+            totalDisplay.innerHTML += `<div class='text-sm font-bold text-yellow-500 mt-1'>+ ₹${totalPending} Pending Approval</div>`;
+        }
+        
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // --- HISTORY MODAL LOGIC ---
+    function openHistoryModal() {
+        document.getElementById('history-modal').classList.remove('hidden');
+        switchHistoryTab('completed'); // Default
+    }
+    function closeHistoryModal() { document.getElementById('history-modal').classList.add('hidden'); }
+
+    // --- UPDATED HISTORY LOGIC ---
+    function switchHistoryTab(type) {
+        // 1. UI Tabs Styling
+        ['completed', 'returned', 'pending'].forEach(t => {
+            const btn = document.getElementById(`hist-tab-${t}`);
+            if(t === type) { 
+                btn.classList.add('tab-active'); 
+                btn.classList.remove('tab-inactive'); 
+            } else { 
+                btn.classList.remove('tab-active'); 
+                btn.classList.add('tab-inactive'); 
+            }
+        });
+        
+        const container = document.getElementById('history-list-container');
+        if(!globalOrdersCache || globalOrdersCache.length === 0) { 
+            container.innerHTML = '<p class="text-center text-gray-400 mt-10">Loading...</p>'; 
+            return; 
+        }
+
+        let filtered = [];
+
+        // 2. FILTERING LOGIC (ACCURATE)
+        if(type === 'completed') {
+            // Show if currently 'Delivered' OR if Delivery Payment is already Verified 
+            // (Even if status changed to Returned later, the delivery work was done)
+            filtered = globalOrdersCache.filter(o => 
+                o.assignedTo === currentUser.email && 
+                (o.status === 'Delivered' || o.isDeliveryVerified === true)
+            );
+        } 
+        else if(type === 'returned') {
+            // Show if status implies Return Work is done
+            filtered = globalOrdersCache.filter(o => 
+                o.assignedTo === currentUser.email && 
+                (o.status === 'Returned' || o.status === 'Return Completed' || o.isReturnVerified === true)
+            );
+        } 
+        else if(type === 'pending') {
+            // Active Jobs (Not Delivered, Not Returned, Not Cancelled)
+            filtered = globalOrdersCache.filter(o => 
+                o.assignedTo === currentUser.email && 
+                (o.status !== 'Delivered' && o.status !== 'Returned' && o.status !== 'Return Completed' && o.status !== 'Cancelled')
+            );
+        }
+
+        // 3. RENDER LIST
+        if(filtered.length === 0) {
+            container.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-60">
+                <i data-lucide="clipboard-x" class="w-12 h-12 text-gray-300 mb-2"></i>
+                <p class="text-sm font-bold text-gray-400">No ${type} history found</p>
+            </div>`;
+            lucide.createIcons();
+            return;
+        }
+
+        container.innerHTML = filtered.map(o => {
+            let statusBadge = '';
+            let isPaid = false;
+
+            // Determine Status Badge & Payment Status
+            if(type === 'completed') {
+                if(o.isDeliveryVerified) {
+                    statusBadge = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">PAID (+₹20)</span>`;
+                    isPaid = true;
+                } else {
+                    statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">PENDING VERIFICATION</span>`;
+                }
+            } else if(type === 'returned') {
+                if(o.isReturnVerified) {
+                    statusBadge = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">PAID (+₹20)</span>`;
+                    isPaid = true;
+                } else {
+                    statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">PENDING VERIFICATION</span>`;
+                }
+            } else {
+                statusBadge = `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">${o.status}</span>`;
+            }
+
+            return `
+                <div class="bg-white p-4 rounded-xl border ${isPaid ? 'border-green-200 shadow-sm' : 'border-gray-100'} mb-3">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="font-black text-sm">Order #${o.id || String(o._id).substr(-6)}</span>
+                            <p class="text-[10px] text-gray-400 mt-0.5">${o.date || 'Date N/A'}</p>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div class="flex gap-3 items-center mt-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                             <i data-lucide="${type==='returned' ? 'rotate-ccw' : 'map-pin'}" class="w-4 h-4 text-gray-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-bold text-gray-700 leading-tight line-clamp-1">${o.address || 'Unknown Address'}</p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">${o.customerName || 'Customer'}</p>
+                        </div>
+                        <span class="text-sm font-black ${isPaid ? 'text-green-600' : 'text-gray-400'}">₹20</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    // --- AUTH LOGIC ---
+    function toggleAuthMode(mode) {
+        document.getElementById('login-error').classList.add('hidden');
+        if (mode === 'register') {
+            document.getElementById('login-form-container').classList.add('hidden');
+            document.getElementById('register-form-container').classList.remove('hidden');
+        } else {
+            document.getElementById('register-form-container').classList.add('hidden');
+            document.getElementById('login-form-container').classList.remove('hidden');
+        }
+    }
+
+    function decodeJwtResponse(token) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    async function handleGoogleLogin(response) {
+        const data = decodeJwtResponse(response.credential);
+        try {
+            const res = await fetch(`${API_URL}/driver/google`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email: data.email, name: data.name })
+            });
+            const user = await res.json();
+            finalizeLogin(user);
+        } catch(err) { console.error(err); alert("Google Login Failed"); }
+    }
+
+    async function handleManualLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        const errorMsg = document.getElementById('login-error');
+        errorMsg.classList.add('hidden');
+        
+        try {
+            const res = await fetch(`${API_URL}/driver/login`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password: pass })
+            });
+            const data = await res.json();
+            if(!res.ok) {
+                errorMsg.innerText = data.message || "Login Failed";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            finalizeLogin(data);
+        } catch(err) { 
+            errorMsg.innerText = "Network Error"; 
+            errorMsg.classList.remove('hidden'); 
+        }
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
+        try {
+            const res = await fetch(`${API_URL}/driver/register`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, email, password: pass })
+            });
+            if(!res.ok) {
+                const errData = await res.json();
+                alert(errData.message || "Registration Failed");
+                return;
+            }
+            alert("Account Created!");
+            toggleAuthMode('login');
+        } catch(err) { alert("Connection Failed"); }
+    }
+
+    function finalizeLogin(user) {
+        localStorage.setItem(DB_SESSION, JSON.stringify(user));
+        currentUser = user;
+        routeUser(user);
+    }
+
+    // --- PROFILE SUBMISSION & UPDATES ---
+    async function submitProfile(e) {
+        e.preventDefault();
+        const name = document.getElementById('setup-name').value;
+        const mobile = document.getElementById('setup-mobile').value;
+        const vehicle = document.getElementById('setup-vehicle').value;
+        const city = document.getElementById('setup-city').value;
+        const state = document.getElementById('setup-state').value;
+        const bio = document.getElementById('setup-bio').value; 
+        if(!mobile || mobile.length !== 10) { alert("Invalid Mobile Number"); return; }
+
+        const updates = { email: currentUser.email, name, mobile, vehicle, city, state, bio, phone: mobile, status: 'pending' };
+        try {
+            const res = await fetch(`${API_URL}/driver/update`, {
+                method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(updates)
+            });
+            const updatedUser = await res.json();
+            currentUser = updatedUser;
+            localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
+            alert("Application Submitted!");
+            routeUser(currentUser);
+        } catch(err) { alert("Update Failed"); }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem(DB_SESSION);
+        if(window.orderInterval) clearInterval(window.orderInterval);
+        location.reload();
+    }
+
+    // --- PROFILE EDIT LOGIC ---
+    function openProfileModal() { 
+        if(!currentUser) return; 
+        document.getElementById('profile-avatar').innerText = currentUser.name[0].toUpperCase(); 
+        document.getElementById('profile-name').innerText = currentUser.name; 
+        document.getElementById('profile-email').innerText = currentUser.email; 
+        
+        // Fill Inputs
+        document.getElementById('profile-city').value = currentUser.city || ''; 
+        document.getElementById('profile-state').value = currentUser.state || ''; 
+        document.getElementById('profile-vehicle').value = currentUser.vehicle || 'Bike'; 
+        document.getElementById('profile-phone').value = currentUser.mobile || ''; 
+        document.getElementById('profile-bio').value = currentUser.bio || ''; 
+        
+        // Reset State
+        isEditingProfile = false;
+        disableProfileInputs(true);
+        
+        document.getElementById('profile-modal').classList.remove('hidden'); 
+    }
+    
+    function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
+
+    function toggleProfileEditMode() {
+        isEditingProfile = !isEditingProfile;
+        disableProfileInputs(!isEditingProfile);
+        
+        const btn = document.getElementById('btn-edit-profile');
+        if(isEditingProfile) {
+            btn.classList.add('bg-black', 'text-white');
+            btn.classList.remove('bg-gray-100', 'text-blue-600');
+        } else {
+            btn.classList.remove('bg-black', 'text-white');
+            btn.classList.add('bg-gray-100', 'text-blue-600');
+        }
+    }
+
+    function disableProfileInputs(disabled) {
+        const inputs = ['profile-city', 'profile-state', 'profile-vehicle', 'profile-phone', 'profile-bio'];
+        inputs.forEach(id => document.getElementById(id).disabled = disabled);
+        
+        // Show/Hide Save Button
+        const saveBtn = document.getElementById('btn-save-profile');
+        if(disabled) saveBtn.classList.add('hidden');
+        else saveBtn.classList.remove('hidden');
+    }
+
+    async function saveProfileChanges() {
+        const newBio = document.getElementById('profile-bio').value;
+        const newCity = document.getElementById('profile-city').value;
+        const newState = document.getElementById('profile-state').value;
+        const newVehicle = document.getElementById('profile-vehicle').value;
+        const newPhone = document.getElementById('profile-phone').value;
+
+        if(currentUser) {
+            try {
+                const res = await fetch(`${API_URL}/driver/update`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        email: currentUser.email, 
+                        bio: newBio, city: newCity, state: newState, vehicle: newVehicle, mobile: newPhone 
+                    })
+                });
+                const updatedUser = await res.json();
+                currentUser = updatedUser;
+                localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
+                alert("Profile Updated Successfully!");
+                toggleProfileEditMode(); // Lock again
+            } catch(e) { alert("Failed to update"); }
+        }
+    }
+
+    // --- SHIFT ---
+    function openShiftModal() { document.getElementById('shift-modal').classList.remove('hidden'); }
+    function closeShiftModal() { document.getElementById('shift-modal').classList.add('hidden'); }
+    function selectShiftType(btn, type) { 
+        document.querySelectorAll('.shift-type-btn').forEach(b => { b.classList.remove('bg-black', 'text-white', 'border-black'); b.classList.add('border-gray-200'); }); 
+        btn.classList.remove('border-gray-200'); btn.classList.add('bg-black', 'text-white', 'border-black'); 
+        const select = document.getElementById('shift-hours'); select.innerHTML = ''; 
+        let hours = []; 
+        if(type === 'Morning') hours = ['08:00 AM - 12:00 PM', '09:00 AM - 01:00 PM']; 
+        if(type === 'Evening') hours = ['04:00 PM - 08:00 PM', '05:00 PM - 09:00 PM']; 
+        if(type === 'Night') hours = ['08:00 PM - 12:00 AM', '09:00 PM - 01:00 AM']; 
+        hours.forEach(h => { const opt = document.createElement('option'); opt.value = h; opt.innerText = h; select.appendChild(opt); }); 
+    }
+
+    async function saveShift() {
+        const select = document.getElementById('shift-hours');
+        if(select.value === 'Select Shift First') { alert("Please select a shift type"); return; }
+        const type = document.querySelector('.shift-type-btn.bg-black').innerText;
+        try {
+            const res = await fetch(`${API_URL}/driver/update`, {
+                method: 'PUT', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email: currentUser.email, shift: { type: type, hours: select.value } })
+            });
+            const updatedUser = await res.json();
+            currentUser = updatedUser;
+            localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
+            alert(`Shift Booked Successfully!\nTime: ${select.value}`);
+            closeShiftModal();
+        } catch(e) { alert("Failed to book shift"); }
+    }
+
+    // --- DATA HANDLING (STABILIZED) ---
+    async function refreshData(force = false) {
+        if(!currentUser || (currentUser.status !== 'active' && currentUser.status !== 'Active')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/orders`); 
+            const allOrders = await res.json();
+            
+            // STABILITY CHECK: JSON HASH Comparison
+            // This prevents DOM Thrashing (Jitter) if data hasn't changed
+            const currentHash = JSON.stringify(allOrders);
+            if (!force && currentHash === lastOrdersHash) {
+                // Data is same, do nothing
+                return;
+            }
+            lastOrdersHash = currentHash;
+            globalOrdersCache = allOrders; 
+            
+            // Filter active assignments
+            const myActiveOrders = allOrders.filter(o => 
+                o.assignedTo === currentUser.email && 
+                o.status !== 'Delivered' && 
+                o.status !== 'Returned' && 
+                o.status !== 'Return Completed' && 
+                o.status !== 'Cancelled'
+            );
+            
+            renderMyOrders(myActiveOrders);
+            renderPool([]); // Currently pool logic is empty/not defined in details
+
+            // Calculate Today's Wallet for Header
+            let totalEarnings = 0;
+            const myOrders = allOrders.filter(o => o.assignedTo === currentUser.email);
+            myOrders.forEach(o => {
+                if(o.isDeliveryVerified) totalEarnings += DELIVERY_RATE;
+                if(o.isReturnVerified) totalEarnings += DELIVERY_RATE;
+            });
+            document.getElementById('today-earnings').innerText = "₹" + totalEarnings;
+        } catch(e) { console.error("Failed to fetch orders"); }
+    }
+
+    async function updateStatus(id, newStatus) {
+        if(!confirm(`Confirm status update to: ${newStatus}?`)) return;
+
+        const btn = document.getElementById(`btn-${id}`);
+        const originalText = btn ? btn.innerText : "";
+        if(btn) { btn.innerText = "Processing..."; btn.disabled = true; }
+
+        try {
+            const res = await fetch(`${API_URL}/update-order-status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: String(id), status: newStatus })
+            });
+
+            if (res.ok) {
+                // Local Optimistic Update
+                refreshData(true);
+            } else {
+                alert("Server Error");
+                if(btn) { btn.innerText = originalText; btn.disabled = false; }
+            }
+        } catch(e) {
+            console.error("Network Error:", e);
+            if(btn) { btn.innerText = originalText; btn.disabled = false; }
+        }
+    }
+
+    function switchTab(tab) {
+        const btnActive = document.getElementById('tab-active');
+        const btnPool = document.getElementById('tab-pool');
+        const viewActive = document.getElementById('view-active');
+        const viewPool = document.getElementById('view-pool');
+
+        if(tab === 'active') {
+            btnActive.className = "flex-1 py-2.5 rounded-xl bg-white shadow-sm transition text-black w-full";
+            btnPool.className = "hidden flex-1 py-2.5 rounded-xl text-gray-500 hover:text-black transition";
+            viewActive.classList.remove('hidden'); viewPool.classList.add('hidden');
+        } else {
+            btnPool.className = "flex-1 py-2.5 rounded-xl bg-white shadow-sm transition text-black w-full";
+            btnActive.className = "flex-1 py-2.5 rounded-xl text-gray-500 hover:text-black transition";
+            viewPool.classList.remove('hidden'); viewActive.classList.add('hidden');
+        }
+    }
+
+    function renderPool(orders) { const container = document.getElementById('pool-list'); if(orders.length === 0) { container.innerHTML = ''; document.getElementById('pool-empty').classList.remove('hidden'); return; } }
+    
+    function renderMyOrders(orders) { 
+        const container = document.getElementById('my-orders-list'); 
+        
+        // Preserve Input Values to avoid wiping them during refresh
+        const activeEl = document.activeElement;
+        const focusedId = activeEl ? activeEl.id : null;
+        let currentOtpValues = {};
+        const existingInputs = container.querySelectorAll('input[id^="otp-input-"]');
+        existingInputs.forEach(inp => { currentOtpValues[inp.id] = inp.value; });
+
+        if(!orders || orders.length === 0) { 
+            container.innerHTML = ''; 
+            document.getElementById('my-orders-empty').classList.remove('hidden'); 
+            return; 
+        } 
+        document.getElementById('my-orders-empty').classList.add('hidden'); 
+        
+        const html = orders.map(o => { 
+            const orderIdToPass = o.id || o._id; 
+            let firstImg = 'https://via.placeholder.com/150';
+            if(o.items && o.items.length > 0) { firstImg = o.items[0].img || o.items[0].image || firstImg; }
+            
+            const s = (o.status || "").toLowerCase().trim();
+            const safeAddress = o.address || "";
+            const mapLink = `https://www.google.com/maps/search/?api=1&query=$?q=${encodeURIComponent(safeAddress)}`;
+
+            let actionHtml = '';
+
+            // --- TYPE 1: NORMAL DELIVERY FLOW ---
+            if(s === 'assigned' || s === 'confirmed' || s === 'pending') {
+                actionHtml = `<button id="btn-${orderIdToPass}" onclick="updateStatus('${orderIdToPass}', 'Picked Up')" class="status-btn w-full py-4 bg-black text-white rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 transform active:scale-95 transition-all text-sm uppercase tracking-wider">Confirm Pickup (Store) <i data-lucide="package" class="w-5 h-5"></i></button>`;
+            }
+            else if(s === 'picked up') {
+                actionHtml = `<button id="btn-${orderIdToPass}" onclick="updateStatus('${orderIdToPass}', 'Out for Delivery')" class="status-btn w-full py-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 transform active:scale-95 transition-all text-sm uppercase tracking-wider">Start Journey <i data-lucide="bike" class="w-5 h-5"></i></button>`;
+            }
+            // --- STYLISH OTP SECTION (DELIVERY) ---
+            else if(s === 'out for delivery') {
+                const savedVal = currentOtpValues[`otp-input-${orderIdToPass}`] || "";
+                actionHtml = `
+                    <div class="mt-6 bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-3xl border border-green-200 shadow-inner text-center">
+                        <div class="mb-4">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm mb-2 text-green-600">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="font-black text-green-900 text-sm uppercase tracking-widest">Customer Verification</h4>
+                            <p class="text-xs text-green-700 mt-1">Ask customer for Delivery OTP</p>
+                        </div>
+                        
+                        <input type="tel" pattern="[0-9]*" maxlength="4" id="otp-input-${orderIdToPass}" value="${savedVal}" 
+                            placeholder="• • • •" 
+                            class="w-full text-center text-3xl font-black tracking-[0.5em] p-4 rounded-2xl border-2 border-green-200 focus:border-green-600 outline-none bg-white shadow-sm mb-4 text-gray-800 placeholder-gray-300 transition-all">
+                        
+                        <button id="btn-verify-${orderIdToPass}" onclick="verifyAndDeliver('${orderIdToPass}', 'Delivered')" 
+                            class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-200 flex items-center justify-center gap-2 transition-all transform active:scale-95 uppercase tracking-wide text-sm">
+                            Verify & Complete Order <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>`;
+            }
+
+            // --- TYPE 2: RETURN FLOW ---
+            else if(s === 'return assigned' || s === 'return approved') {
+                actionHtml = `<button id="btn-${orderIdToPass}" onclick="updateStatus('${orderIdToPass}', 'Pickup Assigned')" class="status-btn w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 transform active:scale-95 transition-all text-sm uppercase tracking-wider">Start Return Journey <i data-lucide="navigation" class="w-5 h-5"></i></button>`;
+            }
+            // --- STYLISH OTP SECTION (RETURN) ---
+            else if(s === 'pickup assigned' || s === 'return picked up') {
+                 const savedVal = currentOtpValues[`otp-input-${orderIdToPass}`] || "";
+                 actionHtml = `
+                    <div class="mt-6 bg-gradient-to-br from-orange-50 to-red-100 p-6 rounded-3xl border border-red-200 shadow-inner text-center">
+                        <div class="mb-4">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm mb-2 text-red-600">
+                                <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="font-black text-red-900 text-sm uppercase tracking-widest">Return Verification</h4>
+                            <p class="text-xs text-red-700 mt-1">Ask customer for Return OTP</p>
+                        </div>
+                        
+                        <input type="tel" pattern="[0-9]*" maxlength="4" id="otp-input-${orderIdToPass}" value="${savedVal}" 
+                            placeholder="• • • •" 
+                            class="w-full text-center text-3xl font-black tracking-[0.5em] p-4 rounded-2xl border-2 border-red-200 focus:border-red-600 outline-none bg-white shadow-sm mb-4 text-gray-800 placeholder-gray-300 transition-all">
+                        
+                        <button id="btn-verify-${orderIdToPass}" onclick="verifyAndDeliver('${orderIdToPass}', 'Return Completed')" 
+                            class="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold shadow-lg shadow-red-200 flex items-center justify-center gap-2 transition-all transform active:scale-95 uppercase tracking-wide text-sm">
+                            Verify & Collect Item <i data-lucide="package-check" class="w-5 h-5"></i>
+                        </button>
+                    </div>`;
+            }
+
+            return ` 
+            <div class="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden slide-up relative mb-6"> 
+                <div class="p-6 border-b border-gray-50 flex justify-between items-start bg-gray-50/50">
+                    <div>
+                        <span class="font-black text-xl text-gray-900 block">#${o.id || String(o._id).substr(-6)}</span>
+                        <p class="text-xs text-gray-400 font-bold mt-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${o.date || 'Today'}</p>
+                    </div>
+                    <span class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm ${getStatusColor(o.status)}">${o.status}</span>
+                </div>
+                <div class="p-6"> 
+                    <div class="flex gap-5 mb-6">
+                        <div class="relative w-24 h-24 flex-shrink-0">
+                            <img src="${firstImg}" class="w-full h-full rounded-2xl object-cover border border-gray-200 bg-white shadow-sm">
+                        </div>
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h4 class="font-bold text-gray-900 text-base line-clamp-1 mb-1">${o.customerName || 'Customer'}</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed bg-gray-50 p-2 rounded-lg border border-gray-100">${o.address}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <a href="tel:${o.phone}" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition status-btn"><i data-lucide="phone" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-black uppercase">Call</span></a>
+                        <a href="${mapLink}" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition status-btn"><i data-lucide="map" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-black uppercase">Map</span></a>
+                        <button onclick="viewOrderBill('${orderIdToPass}')" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-purple-50 text-purple-700 hover:bg-purple-100 transition status-btn"><i data-lucide="receipt" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-black uppercase">Bill</span></button>
+                    </div>
+
+                    ${actionHtml}
+                </div> 
+            </div>`; 
+        }).join(''); 
+        
+        container.innerHTML = html;
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Restore focus to OTP input if it was active
+        if(focusedId) {
+            const el = document.getElementById(focusedId);
+            if(el) { el.focus(); const val = el.value; el.value = ''; el.value = val; }
+        }
+    }
+
+    // --- OTP VERIFICATION & DELIVERY ---
+    async function verifyAndDeliver(orderId, statusType) {
+        const otpInput = document.getElementById(`otp-input-${orderId}`);
+        const otpValue = otpInput ? otpInput.value : "";
+        const btn = document.getElementById(`btn-verify-${orderId}`);
+
+        if (!otpValue) {
+            otpInput.focus();
+            otpInput.classList.add('border-red-500');
+            setTimeout(() => otpInput.classList.remove('border-red-500'), 1000);
+            return;
+        }
+
+        if(btn) { btn.innerText = "Checking..."; btn.disabled = true; }
+
+        try {
+            // Sends OTP to backend to check against SecretOTP in Order Model
+            const res = await fetch(`${API_URL}/update-order-status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    id: String(orderId), 
+                    status: statusType, // 'Delivered' or 'Return Completed'
+                    otp: otpValue
+                })
+            });
+
+            if (res.ok) {
+                let msg = "✅ Verified!";
+                if(statusType === 'Delivered') msg = "✅ Verified! Order Delivered.";
+                if(statusType === 'Return Completed') msg = "✅ Verified! Return Collected.";
+                
+                alert(msg);
+                refreshData(true); 
+            } else {
+                const errData = await res.json();
+                alert(errData.message || "❌ Incorrect OTP");
+                if(btn) { btn.innerText = "Verify & Complete"; btn.disabled = false; }
+                otpInput.value = '';
+                otpInput.focus();
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Connection Error");
+            if(btn) { btn.innerText = "Verify & Complete"; btn.disabled = false; }
+        }
+    }
+
+    // --- BILL VIEW ---
+    function viewOrderBill(orderId) {
+        const order = globalOrdersCache.find(o => String(o.id) === String(orderId) || String(o._id) === String(orderId));
+        if(!order) return alert("Order Data Not Found");
+
+        document.getElementById('bill-order-id').innerText = `Order #${order.id || order._id}`;
+        
+        let itemsHtml = '';
+        if(order.items && order.items.length > 0) {
+            itemsHtml = order.items.map(item => `
+                <div class="flex gap-4 border-b border-gray-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
+                    <img src="${item.img || item.image || 'https://via.placeholder.com/60'}" class="w-16 h-16 rounded-xl object-cover bg-gray-50 border border-gray-200">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm text-gray-900 line-clamp-2">${item.name}</h4>
+                        <p class="text-xs text-gray-500 mt-1">Size: <span class="font-bold text-black">${item.selectedSize || 'N/A'}</span></p>
+                        <div class="flex justify-between items-center mt-2">
+                             <span class="text-xs text-gray-400">Qty: 1</span>
+                             <span class="font-bold text-sm">₹${item.price}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+             itemsHtml = `<p class="font-bold text-sm">${order.product || 'Unknown Product'}</p><p class="text-right font-bold">₹${order.price}</p>`;
+        }
+
+        const billContent = `
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-6">
+                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Customer Details</h4>
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="user" class="w-4 h-4 text-gray-400 mt-0.5"></i>
+                    <div>
+                        <p class="font-bold text-sm text-gray-900">${order.customerName || 'Guest'}</p>
+                        <a href="tel:${order.phone}" class="text-xs text-blue-600 font-bold underline">${order.phone}</a>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 mt-0.5"></i>
+                    <p class="text-xs text-gray-600 leading-relaxed font-medium">${order.address}</p>
+                </div>
+            </div>
+            <div class="mb-6">
+                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Items Ordered</h4>
+                ${itemsHtml}
+            </div>
+            <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-xl">
+                <div class="flex justify-between items-center text-sm mb-2 text-gray-400">
+                    <span>Subtotal</span>
+                    <span>₹${order.price || (order.total - 5)}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm mb-4 text-gray-400">
+                    <span>Platform Fee</span>
+                    <span>₹5</span>
+                </div>
+                <div class="h-px bg-gray-700 w-full mb-4"></div>
+                <div class="flex justify-between items-center text-xl font-black">
+                    <span>Total Amount</span>
+                    <span>₹${order.total || order.price}</span>
+                </div>
+                <div class="mt-4 bg-white/10 rounded-lg p-2 text-center">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-300">Payment Mode</p>
+                    <p class="font-bold text-sm text-white">${order.payment}</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('driver-bill-content').innerHTML = billContent;
+        document.getElementById('driver-bill-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeDriverBill() {
+        document.getElementById('driver-bill-modal').classList.add('hidden');
+    }
+    
+    function getStatusColor(status, isBg = false) { 
+        if(status === 'Delivered') return isBg ? 'bg-green-500' : 'bg-green-100 text-green-700'; 
+        if(status === 'Out for Delivery') return isBg ? 'bg-orange-500' : 'bg-orange-100 text-orange-700'; 
+        if(status === 'Picked Up' || status === 'Return Picked Up') return isBg ? 'bg-blue-500' : 'bg-blue-100 text-blue-700'; 
+        if(status === 'Return Requested' || status === 'Pickup Assigned') return isBg ? 'bg-red-500' : 'bg-red-100 text-red-700'; 
+        if(status === 'Returned' || status === 'Return Completed') return isBg ? 'bg-gray-800' : 'bg-gray-200 text-gray-800'; 
+        return isBg ? 'bg-gray-300' : 'bg-gray-100 text-gray-600'; 
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>

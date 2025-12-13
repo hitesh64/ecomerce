@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KICKS | Admin Portal (MongoDB)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .view-section { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .animation-fadeIn { animation: fadeIn 0.2s ease-out; }
+        .slide-up {
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* OTP input styling */
+    input[type="text"].otp-input {
+        letter-spacing: 10px;
+        font-size: 24px;
+    }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 h-screen flex flex-col overflow-hidden">
+
+    <div id="auth-view" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-black tracking-tighter mb-2">KICKS<span class="text-orange-600">IN</span></h1>
+                <p class="text-gray-500 font-medium">Administrative Access Only (DB)</p>
+            </div>
+            
+            <div id="g_id_onload"
+                 data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleAdminGoogleLogin"
+                 data-auto_prompt="false">
+            </div>
+
+            <div id="login-form" class="space-y-6">
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Login</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <input type="email" id="login-email" placeholder="Admin Email" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <button id="btn-login" onclick="handleLogin()" class="w-full py-4 bg-black text-white font-bold rounded-xl shadow-lg">Secure Login</button>
+                <!-- Forgot Password Button -->
+                <button onclick="showForgotPassword()" class="text-sm text-blue-600 font-medium text-center w-full hover:underline">
+                    Forgot Password?
+                </button>
+                
+                <p class="text-center text-sm text-gray-500">First time? <button onclick="toggleAuth('register')" class="text-blue-600 font-bold">Register Admin</button></p>
+            </div>
+
+            <div id="register-form" class="space-y-6 hidden">
+                <div class="g_id_signin" data-type="standard" data-width="100%"></div>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-200"></div><span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Manual</span><div class="flex-grow border-t border-gray-200"></div>
+                </div>
+                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <input type="email" id="reg-email" placeholder="Work Email" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <input type="password" id="reg-pass" placeholder="Create Password" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <button onclick="handleRegister()" class="w-full py-4 bg-black text-white font-bold rounded-xl shadow-lg">Create Account</button>
+                <p class="text-center text-sm text-gray-500">Have an account? <button onclick="toggleAuth('login')" class="text-blue-600 font-bold">Login</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-layout" class="flex h-full w-full hidden">
+        <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 z-50 transform -translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
+            <div class="h-16 flex items-center px-6 border-b border-gray-100 bg-white">
+                <h1 class="text-xl font-black tracking-tighter">ADMIN<span class="text-blue-600">PANEL</span></h1>
+                <button onclick="toggleSidebar()" class="ml-auto md:hidden text-gray-500"><i data-lucide="x"></i></button>
+            </div>
+            
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <p class="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 mb-2">General</p>
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="w-full flex items-center p-3 rounded-lg bg-blue-50 text-blue-700 font-bold transition"><i data-lucide="layout-dashboard" class="mr-3 w-5 h-5"></i> Dashboard</button>
+                <button onclick="switchTab('vendors')" id="btn-vendors" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="store" class="mr-3 w-5 h-5"></i> Vendors</button>
+                
+                <div class="border-t border-gray-100 my-4"></div>
+                
+                <p class="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Logistics Control</p>
+                <button onclick="switchTab('recruitment')" id="btn-recruitment" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="user-plus" class="mr-3 w-5 h-5"></i> Job Applications</button>
+                <button onclick="switchTab('fleet')" id="btn-fleet" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="users" class="mr-3 w-5 h-5"></i> Active Fleet</button>
+                <button onclick="switchTab('dispatch')" id="btn-dispatch" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="send" class="mr-3 w-5 h-5"></i> Dispatch Manager</button>
+                <button onclick="switchTab('returns')" id="btn-returns" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="rotate-ccw" class="mr-3 w-5 h-5"></i> Returns</button>
+            </nav>
+
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold overflow-hidden" id="admin-avatar">A</div>
+                    <div class="overflow-hidden"><p class="text-sm font-bold truncate" id="admin-name">Admin</p><p class="text-xs text-gray-500 truncate" id="admin-email">admin@system.com</p></div>
+                </div>
+                <button onclick="handleLogout()" class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-50 flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center px-4 justify-between md:hidden flex-shrink-0">
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+                <span class="font-black tracking-tighter text-xl">KICKS<span class="text-orange-600">IN</span></span>
+                <div class="w-8"></div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-gray-50">
+                <div class="p-4 md:p-8 max-w-7xl mx-auto min-h-[calc(100vh-100px)]">
+                    
+                    <div id="view-dashboard" class="view-section">
+                        <h2 class="text-3xl font-black text-gray-900 mb-2">Product Approvals</h2>
+                        <p class="text-gray-500 text-sm mb-6">Review product and shop owner details before approving.</p>
+                        <div id="pending-container" class="grid grid-cols-1 gap-6 mb-12"></div>
+                        
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-xl"><i data-lucide="database" class="w-5 h-5 text-blue-600"></i> Live Inventory</h3>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="overflow-x-auto custom-scroll">
+                                <table class="w-full text-sm text-left whitespace-nowrap">
+                                    <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-bold border-b">
+                                        <tr>
+                                            <th class="px-6 py-4">Product</th>
+                                            <th class="px-6 py-4">Shop Owner Details</th>
+                                            <th class="px-6 py-4">Status</th>
+                                            <th class="px-6 py-4 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="log-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-vendors" class="view-section hidden">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-3xl font-black">Registered Vendors</h2>
+                            <button onclick="openVendorModal()" class="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-gray-800">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add Vendor
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left whitespace-nowrap">
+                                    <thead class="bg-gray-50 uppercase text-xs text-gray-500 font-bold border-b">
+                                        <tr>
+                                            <th class="p-6">Shop Name</th>
+                                            <th class="p-6">Owner</th>
+                                            <th class="p-6">Mobile</th>
+                                            <th class="p-6">Email</th>
+                                            <th class="p-6">Joined (Run Time)</th>
+                                            <th class="p-6 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendor-list-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-recruitment" class="view-section hidden">
+                        <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600"><i data-lucide="user-plus" class="w-6 h-6"></i></div>
+                            Job Applications
+                        </h2>
+                        
+                        <h3 class="font-bold text-gray-800 mb-4">Pending Review</h3>
+                        <div class="max-w-3xl mb-10">
+                             <div id="delivery-apps-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                        </div>
+
+                        <h3 class="font-bold text-gray-800 mb-4">Application History (Rejected / Inactive)</h3>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden max-w-4xl">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b">
+                                        <tr>
+                                            <th class="p-4">Name / Email</th>
+                                            <th class="p-4">Phone / Vehicle</th>
+                                            <th class="p-4">Status</th>
+                                            <th class="p-4 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="app-history-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-fleet" class="view-section hidden">
+                        <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600"><i data-lucide="users" class="w-6 h-6"></i></div>
+                            Active Fleet Management
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-4">Manage online status, view orders, and manage accounts.</p>
+                        <div class="max-w-3xl">
+                            <div id="active-drivers-list" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <div id="view-dispatch" class="view-section hidden">
+                         <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-black text-gray-900 flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i data-lucide="send" class="w-6 h-6"></i></div>
+                                Dispatch Manager
+                            </h2>
+                            <button onclick="loadData()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">All orders (Active, Delivered, Returned & Cancelled) are listed here.</p>
+                        <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b">
+                                        <tr>
+                                            <th class="p-4">Order / Items</th>
+                                            <th class="p-4">Customer / Address</th>
+                                            <th class="p-4">Delivery Status</th>
+                                            <th class="p-4 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orders-table-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-returns" class="view-section hidden">
+                        <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600"><i data-lucide="rotate-ccw" class="w-6 h-6"></i></div>
+                            Returns & Reverse Logistics
+                        </h2>
+                        <div class="bg-white border border-red-100 rounded-xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-red-50 text-xs uppercase font-bold text-red-800 border-b border-red-100">
+                                        <tr>
+                                            <th class="p-4">Return Item</th>
+                                            <th class="p-4">Reason / Proof</th>
+                                            <th class="p-4 text-center">Action / Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="returns-table-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]">
+        <span id="toast-msg" class="font-medium text-sm">Notification</span>
+    </div>
+
+    <div id="assign-modal" class="fixed inset-0 bg-black/50 z-[150] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+            <h3 class="font-bold text-lg mb-1">Select Delivery Partner</h3>
+            <p class="text-xs text-gray-500 mb-4">Assigning Task <span id="modal-order-id" class="font-mono text-black">#...</span></p>
+            
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <select id="assign-filter-state" onchange="filterAssignDrivers()" class="w-full p-2 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
+                    <option value="">All States</option>
+                </select>
+                <select id="assign-filter-city" onchange="filterAssignDrivers()" class="w-full p-2 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
+                    <option value="">All Cities</option>
+                </select>
+            </div>
+
+            <div id="modal-drivers-list" class="space-y-2 mb-6 max-h-64 overflow-y-auto custom-scroll pr-1"></div>
+            <button onclick="closeModal()" class="w-full py-3 bg-gray-100 font-bold rounded-lg text-sm">Cancel</button>
+        </div>
+    </div>
+
+    <div id="vendor-modal" class="fixed inset-0 bg-black/50 z-[150] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-lg" id="vendor-modal-title">Add Vendor</h3>
+                <button onclick="closeVendorModal()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+            </div>
+            
+            <form onsubmit="saveVendor(event)" class="space-y-4">
+                <input type="hidden" id="v-id"> <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Shop Name</label>
+                    <input type="text" id="v-shop" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Owner Name</label>
+                    <input type="text" id="v-owner" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Mobile</label>
+                        <input type="tel" id="v-mobile" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                        <input type="email" id="v-email" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg mt-2">Save Vendor</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-app-modal" class="fixed inset-0 bg-black/50 z-[160] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+            <h3 class="font-bold text-lg mb-4">Edit Application</h3>
+            <input type="hidden" id="edit-app-orig-email">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Name</label>
+                    <input type="text" id="edit-app-name" class="w-full p-3 border rounded-lg text-sm font-bold">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Phone</label>
+                    <input type="text" id="edit-app-phone" class="w-full p-3 border rounded-lg text-sm font-bold">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Vehicle No</label>
+                    <input type="text" id="edit-app-vehicle" class="w-full p-3 border rounded-lg text-sm font-bold">
+                </div>
+            </div>
+            <button onclick="saveEditedApp()" class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg mt-4">Save Changes</button>
+            <button onclick="document.getElementById('edit-app-modal').classList.add('hidden')" class="w-full py-3 text-gray-500 font-bold text-sm mt-1">Cancel</button>
+        </div>
+    </div>
+    
+    <div id="driver-history-modal" class="fixed inset-0 bg-black/50 z-[170] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">Delivery History</h3>
+                <button onclick="document.getElementById('driver-history-modal').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+            </div>
+            <div class="overflow-y-auto custom-scroll flex-1">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 sticky top-0">
+                        <tr>
+                            <th class="p-3">Order ID</th>
+                            <th class="p-3">Customer Detail</th>
+                            <th class="p-3">Type</th>
+                            <th class="p-3 text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="driver-history-body" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+            <div class="mt-4 pt-4 border-t text-right">
+                <button onclick="document.getElementById('driver-history-modal').classList.add('hidden')" class="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bill-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 print:hidden">
+                <h3 class="font-bold text-lg">Order Invoice</h3>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Print</button>
+                    <button onclick="document.getElementById('bill-modal').classList.add('hidden')" class="p-2 hover:bg-gray-200 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+            <div id="bill-content" class="p-8 overflow-y-auto bg-white text-sm font-mono">
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-lg">Reset Password</h3>
+                <button onclick="closeForgotPassword()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+            </div>
+            
+            <div id="forgot-step-1" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                    <input type="email" id="forgot-email" placeholder="Enter your email" 
+                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">User Type</label>
+                    <select id="forgot-role" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                        <option value="admin">Admin</option>
+                        <option value="driver">Delivery Driver</option>
+                        <option value="user">Customer/Vendor</option>
+                    </select>
+                </div>
+                <button onclick="sendOTP()" class="w-full py-3 bg-black text-white font-bold rounded-lg">
+                    Send OTP
+                </button>
+            </div>
+            
+            <div id="forgot-step-2" class="space-y-4 hidden">
+                <p class="text-sm text-gray-600 mb-4">Enter the 6-digit OTP sent to <span id="otp-email" class="font-bold"></span></p>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">OTP Code</label>
+                    <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP" maxlength="6"
+                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-center text-lg font-mono focus:border-black outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">New Password</label>
+                    <input type="password" id="forgot-new-password" placeholder="Enter new password" 
+                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Confirm Password</label>
+                    <input type="password" id="forgot-confirm-password" placeholder="Confirm new password" 
+                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                </div>
+                
+                <button onclick="resetPassword()" class="w-full py-3 bg-green-600 text-white font-bold rounded-lg">
+                    Reset Password
+                </button>
+                
+                <button onclick="backToStep1()" class="w-full py-2 text-gray-600 font-medium text-sm">
+                    Back
+                </button>
+            </div>
+            
+            <div id="forgot-success" class="text-center hidden">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-2">Password Reset Successful!</h4>
+                <p class="text-gray-600 text-sm mb-4">You can now login with your new password.</p>
+                <button onclick="closeForgotPassword()" class="w-full py-3 bg-black text-white font-bold rounded-lg">
+                    Continue to Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #bill-modal, #bill-modal * { visibility: visible; }
+            #bill-modal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; padding: 0; }
+            #bill-content { overflow: visible; height: auto; }
+            .print\:hidden { display: none !important; }
+        }
+    </style>
+<script>
+    const API_URL = 'https://ecomerce-mocha-one.vercel.app/api';
+    const DB_SESSION = 'kicks_admin_session';
+    
+    let currentUser = null;
+    let allDrivers = [];
+    let allOrders = [];
+    let allProducts = [];
+    let allVendors = [];
+    let allReturnRequests = [];
+
+    // --- INIT ---
+    async function init() {
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+        
+        const session = localStorage.getItem(DB_SESSION);
+        if(session) {
+            currentUser = JSON.parse(session);
+            if(currentUser.token) {
+                routeUser(currentUser);
+            } else {
+                handleLogout();
+            }
+        } else {
+            document.getElementById('auth-view').classList.remove('hidden');
+        }
+    }
+
+    // --- GOOGLE LOGIN ---
+    function decodeJwtResponse(token) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    async function handleAdminGoogleLogin(response) {
+        const data = decodeJwtResponse(response.credential);
+        
+        try {
+            const res = await fetch(`${API_URL}/admin/google`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    email: data.email, 
+                    name: data.name, 
+                    picture: data.picture 
+                })
+            });
+
+            const adminData = await res.json();
+
+            if(res.ok) {
+                localStorage.setItem(DB_SESSION, JSON.stringify(adminData));
+                currentUser = adminData;
+                routeUser(currentUser);
+            } else {
+                alert("Login Failed: " + (adminData.message || "Unauthorized Email"));
+            }
+        } catch(err) { 
+            console.error(err); 
+            alert("Connection Error. Is Server Running?"); 
+        }
+    }
+
+    // --- MANUAL LOGIN & REGISTER ---
+    function toggleAuth(mode) {
+        if(mode === 'register') {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        } else {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+    }
+
+    async function handleLogin() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    const loginBtn = document.getElementById('btn-login'); // ID से बटन ढूंढ रहे हैं
+
+    // 1. Validation
+    if(!email || !pass) {
+        showToast("Please enter email and password", "error");
+        return;
+    }
+
+    // 2. Button Loading State
+    const originalText = loginBtn ? loginBtn.innerHTML : 'Secure Login';
+    if(loginBtn) {
+        loginBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Logging in...';
+        loginBtn.disabled = true;
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    try {
+        console.log("🔑 Attempting login for:", email);
+        
+        const res = await fetch(`${API_URL}/admin/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email, pass })
+        });
+        
+        const data = await res.json();
+        
+        // 3. Reset Button
+        if(loginBtn) {
+            loginBtn.innerHTML = originalText;
+            loginBtn.disabled = false;
+        }
+        
+        if(res.ok && data.token) {
+            console.log("✅ Login successful");
+            localStorage.setItem(DB_SESSION, JSON.stringify(data));
+            currentUser = data;
+            routeUser(currentUser);
+            showToast("Login successful!", "success");
+        } else {
+            console.log("❌ Login failed:", data.message);
+            showToast(data.message || "Invalid credentials", "error");
+            document.getElementById('login-pass').value = ''; // Password clear करें
+        }
+    } catch(e) {
+        console.error("❌ Login error:", e);
+        if(loginBtn) {
+            loginBtn.innerHTML = originalText;
+            loginBtn.disabled = false;
+        }
+        showToast("Server connection error. Is server running?", "error");
+    }
+}
+
+    async function handleRegister() {
+        const name = document.getElementById('reg-name').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
+        if(!name || !email || !pass) return alert("Fill all fields");
+
+        try {
+            const res = await fetch(`${API_URL}/admin/register`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, email, pass })
+            });
+            if(res.ok) {
+                alert("Registered! Please Login.");
+                toggleAuth('login');
+            } else {
+                alert("Registration Failed");
+            }
+        } catch(e) { alert("Server Error"); }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem(DB_SESSION);
+        location.reload();
+    }
+
+    // --- ROUTING & DASHBOARD ---
+    function routeUser(user) {
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('dashboard-layout').classList.remove('hidden');
+        document.getElementById('admin-name').innerText = user.name;
+        document.getElementById('admin-email').innerText = user.email;
+        if(user.picture) {
+            document.getElementById('admin-avatar').innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover rounded-full">`;
+        } else {
+            document.getElementById('admin-avatar').innerText = user.name[0].toUpperCase();
+        }
+        
+        switchTab('dashboard');
+    }
+
+    // --- TAB SWITCHING ---
+    function switchTab(tabName) {
+        // Hide all sections
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        
+        // Remove active from all buttons
+        document.querySelectorAll('#sidebar button').forEach(btn => {
+            btn.classList.remove('bg-blue-50', 'text-blue-700', 'font-bold');
+            btn.classList.add('hover:bg-gray-100', 'text-gray-600', 'font-medium');
+        });
+        
+        // Show selected section
+        document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        
+        // Set active button
+        document.getElementById(`btn-${tabName}`).classList.remove('hover:bg-gray-100', 'text-gray-600', 'font-medium');
+        document.getElementById(`btn-${tabName}`).classList.add('bg-blue-50', 'text-blue-700', 'font-bold');
+        
+        // Load data for this tab
+        switch(tabName) {
+            case 'dashboard':
+                loadDashboardData();
+                break;
+            case 'vendors':
+                loadVendors();
+                break;
+            case 'recruitment':
+                loadJobApplications();
+                break;
+            case 'fleet':
+                loadActiveFleet();
+                break;
+            case 'dispatch':
+                loadDispatchManager();
+                break;
+            case 'returns':
+                loadReturns();
+                break;
+        }
+        
+        // Close sidebar on mobile
+        if(window.innerWidth < 768) {
+            toggleSidebar();
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        if(sidebar.classList.contains('-translate-x-full')) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        }
+    }
+
+    function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+    
+    if(!message || message.trim() === '') return;
+    
+    // Set color based on type
+    toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]';
+    
+    if(type === 'success') {
+        toast.classList.add('bg-green-600', 'text-white');
+    } else if(type === 'error') {
+        toast.classList.add('bg-red-600', 'text-white');
+    } else if(type === 'warning') {
+        toast.classList.add('bg-yellow-600', 'text-white');
+    } else {
+        toast.classList.add('bg-gray-900', 'text-white');
+    }
+    
+    toastMsg.innerText = message;
+    toast.classList.remove('opacity-0');
+    
+    // 5 seconds के लिए show करें (5000ms)
+    setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => {
+            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]';
+        }, 300);
+    }, 5000); // Changed from 3000 to 5000
+}
+
+    // --- DASHBOARD ---
+    async function loadDashboardData() {
+        try {
+            // Load pending products
+            const productsRes = await fetch(`${API_URL}/products`);
+            const products = await productsRes.json();
+            allProducts = products;
+            
+            // Load vendors for shop info
+            const vendorsRes = await fetch(`${API_URL}/vendors`);
+            allVendors = await vendorsRes.json();
+            
+            renderPendingProducts(products.filter(p => p.status === 'Pending Review'));
+            renderLiveInventory(products.filter(p => p.status !== 'Pending Review'));
+        } catch(e) {
+            console.error('Error loading dashboard:', e);
+            showToast('Failed to load dashboard data', 'error');
+        }
+    }
+
+    function renderPendingProducts(products) {
+        const container = document.getElementById('pending-container');
+        
+        if(products.length === 0) {
+            container.innerHTML = `
+                <div class="bg-white p-8 rounded-xl border border-gray-200 text-center">
+                    <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
+                    <p class="text-gray-600">No pending products for review</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+        
+        container.innerHTML = products.map(product => {
+            const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
+            const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/300';
+            
+            return `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex gap-6">
+                        <img src="${firstImage}" alt="${product.name}" 
+                             class="w-32 h-32 object-cover rounded-lg border border-gray-200">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg">${product.name}</h4>
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">Pending</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">${product.description || 'No description'}</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <p class="text-xs text-gray-500">Price</p>
+                                    <p class="font-bold">₹${product.price}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Brand</p>
+                                    <p class="font-bold">${product.brand}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Stock</p>
+                                    <p class="font-bold">${product.stock}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Category</p>
+                                    <p class="font-bold">${product.category}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t pt-4">
+                                <p class="text-xs text-gray-500 mb-1">Shop Owner</p>
+                                <p class="font-bold text-sm">${vendor.ownerName || product.vendorEmail}</p>
+                                <p class="text-xs text-gray-600">${vendor.shopName || 'N/A'}</p>
+                            </div>
+                            
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="approveProduct('${product._id || product.id}')" 
+                                        class="flex-1 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700">
+                                    Approve
+                                </button>
+                                <button onclick="rejectProduct('${product._id || product.id}')" 
+                                        class="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700">
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- REPLACE IN webadmin.html ---
+
+function renderLiveInventory(products) {
+    const tbody = document.getElementById('log-body');
+    
+    if(products.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                    No approved products in inventory
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = products.map(product => {
+        // Find Vendor Details
+        const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
+        const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/50';
+        
+        return `
+            <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <img src="${firstImage}" alt="${product.name}" 
+                             class="w-12 h-12 object-cover rounded-lg border border-gray-200">
+                        <div>
+                            <p class="font-bold text-sm text-gray-900 line-clamp-1">${product.name}</p>
+                            <p class="text-xs text-gray-500">${product.brand} • ${product.category}</p>
+                            <div class="mt-1 flex items-center gap-2">
+                                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold border border-gray-200">
+                                    Stock: ${product.stock}
+                                </span>
+                                <span class="text-xs font-bold text-gray-900">₹${product.price}</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <p class="font-bold text-sm text-gray-900">${vendor.ownerName || 'Unknown Owner'}</p>
+                    <p class="text-xs text-gray-500">${vendor.shopName || 'N/A'}</p>
+                    <div class="mt-1 flex flex-col gap-0.5">
+                        <p class="text-xs text-blue-600 font-bold flex items-center gap-1">
+                            <i data-lucide="phone" class="w-3 h-3"></i> ${vendor.mobile || 'No Mobile'}
+                        </p>
+                        <p class="text-[10px] text-gray-400">${vendor.email || product.vendorEmail}</p>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold ${product.status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                        ${product.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <button onclick="viewProduct('${product._id || product.id}')" 
+                                class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition" title="View Details">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteProduct('${product._id || product.id}')" 
+                                class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition" title="Delete">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+}
+    async function approveProduct(productId) {
+        if(!confirm('Approve this product?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/products/${productId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ status: 'Approved' })
+            });
+            
+            if(res.ok) {
+                showToast('Product approved successfully', 'success');
+                loadDashboardData();
+            } else {
+                showToast('Failed to approve product', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error approving product', 'error');
+        }
+    }
+
+    async function rejectProduct(productId) {
+        if(!confirm('Reject this product?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/products/${productId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ status: 'Rejected' })
+            });
+            
+            if(res.ok) {
+                showToast('Product rejected', 'success');
+                loadDashboardData();
+            } else {
+                showToast('Failed to reject product', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error rejecting product', 'error');
+        }
+    }
+
+    async function deleteProduct(productId) {
+        if(!confirm('Delete this product permanently?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/products/${productId}`, {
+                method: 'DELETE'
+            });
+            
+            if(res.ok) {
+                showToast('Product deleted', 'success');
+                loadDashboardData();
+            } else {
+                showToast('Failed to delete product', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error deleting product', 'error');
+        }
+    }
+
+    function viewProduct(productId) {
+        const product = allProducts.find(p => p._id === productId || p.id == productId);
+        if(!product) return alert('Product not found');
+        
+        const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/300';
+        const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
+        
+        // FIX: Changed onclick to remove the closest parent with class 'fixed' (The Overlay)
+        const modalContent = `
+            <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-xl">Product Details</h3>
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <img src="${firstImage}" alt="${product.name}" 
+                                     class="w-full h-64 object-cover rounded-xl border border-gray-200">
+                                ${product.images && product.images.length > 1 ? `
+                                    <div class="flex gap-2 mt-2 overflow-x-auto">
+                                        ${product.images.map(img => `
+                                            <img src="${img}" class="w-16 h-16 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                                                 onclick="this.parentElement.parentElement.previousElementSibling.src='${img}'">
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-2xl mb-2">${product.name}</h4>
+                                <p class="text-gray-600 mb-4">${product.description || 'No description'}</p>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Price</span>
+                                        <span class="font-bold">₹${product.price}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Brand</span>
+                                        <span class="font-bold">${product.brand}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Category</span>
+                                        <span class="font-bold">${product.category} / ${product.subCategory}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Stock</span>
+                                        <span class="font-bold">${product.stock}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Status</span>
+                                        <span class="font-bold ${product.status === 'Approved' ? 'text-green-600' : 'text-yellow-600'}">
+                                            ${product.status}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 pt-6 border-t">
+                                    <h5 class="font-bold text-gray-700 mb-2">Vendor Details</h5>
+                                    <p class="text-sm"><strong>Shop:</strong> ${vendor.shopName || 'N/A'}</p>
+                                    <p class="text-sm"><strong>Owner:</strong> ${vendor.ownerName || product.vendorEmail}</p>
+                                    <p class="text-sm"><strong>Email:</strong> ${vendor.email || product.vendorEmail}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+        lucide.createIcons();
+    }
+
+    // --- VENDORS MANAGEMENT ---
+    async function loadVendors() {
+        try {
+            const res = await fetch(`${API_URL}/vendors`);
+            allVendors = await res.json();
+            renderVendors(allVendors);
+        } catch(e) {
+            console.error('Error loading vendors:', e);
+            showToast('Failed to load vendors', 'error');
+        }
+    }
+
+    function renderVendors(vendors) {
+        const tbody = document.getElementById('vendor-list-body');
+        
+        if(vendors.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="p-6 text-center text-gray-500">
+                        No vendors registered yet
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = vendors.map(vendor => `
+            <tr class="hover:bg-gray-50">
+                <td class="p-6 font-bold">${vendor.shopName}</td>
+                <td class="p-6">${vendor.ownerName}</td>
+                <td class="p-6">
+                    <div>${vendor.mobile || 'N/A'}</div>
+                    <div class="text-xs text-gray-500">${vendor.phone || ''}</div>
+                </td>
+                <td class="p-6">${vendor.email}</td>
+                <td class="p-6">${vendor.joined || 'N/A'}</td>
+                <td class="p-6 text-center">
+                    <button onclick="editVendor('${vendor._id}')" 
+                            class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-200 mr-2">
+                        Edit
+                    </button>
+                    <button onclick="deleteVendor('${vendor._id}')" 
+                            class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-bold hover:bg-red-200">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openVendorModal(vendorId = null) {
+        const modal = document.getElementById('vendor-modal');
+        const title = document.getElementById('vendor-modal-title');
+        
+        if(vendorId) {
+            // Edit mode
+            const vendor = allVendors.find(v => v._id === vendorId);
+            if(vendor) {
+                document.getElementById('v-id').value = vendor._id;
+                document.getElementById('v-shop').value = vendor.shopName;
+                document.getElementById('v-owner').value = vendor.ownerName;
+                document.getElementById('v-mobile').value = vendor.mobile;
+                document.getElementById('v-email').value = vendor.email;
+                title.innerText = 'Edit Vendor';
+            }
+        } else {
+            // Add mode
+            document.getElementById('v-id').value = '';
+            document.getElementById('v-shop').value = '';
+            document.getElementById('v-owner').value = '';
+            document.getElementById('v-mobile').value = '';
+            document.getElementById('v-email').value = '';
+            title.innerText = 'Add Vendor';
+        }
+        
+        modal.classList.remove('hidden');
+    }
+
+    function closeVendorModal() {
+        document.getElementById('vendor-modal').classList.add('hidden');
+    }
+
+    async function saveVendor(event) {
+        event.preventDefault();
+        
+        const vendorId = document.getElementById('v-id').value;
+        const vendorData = {
+            shopName: document.getElementById('v-shop').value,
+            ownerName: document.getElementById('v-owner').value,
+            mobile: document.getElementById('v-mobile').value,
+            email: document.getElementById('v-email').value,
+            joined: new Date().toLocaleDateString()
+        };
+        
+        try {
+            let res;
+            if(vendorId) {
+                // Update existing
+                res = await fetch(`${API_URL}/vendors/${vendorId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(vendorData)
+                });
+            } else {
+                // Create new
+                res = await fetch(`${API_URL}/vendors`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(vendorData)
+                });
+            }
+            
+            if(res.ok) {
+                showToast(vendorId ? 'Vendor updated' : 'Vendor added', 'success');
+                closeVendorModal();
+                loadVendors();
+            } else {
+                showToast('Failed to save vendor', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error saving vendor', 'error');
+        }
+    }
+// Forgot Password Functions
+function showForgotPassword() {
+    document.getElementById('forgot-password-modal').classList.remove('hidden');
+    document.getElementById('forgot-step-1').classList.remove('hidden');
+    document.getElementById('forgot-step-2').classList.add('hidden');
+    document.getElementById('forgot-success').classList.add('hidden');
+    
+    // Pre-fill email if user was trying to login
+    const loginEmail = document.getElementById('login-email')?.value;
+    if(loginEmail) {
+        document.getElementById('forgot-email').value = loginEmail;
+    }
+}
+
+function closeForgotPassword() {
+    document.getElementById('forgot-password-modal').classList.add('hidden');
+}
+
+async function sendOTP() {
+    const email = document.getElementById('forgot-email').value;
+    const role = document.getElementById('forgot-role').value;
+    
+    if(!email) {
+        showToast("Please enter your email", "error");
+        return;
+    }
+    
+    try {
+        showToast("Sending OTP...", "info");
+        
+        const res = await fetch(`${API_URL}/forgot-password`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email, role })
+        });
+        
+        const data = await res.json();
+        
+        if(res.ok) {
+            // Show OTP step
+            document.getElementById('forgot-step-1').classList.add('hidden');
+            document.getElementById('forgot-step-2').classList.remove('hidden');
+            document.getElementById('otp-email').innerText = email;
+            
+            // Focus on OTP input
+            setTimeout(() => {
+                document.getElementById('forgot-otp').focus();
+            }, 100);
+            
+            showToast("OTP sent successfully!", "success");
+            
+            // For testing - show OTP in console
+            if(data.otp) {
+                console.log(`🔐 OTP for ${email}: ${data.otp}`);
+                showToast(`OTP: ${data.otp} (Check console)`, "info");
+            }
+        } else {
+            showToast(data.message || "Failed to send OTP", "error");
+        }
+    } catch(e) {
+        console.error("OTP send error:", e);
+        showToast("Server error. Please try again.", "error");
+    }
+}
+
+async function resetPassword() {
+    const email = document.getElementById('forgot-email').value;
+    const otp = document.getElementById('forgot-otp').value;
+    const newPassword = document.getElementById('forgot-new-password').value;
+    const confirmPassword = document.getElementById('forgot-confirm-password').value;
+    const role = document.getElementById('forgot-role').value;
+    
+    // Clear previous errors
+    showToast("", "info");
+    
+    // Client-side validation
+    if(!otp || otp.length !== 6) {
+        showToast("Please enter a valid 6-digit OTP", "error");
+        document.getElementById('forgot-otp').focus();
+        return;
+    }
+    
+    if(!newPassword) {
+        showToast("Please enter new password", "error");
+        document.getElementById('forgot-new-password').focus();
+        return;
+    }
+    
+    if(!confirmPassword) {
+        showToast("Please confirm your password", "error");
+        document.getElementById('forgot-confirm-password').focus();
+        return;
+    }
+    
+    if(newPassword !== confirmPassword) {
+        showToast("Passwords do not match. Please check again.", "error");
+        // Highlight the mismatched fields
+        document.getElementById('forgot-new-password').classList.add('border-red-500');
+        document.getElementById('forgot-confirm-password').classList.add('border-red-500');
+        return;
+    } else {
+        // Remove error styling if passwords match
+        document.getElementById('forgot-new-password').classList.remove('border-red-500');
+        document.getElementById('forgot-confirm-password').classList.remove('border-red-500');
+    }
+    
+    if(newPassword.length < 6) {
+        showToast("Password must be at least 6 characters", "error");
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const resetBtn = document.querySelector('#forgot-step-2 button[onclick="resetPassword()"]');
+        const originalText = resetBtn.innerHTML;
+        resetBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Resetting...';
+        resetBtn.disabled = true;
+        
+        const res = await fetch(`${API_URL}/reset-password`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                email, 
+                otp, 
+                newPassword, 
+                // confirmPassword नहीं भेज रहे - server में check नहीं है
+                role 
+            })
+        });
+        
+        const data = await res.json();
+        
+        // Reset button state
+        resetBtn.innerHTML = originalText;
+        resetBtn.disabled = false;
+        lucide.createIcons();
+        
+        if(res.ok && data.success) {
+            // Show success message
+            document.getElementById('forgot-step-2').classList.add('hidden');
+            document.getElementById('forgot-success').classList.remove('hidden');
+            showToast("Password reset successful! You can now login.", "success");
+            
+            // Auto-close modal after 3 seconds
+            setTimeout(() => {
+                closeForgotPassword();
+            }, 3000);
+        } else {
+            // Show error from server
+            showToast(data.message || "Failed to reset password", "error");
+            
+            // If OTP is wrong, focus on OTP field
+            if(data.message && data.message.includes("OTP")) {
+                document.getElementById('forgot-otp').focus();
+                document.getElementById('forgot-otp').select();
+            }
+        }
+    } catch(e) {
+        console.error("Reset password error:", e);
+        showToast("Network error. Please check your connection.", "error");
+        
+        // Reset button state
+        const resetBtn = document.querySelector('#forgot-step-2 button[onclick="resetPassword()"]');
+        resetBtn.innerHTML = 'Reset Password';
+        resetBtn.disabled = false;
+    }
+}
+
+
+    async function deleteVendor(vendorId) {
+        if(!confirm('Delete this vendor? This action cannot be undone.')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/vendors/${vendorId}`, {
+                method: 'DELETE'
+            });
+            
+            if(res.ok) {
+                showToast('Vendor deleted', 'success');
+                loadVendors();
+            } else {
+                showToast('Failed to delete vendor', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error deleting vendor', 'error');
+        }
+    }
+
+    // --- JOB APPLICATIONS (DEBUGGED VERSION) ---
+    async function loadJobApplications() {
+        try {
+            console.log("🔄 Fetching Job Applications...");
+            
+            // 1. Fetch Users
+            const res = await fetch(`${API_URL}/users`);
+            const drivers = await res.json();
+            
+            console.log("📦 Raw Data from Server:", drivers); // Console Check Karein
+
+            allDrivers = drivers;
+            
+            // 2. Robust Filtering (Case Insensitive)
+            const pendingApps = drivers.filter(d => {
+                const status = (d.status || "").toLowerCase().trim();
+                return status === 'pending';
+            });
+
+            console.log(`✅ Found ${pendingApps.length} Pending Applications`);
+
+            renderDeliveryApplications(pendingApps);
+            
+            // 3. History Filtering (Not Pending)
+            const historyApps = drivers.filter(d => {
+                const status = (d.status || "").toLowerCase().trim();
+                return status !== 'pending';
+            });
+            
+            renderAppHistory(historyApps);
+
+        } catch(e) {
+            console.error('❌ Error loading applications:', e);
+            showToast('Failed to load applications', 'error');
+        }
+    }
+    function renderDeliveryApplications(applications) {
+        const container = document.getElementById('delivery-apps-container');
+        
+        if(applications.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-2 bg-white p-8 rounded-xl border border-gray-200 text-center">
+                    <i data-lucide="user-check" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
+                    <p class="text-gray-600">No pending applications</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+        
+        container.innerHTML = applications.map(app => `
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-lg">${app.name || 'No Name'}</h4>
+                        <p class="text-sm text-gray-600">${app.email}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">Pending</span>
+                </div>
+                
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-sm">${app.phone || app.mobile || 'No phone'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-sm">${app.city || 'Unknown'}, ${app.state || 'Unknown'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="car" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-sm">${app.vehicle || 'Unknown'} • ${app.vehicleNo || 'No plate'}</span>
+                    </div>
+                </div>
+                
+                ${app.bio ? `<p class="text-sm text-gray-600 mb-4 line-clamp-2">${app.bio}</p>` : ''}
+                
+                <div class="flex gap-2">
+                    <button onclick="approveDriver('${app.email}')" 
+                            class="flex-1 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700">
+                        Approve
+                    </button>
+                    <button onclick="rejectDriver('${app.email}')" 
+                            class="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700">
+                        Reject
+                    </button>
+                    <button onclick="editApplication('${app.email}')" 
+                            class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg font-bold hover:bg-blue-200">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        lucide.createIcons();
+    }
+
+    function renderAppHistory(applications) {
+        const tbody = document.getElementById('app-history-body');
+        
+        if(applications.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="p-4 text-center text-gray-500">
+                        No application history
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = applications.map(app => {
+            const statusColor = app.status === 'active' ? 'bg-green-100 text-green-800' : 
+                              app.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                              'bg-gray-100 text-gray-800';
+            
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4">
+                        <p class="font-bold">${app.name || 'No Name'}</p>
+                        <p class="text-xs text-gray-500">${app.email}</p>
+                    </td>
+                    <td class="p-4">
+                        <p class="text-sm">${app.phone || app.mobile || 'No phone'}</p>
+                        <p class="text-xs text-gray-500">${app.vehicle || 'Unknown'} • ${app.vehicleNo || 'No plate'}</p>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">
+                            ${app.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button onclick="editApplication('${app.email}')" 
+                                class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-200 mr-2">
+                            Edit
+                        </button>
+                        <button onclick="deleteDriver('${app.email}')" 
+                                class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-bold hover:bg-red-200 mr-2">
+                            Delete
+                        </button>
+                        ${app.status === 'active' ? `
+                            <button onclick="blockDriver('${app.email}')" 
+                                    class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200">
+                                Block
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function approveDriver(email) {
+        if(!confirm('Approve this driver?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ status: 'active' })
+            });
+            
+            if(res.ok) {
+                showToast('Driver approved', 'success');
+                loadJobApplications();
+            } else {
+                showToast('Failed to approve driver', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error approving driver', 'error');
+        }
+    }
+
+    async function rejectDriver(email) {
+        if(!confirm('Reject this application?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ status: 'rejected' })
+            });
+            
+            if(res.ok) {
+                showToast('Application rejected', 'success');
+                loadJobApplications();
+            } else {
+                showToast('Failed to reject application', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error rejecting application', 'error');
+        }
+    }
+
+    async function blockDriver(email) {
+        if(!confirm('Block this driver?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ status: 'blocked' })
+            });
+            
+            if(res.ok) {
+                showToast('Driver blocked', 'success');
+                loadJobApplications();
+            } else {
+                showToast('Failed to block driver', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error blocking driver', 'error');
+        }
+    }
+
+    async function deleteDriver(email) {
+        if(!confirm('Delete this driver permanently?')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                method: 'DELETE'
+            });
+            
+            if(res.ok) {
+                showToast('Driver deleted', 'success');
+                loadJobApplications();
+            } else {
+                showToast('Failed to delete driver', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error deleting driver', 'error');
+        }
+    }
+
+    function editApplication(email) {
+        const driver = allDrivers.find(d => d.email === email);
+        if(!driver) return;
+        
+        document.getElementById('edit-app-modal').classList.remove('hidden');
+        document.getElementById('edit-app-orig-email').value = email;
+        document.getElementById('edit-app-name').value = driver.name || '';
+        document.getElementById('edit-app-phone').value = driver.phone || driver.mobile || '';
+        document.getElementById('edit-app-vehicle').value = driver.vehicleNo || '';
+    }
+
+    async function saveEditedApp() {
+        const origEmail = document.getElementById('edit-app-orig-email').value;
+        const updates = {
+            name: document.getElementById('edit-app-name').value,
+            phone: document.getElementById('edit-app-phone').value,
+            vehicleNo: document.getElementById('edit-app-vehicle').value,
+            mobile: document.getElementById('edit-app-phone').value
+        };
+        
+        try {
+            const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(origEmail)}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(updates)
+            });
+            
+            if(res.ok) {
+                showToast('Application updated', 'success');
+                document.getElementById('edit-app-modal').classList.add('hidden');
+                loadJobApplications();
+            } else {
+                showToast('Failed to update application', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error updating application', 'error');
+        }
+    }
+
+    // --- REPLACE THIS FUNCTION IN webadmin.html ---
+
+async function loadActiveFleet() {
+    try {
+        // Show loading state or toast if needed
+        // showToast('Refreshing Fleet Data...', 'info');
+
+        // 1. Fetch Users (Drivers) AND Orders simultaneously
+        const [usersRes, ordersRes] = await Promise.all([
+            fetch(`${API_URL}/users`),
+            fetch(`${API_URL}/orders`)
+        ]);
+
+        const drivers = await usersRes.json();
+        const orders = await ordersRes.json();
+
+        // 2. Update Global Variables
+        allOrders = orders; // Important: Update global orders list
+        
+        // 3. Filter Active Drivers
+        const activeDrivers = drivers.filter(d => d.status === 'active');
+        
+        // 4. Render
+        renderActiveFleet(activeDrivers);
+        
+    } catch(e) {
+        console.error('Error loading fleet:', e);
+        showToast('Failed to load fleet data', 'error');
+    }
+}
+   // --- REPLACE THIS FUNCTION IN webadmin.html ---
+
+function renderActiveFleet(drivers) {
+    const container = document.getElementById('active-drivers-list');
+    
+    if(drivers.length === 0) {
+        container.innerHTML = `
+            <div class="bg-white p-8 rounded-xl border border-gray-200 text-center">
+                <i data-lucide="users" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+                <p class="text-gray-600">No active drivers in fleet</p>
+            </div>
+        `;
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+    }
+    
+    container.innerHTML = drivers.map(driver => {
+        // 1. Safe Email Matching
+        const driverEmail = (driver.email || "").toLowerCase().trim();
+
+        const driverOrders = allOrders.filter(o => 
+            (o.assignedTo || "").toLowerCase().trim() === driverEmail
+        );
+
+        // 2. STATS CALCULATION
+        const deliveryVerifiedCount = driverOrders.filter(o => o.isDeliveryVerified).length;
+        const returnVerifiedCount = driverOrders.filter(o => o.isReturnVerified).length;
+        const totalCompleted = deliveryVerifiedCount + returnVerifiedCount;
+        
+        const pendingCount = driverOrders.filter(o => 
+            !o.isDeliveryVerified && 
+            !o.isReturnVerified && 
+            !['Cancelled', 'Return Cancelled', 'Return Rejected'].includes(o.status)
+        ).length;
+
+        // 3. WALLET CALCULATION
+        const calculatedEarnings = totalCompleted * 20; 
+        
+        // 4. SHIFT DATA DISPLAY LOGIC (NEW)
+        // Check if shift data exists, otherwise show 'Not Booked'
+        const hasShift = driver.shift && driver.shift.type;
+        const shiftType = hasShift ? driver.shift.type : 'Not Booked';
+        const shiftHours = hasShift ? driver.shift.hours : '--';
+        
+        // Styling based on if shift is booked
+        const shiftBg = hasShift ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500';
+        const shiftLabelColor = hasShift ? 'text-gray-400' : 'text-gray-400';
+
+        return `
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-lg">${driver.name || 'No Name'}</h4>
+                        <p class="text-sm text-gray-600">${driver.email}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Active
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Contact</p>
+                        <p class="font-bold text-sm text-gray-900">${driver.phone || driver.mobile || 'N/A'}</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Vehicle</p>
+                        <p class="font-bold text-sm text-gray-900">${driver.vehicle || 'Bike'} • ${driver.vehicleNo || 'N/A'}</p>
+                    </div>
+                </div>
+
+                <div class="${shiftBg} p-3 rounded-lg border border-gray-200 mb-4 flex justify-between items-center transition-all">
+                    <div>
+                        <p class="text-[10px] ${shiftLabelColor} font-bold uppercase">Current Shift</p>
+                        <p class="font-bold text-sm">${shiftType}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] ${shiftLabelColor} font-bold uppercase">Timing</p>
+                        <p class="text-xs font-mono font-bold">${shiftHours}</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                    <div class="bg-blue-50 p-2 rounded-lg text-center border border-blue-100">
+                        <p class="text-[10px] text-blue-600 font-black uppercase">Delivered</p>
+                        <p class="text-lg font-black text-blue-800">${deliveryVerifiedCount}</p>
+                    </div>
+                    <div class="bg-purple-50 p-2 rounded-lg text-center border border-purple-100">
+                        <p class="text-[10px] text-purple-600 font-black uppercase">Returned</p>
+                        <p class="text-lg font-black text-purple-800">${returnVerifiedCount}</p>
+                    </div>
+                    <div class="bg-orange-50 p-2 rounded-lg text-center border border-orange-100">
+                        <p class="text-[10px] text-orange-600 font-black uppercase">Active</p>
+                        <p class="text-lg font-black text-orange-800">${pendingCount}</p>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded-lg text-center border border-green-100">
+                        <p class="text-[10px] text-green-600 font-black uppercase">Wallet</p>
+                        <p class="text-lg font-black text-green-800">₹${calculatedEarnings}</p>
+                    </div>
+                </div>
+                
+                <div class="pt-2 border-t border-gray-100">
+                    <button onclick="viewDriverHistory('${driver.email}')" 
+                            class="w-full py-3 bg-black text-white rounded-lg font-bold text-xs hover:bg-gray-800 transition flex items-center justify-center gap-2">
+                        <i data-lucide="history" class="w-3 h-3"></i> View Delivery History
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+}
+    function manageDriverSlot(email) {
+        const driver = allDrivers.find(d => d.email === email);
+        if(!driver) return;
+        
+        const modalContent = `
+            <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl w-full max-w-sm">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-lg">Manage Shift for ${driver.name}</h3>
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="p-2 hover:bg-gray-100 rounded-lg">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Shift Type</label>
+                                <div class="flex gap-2">
+                                    <button onclick="selectSlotType(this, 'Morning')" class="flex-1 py-2 border border-gray-300 rounded-lg text-sm font-bold hover:bg-gray-50 ${driver.shift?.type === 'Morning' ? 'bg-blue-600 text-white border-blue-600' : ''}">Morning</button>
+                                    <button onclick="selectSlotType(this, 'Evening')" class="flex-1 py-2 border border-gray-300 rounded-lg text-sm font-bold hover:bg-gray-50 ${driver.shift?.type === 'Evening' ? 'bg-blue-600 text-white border-blue-600' : ''}">Evening</button>
+                                    <button onclick="selectSlotType(this, 'Night')" class="flex-1 py-2 border border-gray-300 rounded-lg text-sm font-bold hover:bg-gray-50 ${driver.shift?.type === 'Night' ? 'bg-blue-600 text-white border-blue-600' : ''}">Night</button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Hours</label>
+                                <input type="text" id="slot-hours" placeholder="e.g. 9 AM - 6 PM" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg text-sm font-bold outline-none focus:border-black"
+                                       value="${driver.shift?.hours || ''}">
+                            </div>
+                            
+                            <button onclick="saveDriverSlot('${driver.email}')" class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg">
+                                Save Shift
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+        lucide.createIcons();
+    }
+
+    
+
+    function selectSlotType(btn, type) {
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+            b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+            b.classList.add('border-gray-300');
+        });
+        btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+    }
+
+    async function saveDriverSlot(email) {
+        const typeBtn = document.querySelector('.bg-blue-600.text-white');
+        const hours = document.getElementById('slot-hours').value;
+        
+        if(!typeBtn || !hours) {
+            alert('Please select shift type and hours');
+            return;
+        }
+        
+        const type = typeBtn.textContent.trim();
+        
+        try {
+            const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(email)}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ shift: { type, hours } })
+            });
+            
+            if(res.ok) {
+                showToast('Shift updated successfully', 'success');
+                document.querySelector('.fixed.inset-0.bg-black\\/50').remove();
+                loadActiveFleet();
+            } else {
+                showToast('Failed to update shift', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error updating shift', 'error');
+        }
+    }
+
+   // --- REPLACE IN webadmin.html ---
+
+async function viewDriverHistory(email) {
+    try {
+        const ordersRes = await fetch(`${API_URL}/orders`);
+        const orders = await ordersRes.json();
+        
+        // Filter Orders for this specific driver
+        const driverOrders = orders.filter(o => 
+            o.assignedTo && o.assignedTo.toLowerCase().trim() === email.toLowerCase().trim()
+        );
+        
+        const modal = document.getElementById('driver-history-modal');
+        const tbody = document.getElementById('driver-history-body');
+        
+        if(driverOrders.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="p-6 text-center text-gray-500">
+                        No delivery history found for this driver.
+                    </td>
+                </tr>
+            `;
+        } else {
+            // Sort by latest first (assuming ID or Date helps sort, usually API sends sorted)
+            driverOrders.reverse();
+
+            tbody.innerHTML = driverOrders.map(order => {
+                let badge = '';
+                let amountEarned = 0;
+
+                // LOGIC: Determine Type and Earnings based on Verified Flags
+                
+                // Case 1: Delivery Verified
+                if (order.isDeliveryVerified) {
+                    badge = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-green-200">DELIVERY</span>`;
+                    amountEarned += 20;
+                }
+                
+                // Case 2: Return Verified
+                else if (order.isReturnVerified) {
+                    badge = `<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-purple-200">RETURN PICKUP</span>`;
+                    amountEarned += 20;
+                }
+                
+                // Case 3: Pending / Active
+                else {
+                    const isReturnProcess = order.status.includes('Return') || order.status.includes('Pickup');
+                    const label = isReturnProcess ? 'RETURN (PENDING)' : 'DELIVERY (PENDING)';
+                    const color = isReturnProcess ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600';
+                    badge = `<span class="${color} px-2 py-1 rounded text-[10px] font-bold uppercase border border-gray-200">${label}</span>`;
+                }
+
+                // Amount Badge Color
+                const amountClass = amountEarned > 0 ? "text-green-600 bg-green-50 border-green-200" : "text-gray-400 bg-gray-50 border-gray-200";
+
+                return `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td class="p-3 font-mono text-xs font-bold text-gray-600">
+                            #${order.id || order._id?.substr(-6)}
+                        </td>
+                        <td class="p-3">
+                            <p class="font-bold text-sm text-gray-900">${order.customerName || 'Guest'}</p>
+                            <p class="text-[10px] text-gray-500 line-clamp-1">${order.address || 'No Address'}</p>
+                        </td>
+                        <td class="p-3">
+                            ${badge}
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">${order.status}</p>
+                        </td>
+                        <td class="p-3 text-right">
+                            <span class="px-3 py-1 rounded-full text-xs font-black border ${amountClass}">
+                                ₹${amountEarned}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        modal.classList.remove('hidden');
+    } catch(e) {
+        console.error(e);
+        alert('Failed to load driver history');
+    }
+}
+// ==========================================
+//  HISTORY MODAL - SEPARATE RECORDS FIX
+// ==========================================
+
+// 1. Global Variables
+let historyOrdersCache = []; 
+let currentHistoryTab = 'delivery';
+
+// 2. Main Function - Opens Modal
+async function viewDriverHistory(email) {
+    try {
+        // A. Fetch Data
+        const ordersRes = await fetch(`${API_URL}/orders`);
+        const orders = await ordersRes.json();
+        
+        // B. Filter for Specific Driver
+        historyOrdersCache = orders.filter(o => 
+            o.assignedTo && o.assignedTo.toLowerCase().trim() === email.toLowerCase().trim()
+        );
+
+        // C. CALCULATE GRAND TOTALS (Pura Hissab)
+        // Chahe order delivery tab me ho ya return me, total yahan calculate hoga
+        let totalVerifiedAmount = 0;
+        let totalPendingAmount = 0;
+
+        historyOrdersCache.forEach(o => {
+            // 1. Delivery Ka Hissab
+            if (o.isDeliveryVerified) {
+                totalVerifiedAmount += 20;
+            } else if (o.status === 'Delivered') {
+                totalPendingAmount += 20;
+            }
+
+            // 2. Return Ka Hissab
+            if (o.isReturnVerified) {
+                totalVerifiedAmount += 20;
+            } else if (o.status === 'Returned' || o.status === 'Return Completed') {
+                // Agar return complete hai par paisa verify nahi hua
+                if (!o.isReturnVerified) totalPendingAmount += 20;
+            }
+        });
+
+        // D. Setup UI Containers
+        const modal = document.getElementById('driver-history-modal');
+        const container = modal.querySelector('.bg-white'); 
+        
+        // E. Inject Summary & Tabs (If not exists)
+        if (!document.getElementById('history-ui-container')) {
+            const header = container.querySelector('.flex.justify-between');
+            
+            const uiHTML = `
+                <div id="history-ui-container" class="mb-4">
+                    <div class="mx-6 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <p class="text-[10px] text-green-600 font-bold uppercase">Total Earned (Paid)</p>
+                            <p class="text-2xl font-black text-green-700" id="hist-total-earned">₹0</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-orange-600 font-bold uppercase">Pending Verification</p>
+                            <p class="text-2xl font-black text-orange-700" id="hist-total-pending">₹0</p>
+                        </div>
+                    </div>
+
+                    <div class="flex border-b border-gray-200 px-6">
+                        <button onclick="renderHistoryTable('delivery')" id="tab-hist-del" class="flex-1 py-3 text-sm font-bold border-b-2 border-black text-black transition-colors">
+                            Delivery Records
+                        </button>
+                        <button onclick="renderHistoryTable('return')" id="tab-hist-ret" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-black transition-colors">
+                            Return Records
+                        </button>
+                    </div>
+                </div>
+            `;
+            header.insertAdjacentHTML('afterend', uiHTML);
+        }
+
+        // F. Update Values & Show
+        document.getElementById('hist-total-earned').innerText = `₹${totalVerifiedAmount}`;
+        document.getElementById('hist-total-pending').innerText = `₹${totalPendingAmount}`;
+        
+        renderHistoryTable('delivery');
+        modal.classList.remove('hidden');
+
+    } catch(e) {
+        console.error(e);
+        showToast('Failed to load history', 'error');
+    }
+}
+
+// 3. Render Table Logic (The Fix is Here)
+function renderHistoryTable(type) {
+    currentHistoryTab = type;
+    const tbody = document.getElementById('driver-history-body');
+    
+    // A. Tab Styling
+    const tabDel = document.getElementById('tab-hist-del');
+    const tabRet = document.getElementById('tab-hist-ret');
+    
+    if (tabDel && tabRet) {
+        if (type === 'delivery') {
+            tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black transition-colors";
+            tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-black transition-colors";
+        } else {
+            tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-black transition-colors";
+            tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black transition-colors";
+        }
+    }
+
+    // B. FILTER LOGIC (FIXED)
+    let filteredOrders = [];
+
+    if (type === 'delivery') {
+        // DELIVERY TAB RULE:
+        // 1. Agar Delivery Verify ho chuki hai (isDeliveryVerified == true), toh dikhao (Chahe abhi status 'Returned' ho)
+        // 2. YA fir status 'Delivered' ho (Pending payment)
+        filteredOrders = historyOrdersCache.filter(o => 
+            o.isDeliveryVerified === true || o.status === 'Delivered'
+        );
+    } else {
+        // RETURN TAB RULE:
+        // 1. Agar Return Verify ho chuka hai (isReturnVerified == true)
+        // 2. YA fir status me 'Return' ya 'Pickup' shamil hai
+        filteredOrders = historyOrdersCache.filter(o => 
+            o.isReturnVerified === true || 
+            (o.status && (o.status.includes('Return') || o.status.includes('Pickup')))
+        );
+    }
+
+    // C. Render Rows
+    if (filteredOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No records found in ${type}.</td></tr>`;
+        return;
+    }
+
+    // Sort: Latest first
+    filteredOrders.sort((a, b) => (b._id || b.id).localeCompare(a._id || a.id));
+
+    tbody.innerHTML = filteredOrders.map(order => {
+        
+        // 1. Determine Payment Status & Badge for THIS TAB
+        let isPaid = false;
+        let statusText = order.status; // Default
+        
+        if (type === 'delivery') {
+            isPaid = order.isDeliveryVerified;
+            // Agar order Returned hai par hum Delivery Tab me hai, to status "Delivered" dikhao taki confusion na ho
+            if(isPaid) statusText = "Delivery Completed";
+            else if(order.status === 'Delivered') statusText = "Delivered (Pending)";
+        } else {
+            isPaid = order.isReturnVerified;
+            if(isPaid) statusText = "Return Completed";
+        }
+
+        // 2. Badge UI
+        let payBadge = '';
+        if (isPaid) {
+            payBadge = `<span class="flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full w-fit border border-green-200"><i data-lucide="check-circle" class="w-3 h-3"></i> Verified (₹20)</span>`;
+        } else {
+            payBadge = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full w-fit border border-orange-200">Pending</span>`;
+        }
+
+        // 3. Status Badge Color
+        let statusColor = 'bg-gray-100 text-gray-600';
+        if(statusText.includes('Completed') || statusText.includes('Delivered')) statusColor = 'bg-green-100 text-green-800';
+        
+        return `
+            <tr class="hover:bg-gray-50 border-b border-gray-100 transition">
+                <td class="p-4 align-top w-28">
+                    <p class="font-mono font-bold text-xs text-gray-900">#${order.id || String(order._id).substr(-6)}</p>
+                    <p class="text-[10px] text-gray-500 font-medium mt-1">${order.date || 'No Date'}</p>
+                    <div class="mt-2">${payBadge}</div>
+                </td>
+
+                <td class="p-4 align-top max-w-[200px]">
+                    <p class="font-bold text-sm text-gray-900">${order.customerName || 'Guest'}</p>
+                    <p class="text-xs text-blue-600 font-bold flex items-center gap-1 mt-0.5">
+                        <i data-lucide="phone" class="w-3 h-3"></i> ${order.phone || 'N/A'}
+                    </p>
+                    <div class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 leading-relaxed line-clamp-2">
+                        ${order.address || 'No Address'}
+                    </div>
+                </td>
+
+                <td class="p-4 align-top">
+                    <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide ${statusColor}">
+                        ${statusText}
+                    </span>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase mt-2">Item:</p>
+                    <p class="text-xs text-gray-700 font-medium truncate w-32">${order.product || (order.items && order.items[0]?.name) || 'Item'}</p>
+                </td>
+
+                <td class="p-4 align-top text-right">
+                    <p class="font-black text-sm text-gray-900">₹20.00</p>
+                    <p class="text-[10px] text-gray-400 font-medium">${type === 'delivery' ? 'Delivery Fee' : 'Return Fee'}</p>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+}
+    // --- DISPATCH MANAGER ---
+    async function loadDispatchManager() {
+        try {
+            const res = await fetch(`${API_URL}/orders`);
+            allOrders = await res.json();
+            renderOrdersTable(allOrders);
+        } catch(e) {
+            console.error('Error loading orders:', e);
+            showToast('Failed to load orders', 'error');
+        }
+    }
+
+    // --- REPLACE IN webadmin.html: renderOrdersTable ---
+function renderOrdersTable(orders) {
+    const tbody = document.getElementById('orders-table-body');
+    
+    if(orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">No orders found</td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = orders.map(order => {
+        let firstImage = 'https://via.placeholder.com/50';
+        if(order.items && order.items.length > 0) {
+            const firstItem = order.items[0];
+            firstImage = firstItem.img || firstItem.image || firstImage;
+        }
+        
+        // Status Colors logic
+        const statusColor = (order.status === 'Delivered' || order.status === 'Returned') ? 'bg-green-100 text-green-800' :
+                          (order.status === 'Cancelled' || order.status === 'Return Rejected' || order.status === 'Return Cancelled') ? 'bg-red-100 text-red-800' :
+                          (order.status === 'Return Approved' || order.status === 'Return Assigned') ? 'bg-purple-100 text-purple-800' :
+                          'bg-blue-100 text-blue-800';
+        
+        let actionButtons = '';
+        
+        // --- BUTTON LOGIC START ---
+
+        // 1. SPECIAL: RETURN APPROVED (Must be checked first)
+        // यह वह सेक्शन है जो आपको चाहिए (2 Buttons)
+        if (order.status === 'Return Approved') {
+            actionButtons = `
+                <div class="flex flex-col gap-2 mb-2">
+                    <button onclick="assignOrder('${order._id || order.id}')" 
+                            class="w-full px-3 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold hover:bg-purple-700 shadow-sm flex items-center justify-center gap-2">
+                        <i data-lucide="truck" class="w-3 h-3"></i> Assign Pickup
+                    </button>
+                    
+                    <button onclick="cancelReturnProcess('${order._id || order.id}')" 
+                            class="w-full px-3 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold hover:bg-red-100 flex items-center justify-center gap-2">
+                        <i data-lucide="x-circle" class="w-3 h-3"></i> Cancel Return
+                    </button>
+                </div>
+            `;
+        }
+       // 2. PAYMENT VERIFICATION
+else if ((order.status === 'Delivered' || order.status === 'Return Completed')) {
+    
+    // Check agar paise verify nahi huye
+    const needsVerification = (order.status === 'Delivered' && !order.isDeliveryVerified) || 
+                              (order.status === 'Return Completed' && !order.isReturnVerified);
+
+    if(needsVerification) {
+        const btnText = order.status === 'Delivered' ? "Approve Delivery Payment" : "Approve Return Payment";
+        actionButtons = `
+            <button onclick="verifyAndPay('${order._id || order.id}')" 
+                    class="w-full mb-2 px-3 py-3 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 shadow-md flex items-center justify-center gap-2">
+                <i data-lucide="wallet" class="w-4 h-4"></i> ${btnText} (₹20)
+            </button>
+        `;
+    } else {
+        // Already Paid
+        actionButtons = `
+            <div class="mb-2 w-full px-3 py-2 bg-gray-50 text-green-700 rounded-lg text-xs font-bold border border-green-200 flex items-center justify-center gap-1">
+                <i data-lucide="check" class="w-3 h-3"></i> Payment Verified
+            </div>
+        `;
+    }
+}
+        // 4. STANDARD ACTIVE ORDERS (Normal Delivery)
+        else {
+            let btnLabel = order.assignedTo ? "Reassign" : "Assign";
+            let btnColor = order.assignedTo ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : "bg-blue-600 text-white hover:bg-blue-700";
+            
+            // Show Assign/Reassign only if active
+            if(order.status !== 'Cancelled' && order.status !== 'Returned' && order.status !== 'Return Cancelled' && order.status !== 'Return Rejected') {
+                actionButtons = `
+                    <div class="flex gap-2 justify-center mb-2">
+                        <button onclick="assignOrder('${order._id || order.id}')" class="flex-1 px-3 py-2 ${btnColor} rounded-lg text-xs font-bold shadow-sm transition-colors">
+                            ${btnLabel}
+                        </button>
+                        <button onclick="cancelOrder('${order._id || order.id}')" class="px-3 py-2 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors" title="Cancel Order">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                actionButtons = `<div class="mb-2 text-center text-xs font-bold text-red-400">${order.status}</div>`;
+            }
+        }
+
+        // View Bill Button (Always Visible)
+        const billButton = `
+            <button onclick="viewOrderBill('${order._id || order.id}')" 
+                    class="w-full px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-bold hover:bg-gray-200 flex items-center justify-center gap-2">
+                <i data-lucide="file-text" class="w-3 h-3"></i> View Bill
+            </button>
+        `;
+
+        return `
+            <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                <td class="p-4">
+                    <div class="flex items-center gap-3">
+                        <img src="${firstImage}" class="w-10 h-10 object-cover rounded-lg border bg-white">
+                        <div>
+                            <p class="font-bold text-sm">#${order.id || order._id?.substr(-6)}</p>
+                            <p class="text-xs text-gray-500">₹${order.total || order.price}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <p class="font-bold text-xs text-gray-900">${order.customerName || 'Guest'}</p>
+                    <p class="text-[10px] text-gray-500 line-clamp-1">${order.address || 'No Address'}</p>
+                </td>
+                <td class="p-4">
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusColor}">${order.status}</span>
+                    ${order.assignedTo ? `
+                        <div class="flex items-center gap-1 mt-1.5 text-[10px] text-gray-500 font-medium">
+                            <i data-lucide="truck" class="w-3 h-3"></i> ${order.assignedTo}
+                        </div>
+                    ` : ''}
+                </td>
+                <td class="p-4">
+                    <div class="w-32 mx-auto">
+                         ${actionButtons}
+                         ${billButton}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+}
+    async function cancelReturnProcess(orderId) {
+        if(!confirm('Are you sure you want to Cancel this Return?')) return;
+
+        try {
+            // Status ko 'Return Cancelled' set karein
+            const res = await fetch(`${API_URL}/update-order-status`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    id: orderId, 
+                    status: 'Return Cancelled' 
+                })
+            });
+
+            if(res.ok) {
+                showToast('Return Process Cancelled', 'success');
+                loadDispatchManager(); // Table refresh
+            } else {
+                showToast('Failed to cancel return', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Server Error', 'error');
+        }
+    }
+async function verifyAndPay(orderId) {
+        if(!confirm("Verify this delivery and credit ₹20 to the driver's wallet?")) return;
+
+        try {
+            const res = await fetch(`${API_URL}/admin/verify-payment`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ orderId: orderId })
+            });
+
+            // पहले टेक्स्ट के रूप में रिस्पॉन्स लें (ताकि HTML एरर को पकड़ सकें)
+            const textResponse = await res.text();
+            
+            let data;
+            try {
+                data = JSON.parse(textResponse); // अब JSON पार्स करें
+            } catch(e) {
+                console.error("Server Sent Non-JSON:", textResponse);
+                showToast(`❌ Server Error: ${res.status} ${res.statusText}`, "error");
+                return;
+            }
+
+            if(res.ok) {
+                showToast("✅ Payment Successful! Driver Wallet Updated.", "success");
+                loadDispatchManager(); // टेबल रिफ्रेश करें
+            } else {
+                showToast("❌ Error: " + (data.message || "Unknown Error"), "error");
+            }
+        } catch(e) {
+            console.error("Network Error:", e);
+            showToast("Server Connection Error. Is Server Running?", "error");
+        }
+    }
+    async function viewOrderBill(orderId) {
+        try {
+            const res = await fetch(`${API_URL}/orders/${orderId}`);
+            const order = await res.json();
+            
+            const billContent = document.getElementById('bill-content');
+            let itemsHtml = '';
+            
+            if(order.items && order.items.length > 0) {
+                itemsHtml = order.items.map(item => `
+                    <div class="flex justify-between items-center border-b border-gray-200 py-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.img || item.image || 'https://via.placeholder.com/60'}" 
+                                 class="w-12 h-12 object-cover rounded-lg border border-gray-200">
+                            <div>
+                                <p class="font-bold text-sm">${item.name}</p>
+                                <p class="text-xs text-gray-500">Size: ${item.selectedSize || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold">₹${item.price}</p>
+                    </div>
+                `).join('');
+            } else {
+                itemsHtml = `
+                    <div class="flex justify-between items-center border-b border-gray-200 py-3">
+                        <p class="font-bold">${order.product || 'Unknown Product'}</p>
+                        <p class="font-bold">₹${order.price}</p>
+                    </div>
+                `;
+            }
+            
+            billContent.innerHTML = `
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h1 class="text-2xl font-black">KICKS INVOICE</h1>
+                        <p class="text-gray-600">Order #${order.id || order._id?.substr(-6)}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <h3 class="font-bold text-gray-700 mb-2">Customer Details</h3>
+                            <p class="text-sm"><strong>Name:</strong> ${order.customerName || 'Guest'}</p>
+                            <p class="text-sm"><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                            <p class="text-sm"><strong>Email:</strong> ${order.email || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-700 mb-2">Order Details</h3>
+                            <p class="text-sm"><strong>Date:</strong> ${order.date || 'N/A'}</p>
+                            <p class="text-sm"><strong>Status:</strong> ${order.status}</p>
+                            <p class="text-sm"><strong>Payment:</strong> ${order.payment || 'COD'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h3 class="font-bold text-gray-700 mb-4">Shipping Address</h3>
+                        <p class="text-sm text-gray-600">${order.address || 'No address provided'}</p>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h3 class="font-bold text-gray-700 mb-4">Order Items</h3>
+                        ${itemsHtml}
+                    </div>
+                    
+                    <div class="bg-gray-900 text-white p-6 rounded-xl">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>Subtotal</span>
+                            <span>₹${order.price || (order.total - 5) || 0}</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>Platform Fee</span>
+                            <span>₹5</span>
+                        </div>
+                        <div class="h-px bg-gray-700 my-3"></div>
+                        <div class="flex justify-between text-xl font-black">
+                            <span>Total Amount</span>
+                            <span>₹${order.total || order.price || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('bill-modal').classList.remove('hidden');
+        } catch(e) {
+            console.error(e);
+            showToast('Failed to load order details', 'error');
+        }
+    }
+
+    async function assignOrder(orderId) {
+        const order = allOrders.find(o => o._id === orderId || o.id == orderId);
+        if(!order) return;
+        
+        try {
+            const driversRes = await fetch(`${API_URL}/users`);
+            const drivers = await driversRes.json();
+            const activeDrivers = drivers.filter(d => d.status === 'active');
+            
+            document.getElementById('modal-order-id').innerText = `#${order.id || order._id?.substr(-6)}`;
+            
+            const driversList = document.getElementById('modal-drivers-list');
+            driversList.innerHTML = activeDrivers.map(driver => `
+                <div class="bg-gray-50 p-3 rounded-lg hover:bg-gray-100 cursor-pointer border border-gray-200"
+                     onclick="selectDriverForAssignment('${driver.email}', '${orderId}')">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-sm">${driver.name}</p>
+                            <p class="text-xs text-gray-500">${driver.vehicle || 'Bike'} • ${driver.city || 'Unknown'}</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('assign-modal').classList.remove('hidden');
+            lucide.createIcons();
+        } catch(e) {
+            console.error(e);
+            showToast('Failed to load drivers', 'error');
+        }
+    }
+
+   async function selectDriverForAssignment(driverEmail, orderId) {
+    if(!confirm(`Assign order to ${driverEmail}?`)) return;
+    
+    const cleanEmail = driverEmail.toLowerCase().trim();
+    
+    // Find the order to check if it's a Return
+    const order = allOrders.find(o => o._id === orderId || o.id == orderId);
+    
+    // Determine Status: If currently 'Return Approved', set to 'Return Assigned'
+    // Otherwise set to 'Assigned' (Normal Delivery)
+    let newStatus = 'Assigned';
+    if(order.status === 'Return Approved' || order.status.includes('Return')) {
+        newStatus = 'Return Assigned';
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/orders/${orderId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                assignedTo: cleanEmail, 
+                status: newStatus 
+            })
+        });
+        
+        if(res.ok) {
+            alert("Driver Assigned Successfully!");
+            document.getElementById('assign-modal').classList.add('hidden');
+            loadDispatchManager(); 
+        } else {
+            alert("Failed to assign");
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+    function reassignOrder(orderId) {
+        assignOrder(orderId);
+    }
+
+    async function cancelOrder(orderId) {
+        if(!confirm('Cancel this order? This action cannot be undone.')) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/orders/cancel`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: orderId })
+            });
+            
+            if(res.ok) {
+                showToast('Order cancelled', 'success');
+                loadDispatchManager();
+            } else {
+                showToast('Failed to cancel order', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Error cancelling order', 'error');
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('assign-modal').classList.add('hidden');
+    }
+
+    // --- RETURNS MANAGEMENT ---
+    async function loadReturns() {
+        try {
+            const res = await fetch(`${API_URL}/returns`);
+            allReturnRequests = await res.json();
+            renderReturnsTable(allReturnRequests);
+        } catch(e) {
+            console.error('Error loading returns:', e);
+            showToast('Failed to load returns', 'error');
+        }
+    }
+
+    function renderReturnsTable(returns) {
+        const tbody = document.getElementById('returns-table-body');
+        
+        if(returns.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="p-4 text-center text-gray-500">
+                        No return requests
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = returns.map(req => {
+            const statusColor = req.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                              req.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800';
+            
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4">
+                        <p class="font-bold text-sm">Order #${req.orderId}</p>
+                        <p class="text-xs text-gray-500">Request ID: ${req.reqId}</p>
+                    </td>
+                    <td class="p-4">
+                        <p class="text-sm mb-2">${req.reason || 'No reason provided'}</p>
+                        ${req.hasImage ? `
+                            <button onclick="viewReturnImage('${req.image || req.imageData}')" 
+                                    class="text-xs text-blue-600 font-bold flex items-center gap-1">
+                                <i data-lucide="image" class="w-3 h-3"></i> View Proof
+                            </button>
+                        ` : ''}
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex flex-col gap-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">
+                                ${req.status}
+                            </span>
+                            ${req.status === 'Requested' ? `
+                                <div class="flex gap-2 justify-center">
+                                    <button onclick="updateReturnStatus('${req.orderId}', 'Approved')" 
+                                            class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold hover:bg-green-200">
+                                        Approve
+                                    </button>
+                                    <button onclick="updateReturnStatus('${req.orderId}', 'Rejected')" 
+                                            class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-bold hover:bg-red-200">
+                                        Reject
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        
+        lucide.createIcons();
+    }
+
+    // --- REPLACE THIS FUNCTION IN webadmin.html ---
+
+async function updateReturnStatus(orderId, status) {
+    if(!confirm(`${status} this return request?`)) return;
+    
+    // Show loading toast
+    showToast(`Updating return to ${status}...`, 'info');
+
+    try {
+        // 1. Update the Return Request Entry (Admin Panel View)
+        const returnRes = await fetch(`${API_URL}/returns/${encodeURIComponent(orderId)}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ status })
+        });
+        
+        if(!returnRes.ok) {
+            throw new Error("Failed to update Return Request table.");
+        }
+
+        // 2. Update the Actual Order Status (For Driver/Dispatch View)
+        // If Approved -> 'Return Approved' (Ready for driver assignment)
+        // If Rejected -> 'Return Rejected' (Process ends)
+        const newOrderStatus = status === 'Approved' ? 'Return Approved' : 'Return Rejected';
+
+        const orderRes = await fetch(`${API_URL}/update-order-status`, { 
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                id: orderId, 
+                status: newOrderStatus
+            })
+        });
+
+        if(!orderRes.ok) {
+            throw new Error("Failed to update Order Status.");
+        }
+        
+        showToast(`Return ${status} Successfully!`, 'success');
+        
+        // 3. Reload Tables to show changes
+        await loadReturns();
+        await loadDispatchManager();
+
+    } catch(e) {
+        console.error(e);
+        showToast(`Error: ${e.message}`, 'error');
+    }
+}
+    function viewReturnImage(imageData) {
+        const modalContent = `
+            <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-lg">Return Proof Image</h3>
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-center bg-gray-50 rounded-xl p-2 border border-gray-100">
+                            <img src="${imageData}" alt="Return Proof" 
+                                 class="max-w-full h-auto max-h-[70vh] rounded-lg shadow-sm object-contain">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+        lucide.createIcons();
+    }
+    // --- UTILITY FUNCTIONS ---
+    function filterAssignDrivers() {
+        // Implementation for filtering drivers by state/city
+        console.log('Filter drivers function');
+    }
+
+    // --- INITIALIZE ---
+    window.onload = init;
+</script>
+</body>
+</html>
