@@ -929,27 +929,32 @@ function renderLiveInventory(products) {
         }
     }
 
-    async function rejectProduct(productId) {
-        if(!confirm('Reject this product?')) return;
+  async function rejectOrder(orderId) {
+    if(!confirm('REJECT Order? Stock will be increased automatically.')) return;
+    
+    try {
+        const res = await fetch(`${API_URL}/orders/cancel`, { // Note: Calling cancel route but with 'Rejected' status
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                id: orderId,
+                status: 'Rejected' // Ye naya status server handle karega
+            })
+        });
         
-        try {
-            const res = await fetch(`${API_URL}/products/${productId}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ status: 'Rejected' })
-            });
-            
-            if(res.ok) {
-                showToast('Product rejected', 'success');
-                loadDashboardData();
-            } else {
-                showToast('Failed to reject product', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error rejecting product', 'error');
+        const data = await res.json();
+        
+        if(res.ok) {
+            showToast('Order Rejected & Stock Restored', 'success');
+            loadDispatchManager(); // Refresh Table
+        } else {
+            showToast(data.error || 'Failed to reject', 'error');
         }
+    } catch(e) {
+        console.error(e);
+        showToast('Server Error', 'error');
     }
+}
 
     async function deleteProduct(productId) {
         if(!confirm('Delete this product permanently?')) return;
@@ -2239,25 +2244,31 @@ else if ((order.status === 'Delivered' || order.status === 'Return Completed')) 
 }
         // 4. STANDARD ACTIVE ORDERS (Normal Delivery)
         else {
-            let btnLabel = order.assignedTo ? "Reassign" : "Assign";
-            let btnColor = order.assignedTo ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : "bg-blue-600 text-white hover:bg-blue-700";
-            
-            // Show Assign/Reassign only if active
-            if(order.status !== 'Cancelled' && order.status !== 'Returned' && order.status !== 'Return Cancelled' && order.status !== 'Return Rejected') {
-                actionButtons = `
-                    <div class="flex gap-2 justify-center mb-2">
-                        <button onclick="assignOrder('${order._id || order.id}')" class="flex-1 px-3 py-2 ${btnColor} rounded-lg text-xs font-bold shadow-sm transition-colors">
-                            ${btnLabel}
-                        </button>
-                        <button onclick="cancelOrder('${order._id || order.id}')" class="px-3 py-2 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors" title="Cancel Order">
-                            <i data-lucide="x" class="w-3 h-3"></i>
-                        </button>
-                    </div>
-                `;
-            } else {
-                actionButtons = `<div class="mb-2 text-center text-xs font-bold text-red-400">${order.status}</div>`;
-            }
-        }
+    let btnLabel = order.assignedTo ? "Reassign" : "Assign";
+    let btnColor = order.assignedTo ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : "bg-blue-600 text-white hover:bg-blue-700";
+    
+    // Show Assign/Reassign/Reject only if active
+    if(order.status !== 'Cancelled' && order.status !== 'Rejected' && order.status !== 'Returned' && order.status !== 'Return Cancelled') {
+        actionButtons = `
+            <div class="flex flex-col gap-2 justify-center mb-2">
+                <button onclick="assignOrder('${order._id || order.id}')" class="w-full px-3 py-2 ${btnColor} rounded-lg text-xs font-bold shadow-sm transition-colors">
+                    ${btnLabel} Driver
+                </button>
+                
+                <div class="flex gap-2">
+                    <button onclick="rejectOrder('${order._id || order.id}')" class="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors" title="Reject Order (Restock)">
+                        Reject
+                    </button>
+                    <button onclick="cancelOrder('${order._id || order.id}')" class="flex-1 px-3 py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors" title="Cancel Order">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+    } else {
+        actionButtons = `<div class="mb-2 text-center text-xs font-bold text-red-400 uppercase tracking-wide border border-red-100 bg-red-50 py-2 rounded-lg">${order.status}</div>`;
+    }
+}
 
         // View Bill Button (Always Visible)
         const billButton = `

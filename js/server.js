@@ -38,27 +38,27 @@ app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
 
-// --- CUSTOM MIDDLEWARE: AUTHENTICATION (NEW) ---
+// server.js में verifyToken फंक्शन को इससे बदलें:
+
 const verifyToken = (roles = []) => {
     return (req, res, next) => {
-        // Frontend se 'Authorization: Bearer <token>' bhejna hoga
         const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+        
+        // Token format "Bearer <token>" होता है
+        const token = authHeader && authHeader.split(' ')[1]; 
 
         if (!token) {
-            // Development mode mein shayad token na ho, isliye warning dekar chhod sakte hain
-            // Lekin Production ke liye yeh Block hona chahiye.
-            // Abhi ke liye hum soft check rakhenge taaki tumhara frontend tute nahi.
-            // return res.status(403).json({ message: "No token provided" }); 
-            return next(); // WARNING: Remove this line and uncomment above for strict security!
+            return res.status(403).json({ message: "Login Required (No Token)" });
         }
 
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
-            if (err) return res.status(401).json({ message: "Unauthorized: Invalid Token" });
+            if (err) {
+                return res.status(401).json({ message: "Session Expired. Please Login Again." });
+            }
             
-            // Check Role
+            // Check Role (Optional)
             if (roles.length > 0 && !roles.includes(decoded.role)) {
-                return res.status(403).json({ message: "Access Denied: Insufficient Permissions" });
+                return res.status(403).json({ message: "Access Denied" });
             }
             
             req.user = decoded;
@@ -66,7 +66,6 @@ const verifyToken = (roles = []) => {
         });
     };
 };
-
 // ==========================================
 // 2. MONGODB CONNECTION
 // ==========================================
@@ -650,25 +649,39 @@ app.put('/api/update-order-status', verifyToken(['admin', 'driver']), async (req
 
 app.post('/api/orders/cancel', async (req, res) => {
     try {
-        const { id } = req.body;
+        const { id, status } = req.body; // Status accept karein (Cancel ya Reject)
+        const newStatus = status || 'Cancelled'; // Default Cancelled rahega
+
         const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { id: id };
         
         // Find order to restock
         const order = await Order.findOne(query);
-        if(order && order.status !== 'Cancelled') {
-            // Restock Logic
+        
+        // Sirf tab restock karein agar pehle se Cancelled/Rejected nahi hai
+        if(order && order.status !== 'Cancelled' && order.status !== 'Rejected') {
+            
+            // Restock Logic (Critical Fix: parseInt use karein)
             for(const item of order.items) {
-                await Product.updateOne({ id: item.id }, { $inc: { stock: 1 } });
+                const prodId = parseInt(item.id); // ID ko number banayein
+                
+                // Stock +1 karein
+                await Product.updateOne(
+                    { id: prodId }, 
+                    { $inc: { stock: 1 } }
+                );
             }
-            order.status = 'Cancelled';
-            await order.save();
-            res.json({ success: true });
-        } else {
-            res.status(400).json({ error: "Cannot cancel" });
-        }
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
 
+            order.status = newStatus;
+            await order.save();
+            res.json({ success: true, message: `Order ${newStatus} & Stock Updated` });
+        } else {
+            res.status(400).json({ error: "Order already cancelled or not found" });
+        }
+    } catch (e) { 
+        console.error("Cancel Error:", e);
+        res.status(500).json({ error: e.message }); 
+    }
+});
 app.delete('/api/orders/:id', verifyToken(['admin']), async (req, res) => {
     try {
         if (mongoose.Types.ObjectId.isValid(req.params.id)) await Order.findByIdAndDelete(req.params.id);
@@ -794,6 +807,92 @@ app.get('/api/fix-admin-pass/:email/:newpass', verifyToken(['admin']), async (re
         res.send(`✅ Password updated for ${email}`);
     } catch (e) { res.status(500).send(e.message); }
 });
+// --- REELS API ---
+
+// 1. Get All Reels
+app.get('/api/reels', async (req, res) => {
+    try {
+        const reels = await Reel.find().sort({ createdAt: -1 }); // Newest first
+        res.json(reels);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 2. Upload a Reel
+app.post('/api/reels', verifyToken(['customer', 'admin', 'vendor']), async (req, res) => {
+    try {
+        const { videoUrl, caption } = req.body;
+        
+        // Backend Validation: MongoDB document limit 16MB hoti hai via BSON
+        if(!videoUrl) return res.status(400).json({ error: "Video data missing" });
+
+        const newReel = new Reel({
+            userId: req.user.id,
+            userName: req.user.name || 'User', // User details token se aayengi
+            userPic: req.user.picture || '',
+            videoUrl: videoUrl,
+            caption: caption
+        });
+
+        await newReel.save();
+        res.json({ success: true, message: "Reel Uploaded!" });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: "Video too large or server error" });
+    }
+});
+// --- REELS SECTION (Corrected & Single Version) ---
+
+// 1. Reel Schema
+// Note: Agar Schema pehle se define hai to delete karne ki zaroorat nahi, bas check karo do baar na ho.
+const ReelSchema = new mongoose.Schema({
+    userId: String,
+    userName: String,
+    userPic: String,
+    videoData: String, // Base64 Video
+    caption: String,
+    likes: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// Check if model already exists to prevent OverwriteModelError
+const Reel = mongoose.models.Reel || mongoose.model('Reel', ReelSchema);
+
+// 2. Get All Reels Route
+app.get('/api/reels', async (req, res) => {
+    try {
+        const reels = await Reel.find().sort({ createdAt: -1 });
+        res.json(reels);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 3. Upload Reel Route
+app.post('/api/reels', verifyToken(['customer', 'admin', 'vendor']), async (req, res) => {
+    try {
+        const { videoData, caption } = req.body;
+        
+        if(!videoData) return res.status(400).json({ error: "Video data missing" });
+
+        // MongoDB Limit Check (Safety)
+        if(videoData.length > 16 * 1024 * 1024) {
+             return res.status(400).json({ error: "Video too large for Database (Limit 15MB)" });
+        }
+
+        const newReel = new Reel({
+            userId: req.user.id,
+            userName: req.user.name || 'User',
+            userPic: req.user.picture || '',
+            videoData: videoData,
+            caption: caption
+        });
+
+        await newReel.save();
+        res.json({ success: true, message: "Reel Uploaded!" });
+    } catch (e) {
+        console.error("Reel Upload Error:", e);
+        res.status(500).json({ error: "Server Error or Video Too Large" });
+    }
+});
+
 module.exports = app;
 // ==========================================
 // START SERVER

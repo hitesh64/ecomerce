@@ -7,6 +7,7 @@ let products = [];
 let bannerInterval;
 let sundayInterval = null;
 let trackingInterval = null;
+let categorySlideInterval = null; // ✅ Ye line zaroori hai
 
 let state = {
     user: null,
@@ -19,177 +20,229 @@ let state = {
     selectedSize: null,
     currentQuantity: 1
 };
-
 let activeFilters = {
     mainCat: null,
     subCat: null,
     search: ""
 };
+let homeSlideshowInterval = null;
 
-// --- 2. BANNER CONFIGURATION ---
+const homeBannerConfig = {
+    // 9 Regular Images (Somwar - Shanivar dikhengi)
+    regularImages: [
+        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80", // 1. Fashion
+        "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=1200&q=80", // 2. Lifestyle
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&q=80", // 3. Shopping Bags
+        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80", // 4. Store
+        "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80", // 5. Products
+        "https://images.unsplash.com/photo-1513094735237-8f2714d57c13?w=1200&q=80", // 6. Women Fashion
+        "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&q=80", // 7. Men Fashion
+        "https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1200&q=80", // 8. Accessories
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80"  // 9. Shoes
+    ],
+    // 1 Special Image (Jo sirf Sunday ko total 10 karegi)
+    sundaySpecialImage: "sources/sunday.jpg" 
+};
+    
+// --- 2. BANNER CONFIGURATION (Updated with 4 Images Each) ---
 const bannerConfig = {
     'Electronics': {
         title: "Future Tech",
         desc: "Upgrade your life with the latest gadgets.",
         images: [
-            "https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?w=1200&q=80",
-            "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=1200&q=80",
-            "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=1200&q=80"
+            "https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?w=800&q=80",
+            "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=800&q=80",
+            "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&q=80",
+            "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80"
         ]
     },
     'Fashion': {
         title: "Trend Setter",
         desc: "Style that speaks without words.",
         images: [
-            "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80",
-            "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&q=80",
-            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80"
+            "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80",
+            "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80",
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80",
+            "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80"
         ]
     },
     'Beauty': {
         title: "Glow Up",
         desc: "Enhance your natural beauty.",
         images: [
-            "https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=1200&q=80",
-            "https://images.unsplash.com/photo-1522335789203-abd652322ed8?w=1200&q=80",
-            "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=1200&q=80"
+            "https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=800&q=80",
+            "https://images.unsplash.com/photo-1522335789203-abd652322ed8?w=800&q=80",
+            "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=800&q=80",
+            "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80"
         ]
     },
     'Appliances': {
         title: "Smart Home",
         desc: "Efficiency meets innovation.",
         images: [
-            "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200&q=80",
-            "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=1200&q=80"
+            "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&q=80",
+            "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=800&q=80",
+            "https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=800&q=80",
+            "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&q=80"
         ]
     },
     'Toys': {
         title: "Play Time",
         desc: "Fun and learning for every age.",
         images: [
-            "https://images.unsplash.com/photo-1558877385-81a1c7e67d1d?w=1200&q=80",
-            "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=1200&q=80"
+            "https://images.unsplash.com/photo-1558877385-81a1c7e67d1d?w=800&q=80",
+            "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=800&q=80",
+            "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80",
+            "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&q=80"
         ]
     },
     'Grocery': {
         title: "Fresh Daily",
         desc: "Organic and fresh essentials.",
         images: [
-            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80",
-            "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1200&q=80"
+            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80",
+            "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&q=80",
+            "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&q=80",
+            "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=800&q=80"
         ]
     },
     'Mobiles': {
         title: "Pocket Power",
         desc: "Stay connected, stay ahead.",
         images: [
-            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
-            "https://images.unsplash.com/photo-1598327105666-5b89351aff23?w=1200&q=80"
+            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80",
+            "https://images.unsplash.com/photo-1598327105666-5b89351aff23?w=800&q=80",
+            "https://images.unsplash.com/photo-1556656793-02715d8dd660?w=800&q=80",
+            "https://images.unsplash.com/photo-1533228126398-39c2947e4d7b?w=800&q=80"
         ]
     },
     'Laptops': {
         title: "Workstation",
         desc: "Power your productivity.",
         images: [
-            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&q=80",
-            "https://images.unsplash.com/photo-1531297420492-604749b8b031?w=1200&q=80"
+            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80",
+            "https://images.unsplash.com/photo-1531297420492-604749b8b031?w=800&q=80",
+            "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=800&q=80",
+            "https://images.unsplash.com/photo-1588872657578-a3d8919b9b43?w=800&q=80"
         ]
     },
     'Furniture': {
         title: "Interior Art",
         desc: "Design your perfect space.",
         images: [
-            "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=80",
-            "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1200&q=80"
+            "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80",
+            "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80",
+            "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+            "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800&q=80"
         ]
     },
     'Sports': {
         title: "Active Life",
         desc: "Gear up for the win.",
         images: [
-            "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1200&q=80",
-            "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200&q=80"
+            "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80",
+            "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&q=80",
+            "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+            "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&q=80"
         ]
     },
     'Footwear': {
         title: "Walk Tall",
         desc: "Comfort for every step.",
         images: [
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
-            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200&q=80"
+            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
+            "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&q=80",
+            "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&q=80",
+            "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&q=80"
         ]
     },
     'Watches': {
         title: "Timeless",
         desc: "Luxury on your wrist.",
         images: [
-            "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=1200&q=80",
-            "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=1200&q=80"
+            "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800&q=80",
+            "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800&q=80",
+            "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800&q=80",
+            "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?w=800&q=80"
         ]
     },
     'Jewellery': {
         title: "Elegance",
         desc: "Shine bright like a diamond.",
         images: [
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1200&q=80",
-            "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=1200&q=80"
+            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+            "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&q=80",
+            "https://images.unsplash.com/photo-1599643478518-17488fbbcd75?w=800&q=80",
+            "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80"
         ]
     },
     'Bags': {
         title: "Carry Style",
         desc: "Fashion meets function.",
         images: [
-            "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1200&q=80",
-            "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1200&q=80"
+            "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&q=80",
+            "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&q=80",
+            "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80",
+            "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80"
         ]
     },
     'Kitchen': {
         title: "Master Chef",
         desc: "Cook with passion.",
         images: [
-            "https://images.unsplash.com/photo-1556910103-1c02745a30bf?w=1200&q=80",
-            "https://images.unsplash.com/photo-1556912173-3db9963f6bee?w=1200&q=80"
+            "https://images.unsplash.com/photo-1556910103-1c02745a30bf?w=800&q=80",
+            "https://images.unsplash.com/photo-1556912173-3db9963f6bee?w=800&q=80",
+            "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=800&q=80",
+            "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80"
         ]
     },
     'Baby Care': {
         title: "Little Ones",
         desc: "Only the best for your baby.",
         images: [
-            "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=1200&q=80",
-            "https://images.unsplash.com/photo-1522771753035-4a50094a167e?w=1200&q=80"
+            "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&q=80",
+            "https://images.unsplash.com/photo-1522771753035-4a50094a167e?w=800&q=80",
+            "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800&q=80",
+            "https://images.unsplash.com/photo-1544126566-47443899bdb0?w=800&q=80"
         ]
     },
     'Automotive': {
         title: "On The Road",
         desc: "Essentials for your vehicle.",
         images: [
-            "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80",
-            "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200&q=80"
+            "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&q=80",
+            "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80",
+            "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800&q=80",
+            "https://images.unsplash.com/photo-1503376763036-066120622c74?w=800&q=80"
         ]
     },
     'Books': {
         title: "Read More",
         desc: "Stories that inspire.",
         images: [
-            "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=1200&q=80",
-            "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=1200&q=80"
+            "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800&q=80",
+            "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80",
+            "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=800&q=80",
+            "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&q=80"
         ]
     },
     'Stationery': {
         title: "Create",
         desc: "Tools for your imagination.",
         images: [
-            "https://images.unsplash.com/photo-1456735190827-d1261f794971?w=1200&q=80",
-            "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&q=80"
+            "https://images.unsplash.com/photo-1456735190827-d1261f794971?w=800&q=80",
+            "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80",
+            "https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=800&q=80",
+            "https://images.unsplash.com/photo-1520697830682-bbb6e85e2b0b?w=800&q=80"
         ]
     }
 };
-
 // --- 3. INITIALIZATION & EVENTS ---
 document.addEventListener('DOMContentLoaded', async () => {
     if (window.lucide) lucide.createIcons();
     
     // Load Products
+    initHomeSlideshowLogic();
     products = await loadAllProducts(); 
     
     // Initial UI Setup
@@ -315,7 +368,11 @@ function navigate(view) {
     if(sidebar) sidebar.classList.add('-translate-x-full');
     if(overlay) overlay.classList.add('hidden');
 
-    if (view !== 'home' && view !== 'listing' && view !== 'profile' && !state.user) { openAuth('login'); return; }
+   // Updated navigation logic: Allow 'categories' and 'play' without login
+if (view !== 'home' && view !== 'listing' && view !== 'categories' && view !== 'profile' && !state.user) {
+    openAuth('login'); 
+    return; 
+}
     if(view === 'profile' && !state.user) { openAuth('login'); return; } 
     if(view === 'listing') { openListing('all', ''); return; }
     switchView(view);
@@ -324,6 +381,19 @@ function navigate(view) {
 function switchView(viewName) {
     // 1. Force Scroll to Top Immediately
     window.scrollTo({ top: 0, behavior: 'auto' });
+    const topHeader = document.getElementById('category-header');
+    if (topHeader) {
+        // Sirf 'home' par dikhao, baaki jagah chhupao
+        if (viewName === 'home') {
+            topHeader.classList.remove('hidden');
+        } else {
+            topHeader.classList.add('hidden');
+        }
+    }
+   const footer = document.querySelector('footer');
+    if (footer) {
+        footer.classList.remove('hidden'); 
+    }
 
     // --- FIX START: Hide Exit Button on other pages ---
     // This ensures the "Exit ₹150 Store" button disappears when you leave the Sunday page
@@ -355,6 +425,9 @@ function switchView(viewName) {
         const searchInput = document.getElementById('search-input');
         if(searchInput) searchInput.value = "";
     }
+    if(viewName === 'categories') {
+        loadDefaultCategoryView(); // Ye function "Popular Store" load karega
+    }
     if(viewName === 'my-reviews') renderUserReviews();
     if(viewName === 'profile') renderProfile();
     if(viewName === 'cart') renderCart();
@@ -368,6 +441,7 @@ function switchView(viewName) {
         // Slight delay to allow display:block to apply before adding class
         setTimeout(() => {
             target.classList.add('active');
+            if (window.lucide) lucide.createIcons();
         }, 10);
     }
 }
@@ -470,36 +544,56 @@ function logout() {
     updateAllUI(); 
     switchView('home'); 
     showToast("Signed Out");
-}
+}// index.js
 
 function updateAllUI() {
-    const hasUser = !!state.user;
+    // Check karein ki user data exist karta hai aur usme email hai
+    const hasUser = state.user && state.user.email;
+    
     const userInfo = document.getElementById('sidebar-user-info');
     const guestInfo = document.getElementById('sidebar-guest-info');
     const logoutBtn = document.getElementById('sidebar-logout-btn');
 
-    if (userInfo) userInfo.classList.toggle('hidden', !hasUser);
-    if (guestInfo) guestInfo.classList.toggle('hidden', hasUser);
-    if (logoutBtn) logoutBtn.style.display = hasUser ? 'block' : 'none';
+    // --- FIX: Logout Button & Sections Visibility ---
+    if (userInfo) userInfo.style.display = hasUser ? 'block' : 'none';
+    if (guestInfo) guestInfo.style.display = hasUser ? 'none' : 'block';
+    
+    // IMPORTANT: Logout button ko force show karein agar user hai
+    if (logoutBtn) {
+        logoutBtn.style.display = hasUser ? 'block' : 'none';
+    }
     
     if(hasUser) {
-        document.getElementById('sidebar-name').innerText = state.user.name;
-        document.getElementById('sidebar-email').innerText = state.user.email;
+        // --- FIX: Safe Data Display (Fallback text lagaya hai) ---
+        const safeName = state.user.name || "User"; 
+        const safeEmail = state.user.email || ""; // Email missing ho to blank rakho
+        
+        const sidebarName = document.getElementById('sidebar-name');
+        if(sidebarName) sidebarName.innerText = safeName;
+
+        const sidebarEmail = document.getElementById('sidebar-email');
+        if(sidebarEmail) sidebarEmail.innerText = safeEmail;
+        
+        // Avatar Logic
         const sidebarAv = document.getElementById('sidebar-avatar');
-        if(state.user.picture) {
-            const imgHTML = `<img src="${state.user.picture}" class="w-full h-full object-cover">`;
-            sidebarAv.innerHTML = imgHTML;
-        } else {
-            const letter = state.user.name[0].toUpperCase();
-            sidebarAv.innerText = letter;
+        if(sidebarAv) {
+            if(state.user.picture) {
+                sidebarAv.innerHTML = `<img src="${state.user.picture}" class="w-full h-full object-cover">`;
+            } else {
+                // Name ka pehla letter
+                const letter = safeName.charAt(0).toUpperCase();
+                sidebarAv.innerText = letter;
+            }
         }
     }
 
-    const cartCount = state.cart.length;
-    const wishCount = state.wishlist.length;
+    // --- Cart & Wishlist Counts Update (Baaki code same rahega) ---
+    const cartCount = state.cart ? state.cart.length : 0;
+    const wishCount = state.wishlist ? state.wishlist.length : 0;
     
     const headerCart = document.getElementById('header-cart-count');
     const sidebarCart = document.getElementById('sidebar-cart-count');
+    const bottomCart = document.getElementById('bottom-cart-count');
     
     if(headerCart) {
         headerCart.innerText = cartCount;
@@ -508,6 +602,10 @@ function updateAllUI() {
     if(sidebarCart) {
         sidebarCart.innerText = cartCount;
         sidebarCart.classList.toggle('hidden', cartCount === 0);
+    }
+    if(bottomCart) {
+        bottomCart.innerText = cartCount;
+        bottomCart.classList.toggle('hidden', cartCount === 0);
     }
 
     const wishDot = document.getElementById('header-wishlist-dot');
@@ -519,7 +617,15 @@ function updateAllUI() {
         sidebarWish.classList.toggle('hidden', wishCount === 0);
     }
 }
+// Update navigate/switchView to handle active tab color
+function updateBottomNav(viewName) {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`nav-${viewName}`);
+    if(activeBtn) activeBtn.classList.add('active');
+}
 
+// Call this inside your switchView(viewName) function
+updateBottomNav(viewName);
 // --- 8. VOICE SEARCH (FIXED) ---
 function startVoiceSearch() {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -914,7 +1020,7 @@ function openProductPage(id) {
     state.selectedSize = null;
     state.currentImageIndex = 0;
     state.currentQuantity = 1; 
-    
+    addToRecent(product);
     switchView('product');
     
     document.getElementById('pdp-main-img').src = product.images[0] || product.img;
@@ -1016,6 +1122,17 @@ function resetThumbBorders(activeIndex) {
             if(i === activeIndex) el.classList.add('border-2', 'border-purple-600');
             else el.classList.remove('border-2', 'border-purple-600');
         }
+    });
+}
+// --- ADD THIS TO index.js ---
+
+const categoryContainer = document.getElementById('category-header');
+
+if (categoryContainer) {
+    categoryContainer.addEventListener('wheel', (evt) => {
+        evt.preventDefault();
+        // Adjust scrolling speed by changing 3
+        categoryContainer.scrollLeft += evt.deltaY * 3; 
     });
 }
 
@@ -1265,18 +1382,33 @@ function updateQuantity(change) {
 
     document.getElementById('pdp-qty-display').innerText = state.currentQuantity;
 }
-
 function selectSize(btn, size) {
     state.selectedSize = size;
+    
+    // 1. Reset ALL buttons to default style (Gray/White)
     document.querySelectorAll('.size-btn').forEach(b => { 
+        b.classList.remove('active-size'); 
+        
+        // Remove Purple (Active) Classes
         b.classList.remove('bg-purple-600', 'text-white', 'border-purple-600'); 
+        
+        // Add Gray (Inactive) Classes
         b.classList.add('bg-white', 'text-gray-500', 'border-gray-200'); 
     });
-    btn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200'); 
-    btn.classList.add('bg-purple-600', 'text-white', 'border-purple-600');
-    document.getElementById('size-error').classList.add('hidden');
-}
 
+    // 2. Highlight the CLICKED button (Purple)
+    btn.classList.add('active-size');
+    
+    // Remove Gray (Inactive) Classes
+    btn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200'); 
+    
+    // Add Purple (Active) Classes
+    btn.classList.add('bg-purple-600', 'text-white', 'border-purple-600');
+    
+    // 3. Hide Error Message if it was showing
+    const errorMsg = document.getElementById('size-error');
+    if(errorMsg) errorMsg.classList.add('hidden');
+}
 function validateSize() {
     if(!state.selectedSize) { 
         const err = document.getElementById('size-error');
@@ -1534,42 +1666,70 @@ async function openCheckout() {
 function closeCheckout() {
     document.getElementById('checkout-modal').classList.add('hidden');
 }
-
-// index.js
-
 async function processOrder(e) {
     e.preventDefault();
     
+    // --- VALIDATION START ---
+    const phoneInput = document.getElementById('checkout-phone').value.trim();
+    const pincodeInput = document.getElementById('checkout-pincode').value.trim();
+    const emailInput = document.getElementById('checkout-email').value.trim();
+    
+    // 1. Mobile Number Validation (Exactly 10 digits, numeric)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phoneInput)) {
+        showToast("Invalid Mobile: Must be 10 digits");
+        document.getElementById('checkout-phone').focus();
+        document.getElementById('checkout-phone').classList.add('border-red-500');
+        return;
+    }
+
+    // 2. Pincode Validation (Exactly 6 digits, numeric)
+    const pinRegex = /^[0-9]{6}$/;
+    if (!pinRegex.test(pincodeInput)) {
+        showToast("Invalid Pincode: Must be 6 digits");
+        document.getElementById('checkout-pincode').focus();
+        document.getElementById('checkout-pincode').classList.add('border-red-500');
+        return;
+    }
+
+    // 3. Email Match Validation
+    // Check if user is logged in first
+    if (state.user && state.user.email) {
+        if (emailInput.toLowerCase() !== state.user.email.toLowerCase()) {
+            showToast("Email must match your login email");
+            document.getElementById('checkout-email').focus();
+            document.getElementById('checkout-email').classList.add('border-red-500');
+            return;
+        }
+    }
+    // --- VALIDATION END ---
+
     // Calculate Total
     const total = state.cart.reduce((s, i) => s + i.price, 0) + 5;
 
     // Gather Form Data
     const name = document.getElementById('checkout-name').value;
-    const email = document.getElementById('checkout-email').value;
-    const phone = document.getElementById('checkout-phone').value;
     const street = document.getElementById('checkout-street').value;
     const city = document.getElementById('checkout-city').value;
     const stateInput = document.getElementById('checkout-state').value;
-    const pincode = document.getElementById('checkout-pincode').value;
     const paymentMode = document.querySelector('input[name="payment-mode"]:checked').value;
     
-    const fullAddress = `${street}, ${city}, ${stateInput} - ${pincode}`;
+    const fullAddress = `${street}, ${city}, ${stateInput} - ${pincodeInput}`;
     
     const orderData = {
         id: 'ORD' + Math.floor(Math.random()*90000+10000),
-        email: email,
+        email: emailInput,
         customerName: name,
-        phone: phone,
+        phone: phoneInput,
         address: fullAddress,
         payment: paymentMode,
-        items: [...state.cart], // Send copy of items
+        items: [...state.cart], 
         total: total,
         status: 'Placed',
         date: new Date().toLocaleDateString('en-IN')
     };
 
     try {
-        // Show loading state
         const submitBtn = document.querySelector('#checkout-modal button[type="submit"]');
         const originalText = submitBtn.innerText;
         submitBtn.innerText = "Processing...";
@@ -1583,18 +1743,15 @@ async function processOrder(e) {
         
         const data = await res.json();
 
-        // Restore button
         submitBtn.innerText = originalText;
         submitBtn.disabled = false;
 
-        // CHECK FOR ERRORS (Like Out of Stock)
         if (data.error) {
             showToast("Failed: " + data.error);
             closeCheckout();
-            return; // Do NOT clear cart
+            return; 
         }
         
-        // SUCCESS: NOW clear the cart
         state.cart = [];
         await saveState(); 
         
@@ -1602,7 +1759,6 @@ async function processOrder(e) {
         closeCheckout(); 
         showToast("Order Placed Successfully!");
         
-        // Refresh products to show new stock levels
         products = await loadAllProducts(); 
         fetchUserOrders();
         navigate('orders');
@@ -1612,6 +1768,13 @@ async function processOrder(e) {
         showToast("Server Connection Failed"); 
     }
 }
+// Remove red border when user starts typing
+['checkout-phone', 'checkout-pincode', 'checkout-email'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+        el.addEventListener('input', () => el.classList.remove('border-red-500'));
+    }
+});
 function renderOrders() {
     const list = document.getElementById('orders-list');
     
@@ -1839,7 +2002,11 @@ function closeTracking() {
     document.getElementById('tracking-modal').classList.add('hidden');
     if(trackingInterval) clearInterval(trackingInterval); 
 }
-
+function clearFilters() {
+    document.querySelectorAll('.brand-check, .tag-check').forEach(cb => cb.checked = false);
+    renderListingGrid();
+    showToast("Filters cleared");
+}
 async function cancelOrder(id) {
     if(!confirm("Cancel this order?")) return;
     try {
@@ -1959,21 +2126,21 @@ async function handleGoogleLogin(response) {
 }
 
 // --- 19. SUNDAY SPECIAL LOGIC ---
-
-// --- REPLACE THIS FUNCTION IN index.js ---
+// index.js mein initSundayStatus ko isse replace karein
 
 function initSundayStatus() {
     const btn = document.getElementById('sunday-trigger-btn');
+    if(!btn) return; // Agar button hi nahi hai to ruk jao
+
+    // Elements ko dhundho (par agar na mile to crash mat hone do)
     const lockedSection = document.getElementById('sunday-locked'); 
     const liveSection = document.getElementById('sunday-live');     
     const track = document.getElementById('sunday-track');          
     
-    // Hero Elements
+    // Inhe optional handle karenge
     const heroText = document.getElementById('heroText');
     const heroPoster = document.getElementById('heroPoster');
     const heroVideo = document.getElementById('heroVideo');
-
-    if(!btn) return;
 
     if(sundayInterval) clearInterval(sundayInterval);
 
@@ -1982,32 +2149,23 @@ function initSundayStatus() {
         const day = now.getDay(); // 0 = Sunday
 
         if (day === 0) {
-            // ============================
-            // SUNDAY MODE ACTIVE (OPEN)
-            // ============================
+            // === SUNDAY ACTIVE ===
             
-            // 1. HERO SECTION LOGIC (Fix: Show Video, Hide Text Only)
-            if(heroText) heroText.classList.add('hidden'); // Text hatao taaki clash na ho
-            
-            if(heroVideo) {
-                heroVideo.classList.remove('hidden'); // ✅ VIDEO WAPAS DIKHAO
-            }
-            
+            // Safe Checks: Sirf tabhi class list change karo agar element exist karta ho
+            if(heroText) heroText.classList.add('hidden');
+            if(heroVideo) heroVideo.classList.remove('hidden');
             if(heroPoster) {
-                // Sunday wala poster lagao
                 heroPoster.src = "sources/sunday.jpg"; 
                 heroPoster.classList.remove('hidden');
             }
 
-            // 2. Banner Logic
             if(lockedSection) lockedSection.classList.add('hidden');
             if(liveSection) liveSection.classList.remove('hidden');
 
-            // 3. Ticker Logic (Strict 150)
+            // Ticker Logic (Same as before)
             if(track && products.length > 0) {
-                if(track.children.length === 0 || track.innerHTML.includes('Loading')) {
+                 if(track.children.length === 0 || track.innerHTML.includes('Loading')) {
                     const sundayItems = products.filter(p => p.price == 150 || p.originalPrice == 150);
-
                     if(sundayItems.length > 0) {
                         const itemsHtml = sundayItems.map(p => `
                             <div onclick="openProductPage(${p.id})" class="flex-shrink-0 w-64 bg-gray-900/80 backdrop-blur-md rounded-2xl p-3 border border-red-500/30 flex items-center gap-4 cursor-pointer hover:bg-gray-800 transition group">
@@ -2018,62 +2176,55 @@ function initSundayStatus() {
                                     <p class="text-white text-sm font-bold truncate w-32">${p.name}</p>
                                     <div class="flex items-center gap-2">
                                         <span class="text-green-400 text-sm font-black">₹150</span>
-                                        <span class="text-[10px] text-gray-500 line-through">₹${p.originalPrice || p.price + 500}</span>
                                     </div>
                                 </div>
                             </div>
                         `).join('');
-                        track.innerHTML = itemsHtml + itemsHtml + itemsHtml + itemsHtml; 
-                        track.style.animationPlayState = 'running';
+                        track.innerHTML = itemsHtml.repeat(4); 
                         track.className = "flex gap-6 w-max hover:pause-scroll"; 
+                        track.style.animation = "scrollLeft 30s linear infinite";
                     } else {
-                        track.innerHTML = `<div class="flex items-center justify-center w-full h-full px-10 gap-4 opacity-50"><span class="text-gray-400 font-bold uppercase tracking-widest text-sm">₹150 Stock Sold Out</span></div>`;
-                        track.style.animation = "none";
+                        track.innerHTML = `<div class="p-4 text-gray-400">Sold Out</div>`;
                     }
                 }
             }
 
-            // 4. Button Styling
+            // Button Update
             if (!btn.classList.contains('sunday-active')) {
                 btn.classList.add('sunday-active');
                 btn.className = "w-full md:w-auto px-12 py-5 rounded-full font-black uppercase tracking-widest text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(239,68,68,0.6)] border-2 border-red-500 bg-black text-white cursor-pointer flex items-center justify-center gap-3 animate-pulse";
-                btn.innerHTML = `<span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span> ENTER FLASH SALE`;
+                btn.innerHTML = `ENTER FLASH SALE`;
                 btn.onclick = openSundayPage;
             }
 
         } else {
-            // ============================
-            // NORMAL DAY (CLOSED)
-            // ============================
+            // === NORMAL DAY (CLOSED) ===
             
-            // 1. REVERT HERO (Text Wapas, Original Poster Wapas)
+            // Safe Revert
             if(heroText) heroText.classList.remove('hidden'); 
-            if(heroVideo) heroVideo.classList.remove('hidden');
+            if(heroVideo) heroVideo.classList.remove('hidden'); // Video ko chhupana hai to .add('hidden') karein
             
-            // Optional: Revert to default poster if you have one
-            if(heroPoster) heroPoster.src = "https://i.imgur.com/ZKrJ8q9.jpeg"; 
-
             if(lockedSection) lockedSection.classList.remove('hidden');
             if(liveSection) liveSection.classList.add('hidden');
 
             btn.classList.remove('sunday-active');
             btn.onclick = () => showToast("Store opens only on Sunday!");
 
-            // Countdown Logic
+            // Countdown Calculation
             const target = new Date();
             target.setDate(now.getDate() + (7 - day) % 7);
             target.setHours(0, 0, 0, 0);
             if (target <= now) target.setDate(target.getDate() + 7);
+            
             const diff = target - now;
             const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
 
+            // Button Text Update
             btn.className = "w-full md:w-auto px-8 py-4 rounded-full font-bold text-sm border-2 border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed font-mono shadow-inner";
-            btn.innerHTML = `<div class="flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i> <span>OPENS IN: <span class="text-purple-600 font-black text-base">${d}d ${h}h ${m}m ${s}s</span></span></div>`;
-            
-            if (window.lucide) lucide.createIcons();
+            btn.innerHTML = `<div class="flex items-center gap-2"><span>OPENS IN: <span class="text-purple-600 font-black text-base">${d}d ${h}h ${m}m ${s}s</span></span></div>`;
         }
     }
 
@@ -2144,5 +2295,391 @@ function toggleSundayMode(isActive) {
         // Wapas Home aa rahe hain
         switchView('home');
         if(exitBtn) exitBtn.classList.add('hidden'); // Button chhupao
+    }
+}
+// A. Get User Accurate Location (Forces GPS)
+function getUserLocation() {
+    const locText = document.getElementById('user-location-text');
+    
+    // Check if Geolocation is supported
+    if (!navigator.geolocation) {
+        locText.innerText = "GPS Not Supported";
+        return;
+    }
+
+    locText.innerText = "Waiting for Satellite...";
+
+    // 1. Force High Accuracy (GPS Only)
+    const options = {
+        enableHighAccuracy: true, // Satellite ko force karega
+        timeout: 20000,           // 20 sec wait karega (GPS lock hone mein time lagta hai)
+        maximumAge: 0             // Purana saved location bilkul use nahi karega
+    };
+
+    const success = async (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        
+        // Debugging: Agar accuracy 5km se zyada kharab hai, to user ko batao
+        if (accuracy > 5000) {
+            console.warn("Low Accuracy (likely IP based):", accuracy);
+            // Hum fir bhi try karenge, par result shayad Pune aaye agar GPS lock nahi hua
+        }
+
+        try {
+            // Using OpenStreetMap with Village/Street details
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
+                headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+            });
+            
+            if(!res.ok) throw new Error("Map Failed");
+            
+            const data = await res.json();
+            const address = data.address;
+            
+            // 2. Specific Address Logic for Villages (Nhavi/Jalgaon)
+            // Gaon (Village) > Rasta (Road) > Colony
+            const specific = address.village || address.road || address.building || address.hamlet || "";
+            const area = address.suburb || address.residential || address.town || "";
+            const city = address.city || address.county || address.state_district || "";
+            const pincode = address.postcode || "";
+
+            // Format: "Nhavi, Jalgaon - 425001"
+            let shortAddr = "";
+            
+            if(specific) shortAddr += specific;
+            if(area && area !== specific) shortAddr += `, ${area}`;
+            if(city && city !== area) shortAddr += `, ${city}`;
+            
+            // Clean up commas
+            shortAddr = shortAddr.replace(/^, /, '').trim();
+            
+            // Fallback
+            if (shortAddr.length < 3) shortAddr = city || "Location Found";
+            if (shortAddr.length > 35) shortAddr = shortAddr.substring(0, 32) + "...";
+
+            locText.innerText = shortAddr;
+            
+            // Save to Profile
+            if(state.user) {
+                state.user.pincode = pincode;
+                state.user.city = city;
+                if(!state.user.address) state.user.address = `${specific}, ${area}`;
+            }
+
+        } catch (e) {
+            // Backup Map Service (BigDataCloud) agar pehla fail ho
+            try {
+                const res2 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                const data2 = await res2.json();
+                locText.innerText = `${data2.locality || data2.city}, ${data2.principalSubdivision}`;
+            } catch (err2) {
+                locText.innerText = "Map Error (Try Again)";
+            }
+        }
+    };
+
+    const error = (err) => {
+        if(err.code === 1) locText.innerText = "Please Allow GPS Permission";
+        else if(err.code === 2) locText.innerText = "GPS Signal Not Found (Go Outside)";
+        else if(err.code === 3) locText.innerText = "GPS Timeout (Try Again)";
+        else locText.innerText = "Location Error";
+    };
+
+    // Request Location
+    navigator.geolocation.getCurrentPosition(success, error, options);
+}
+// B. Track Recently Viewed Items
+function addToRecent(product) {
+    let recent = JSON.parse(localStorage.getItem('kicks_recent')) || [];
+    
+    // Remove if already exists to push to top
+    recent = recent.filter(p => p.id !== product.id);
+    
+    // Add to beginning
+    recent.unshift({
+        id: product.id,
+        name: product.name,
+        img: product.img,
+        price: product.price
+    });
+
+    // Keep only last 6
+    if (recent.length > 6) recent.pop();
+
+    localStorage.setItem('kicks_recent', JSON.stringify(recent));
+    renderRecentSection(); // Refresh UI
+}
+
+// C. Render "Still Looking For These?"
+function renderRecentSection() {
+    const section = document.getElementById('recent-view-section');
+    const container = document.getElementById('recent-items-container');
+    const nameDisplay = document.getElementById('recent-user-name');
+    
+    const recent = JSON.parse(localStorage.getItem('kicks_recent')) || [];
+
+    // Personalize Name
+    if(state.user && state.user.name) {
+        nameDisplay.innerText = state.user.name.split(' ')[0];
+    } else {
+        nameDisplay.innerText = "Guest";
+    }
+
+    if (recent.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    section.classList.remove('hidden');
+    container.innerHTML = recent.map(item => `
+        <div onclick="openProductPage(${item.id})" class="min-w-[120px] bg-white rounded-xl p-2 cursor-pointer shadow-sm hover:scale-105 transition-transform">
+            <div class="h-28 w-full bg-gray-50 rounded-lg mb-2 overflow-hidden">
+                <img src="${item.img}" class="w-full h-full object-cover">
+            </div>
+            <p class="text-xs font-bold text-gray-800 truncate">${item.name}</p>
+            <p class="text-xs text-[#c20069] font-black mt-1">₹${item.price}</p>
+        </div>
+    `).join('');
+}
+
+// --- D. AUTO RUN ON LOAD ---
+document.addEventListener('DOMContentLoaded', () => {
+    getUserLocation(); // Try getting location immediately
+    renderRecentSection();
+});// --- CATEGORY VIEW LOGIC ---
+
+// 1. Default View (Jab Categories page khule)
+function loadDefaultCategoryView() {
+    const container = document.getElementById('category-right-content');
+    if(!container) return;
+    
+    container.innerHTML = `
+        <div class="flex flex-col items-center justify-center h-full text-center pb-20">
+            <div class="bg-purple-50 p-6 rounded-full mb-4">
+                <i data-lucide="layout-grid" class="w-12 h-12 text-purple-600"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 text-lg mb-2">Select a Category</h3>
+            <p class="text-gray-500 text-xs max-w-[200px]">Choose a category from the sidebar to explore products.</p>
+        </div>
+    `;
+    
+    if(window.lucide) lucide.createIcons();
+    
+    // Reset Sidebar Highlight
+    const allItems = document.querySelectorAll('#view-categories .cursor-pointer');
+    allItems.forEach(el => {
+        el.classList.remove('border-l-4', 'border-blue-600', 'bg-white');
+        el.classList.add('border-b', 'border-gray-100');
+        const span = el.querySelector('span');
+        if(span) span.classList.remove('text-purple-600', 'font-bold');
+    });
+}
+
+// 2. Load Specific Category Logic
+function loadCategoryInView(categoryName) {
+    const container = document.getElementById('category-right-content');
+    if(!container) return;
+
+    // A. Clear previous slideshow (Fixes glitching)
+    if(categorySlideInterval) {
+        clearInterval(categorySlideInterval);
+        categorySlideInterval = null;
+    }
+
+    // B. Loading State
+    container.innerHTML = `<div class="flex h-full items-center justify-center"><i data-lucide="loader" class="animate-spin text-purple-600 w-10 h-10"></i></div>`;
+    if(window.lucide) lucide.createIcons();
+
+    // C. Get Data
+    const defaultImg = "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80";
+    const catConfig = bannerConfig[categoryName] || { 
+        title: categoryName, 
+        desc: "Explore our latest collection", 
+        images: [defaultImg] 
+    };
+
+    const catProducts = products.filter(p => p.category === categoryName);
+
+    // D. Build HTML
+    let html = ``;
+
+    // --- Banner Section ---
+    if(catConfig.images && catConfig.images.length > 0) {
+        const slidesHtml = catConfig.images.map((img, i) => 
+            `<img src="${img}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${i === 0 ? 'opacity-100' : 'opacity-0'}" id="cat-banner-${i}">`
+        ).join('');
+
+        html += `
+        <div class="relative w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-6 shadow-xl group border border-purple-100">
+            ${slidesHtml}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 md:p-10 z-10">
+                <h3 class="text-white font-black text-3xl md:text-5xl uppercase brand-font drop-shadow-lg">${catConfig.title}</h3>
+                <p class="text-white/90 text-sm md:text-base font-medium">${catConfig.desc}</p>
+            </div>
+        </div>`;
+    }
+
+    // --- Product Grid Section ---
+    if(catProducts.length > 0) {
+        html += `<h3 class="font-bold text-gray-800 mb-4 flex justify-between items-center px-2">
+                    <span class="text-lg">Shop ${categoryName}</span>
+                    <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">${catProducts.length} Items</span>
+                 </h3>
+                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pb-20">`;
+        
+        html += catProducts.map(p => `
+            <div onclick="openProductPage(${p.id})" class="bg-white border border-gray-100 rounded-2xl p-3 cursor-pointer shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 group">
+                <div class="aspect-square bg-gray-50 rounded-xl mb-3 overflow-hidden relative">
+                    <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-purple-900">₹${p.price}</div>
+                </div>
+                <h4 class="font-bold text-xs text-gray-900 line-clamp-2 min-h-[2.5em]">${p.name}</h4>
+                <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">${p.brand}</p>
+            </div>
+        `).join('');
+        html += `</div>`;
+    } else {
+        html += `
+        <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+            <div class="bg-gray-50 p-4 rounded-full mb-3">
+                <i data-lucide="package-open" class="w-8 h-8 opacity-50"></i>
+            </div>
+            <p class="text-sm font-medium">No items found in ${categoryName}</p>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+    if(window.lucide) lucide.createIcons();
+    
+    highlightSidebar(categoryName);
+
+    // E. Start Slideshow Animation
+    if(catConfig.images && catConfig.images.length > 1) {
+        let currentSlide = 0;
+        const totalSlides = catConfig.images.length;
+        
+        categorySlideInterval = setInterval(() => {
+            const currEl = document.getElementById(`cat-banner-${currentSlide}`);
+            if(currEl) {
+                currEl.classList.remove('opacity-100');
+                currEl.classList.add('opacity-0');
+            }
+            currentSlide = (currentSlide + 1) % totalSlides;
+            const nextEl = document.getElementById(`cat-banner-${currentSlide}`);
+            if(nextEl) {
+                nextEl.classList.remove('opacity-0');
+                nextEl.classList.add('opacity-100');
+            }
+        }, 3000);
+    }
+}
+
+// Helper: Highlight Sidebar Item
+function highlightSidebar(activeName) {
+    const allItems = document.querySelectorAll('#view-categories .cursor-pointer');
+    
+    // Reset All
+    allItems.forEach(el => {
+        el.classList.remove('border-l-4', 'border-purple-600', 'bg-white');
+        el.classList.add('border-b', 'border-gray-100');
+        
+        const span = el.querySelector('span');
+        if(span) {
+            span.classList.remove('text-purple-600', 'font-bold');
+            span.classList.add('text-gray-600');
+        }
+        
+        const imgDiv = el.querySelector('div'); 
+        if(imgDiv) {
+            imgDiv.classList.remove('border-purple-500');
+            imgDiv.classList.add('border-gray-200');
+        }
+    });
+
+    // Highlight Active
+    allItems.forEach(el => {
+        if(el.innerText.includes(activeName)) {
+            el.classList.remove('border-b', 'border-gray-100');
+            el.classList.add('border-l-4', 'border-purple-600', 'bg-white');
+            
+            const span = el.querySelector('span');
+            if(span) {
+                span.classList.remove('text-gray-600');
+                span.classList.add('text-purple-600', 'font-bold');
+            }
+
+            const imgDiv = el.querySelector('div');
+            if(imgDiv) {
+                imgDiv.classList.remove('border-gray-200');
+                imgDiv.classList.add('border-purple-500');
+            }
+        }
+    });
+}// =========================================
+// NEW HOME SLIDESHOW LOGIC (Fixed & Clean)
+// =========================================
+function initHomeSlideshowLogic() {
+    const slidesContainer = document.getElementById('home-slides-container');
+    const indicatorsContainer = document.getElementById('home-slides-indicators');
+    if (!slidesContainer || !indicatorsContainer) return;
+
+    // 1. Clear Old Interval
+    if (homeSlideshowInterval) clearInterval(homeSlideshowInterval);
+
+    // 2. Check Day & Prepare Images
+    const todayIndex = new Date().getDay();
+    const isSunday = todayIndex === 0;
+    let imagesToShow = [...homeBannerConfig.regularImages];
+    if (isSunday) {
+        imagesToShow.unshift(homeBannerConfig.sundaySpecialImage);
+    }
+
+    // 3. Generate HTML for Images
+    slidesContainer.innerHTML = imagesToShow.map((img, i) => `
+        <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${i === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}" id="home-slide-${i}">
+            <img src="${img}" class="w-full h-full object-cover" alt="Slide ${i+1}">
+        </div>
+    `).join('') + '<div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-20 pointer-events-none"></div>';
+
+    // 4. Generate HTML for Indicators (Flat Lines Style)
+    indicatorsContainer.innerHTML = imagesToShow.map((_, i) => `
+        <button id="indicator-${i}" class="h-1 rounded-full transition-all duration-300 ${i === 0 ? 'w-8 bg-purple-600' : 'w-4 bg-gray-300 hover:bg-purple-300'}"></button>
+    `).join('');
+
+    // 5. Start Animation Loop (Images + Indicators)
+    if (imagesToShow.length > 1) {
+        let current = 0;
+        homeSlideshowInterval = setInterval(() => {
+            
+            // --- A. Deactivate Current Slide & Dot ---
+            const currSlide = document.getElementById(`home-slide-${current}`);
+            const currDot = document.getElementById(`indicator-${current}`);
+            
+            if(currSlide) { 
+                currSlide.classList.remove('opacity-100', 'z-10'); 
+                currSlide.classList.add('opacity-0', 'z-0'); 
+            }
+            if(currDot) { 
+                currDot.classList.remove('w-8', 'bg-purple-600'); 
+                currDot.classList.add('w-4', 'bg-gray-300'); 
+            }
+
+            // --- B. Move to Next Index ---
+            current = (current + 1) % imagesToShow.length;
+
+            // --- C. Activate Next Slide & Dot ---
+            const nextSlide = document.getElementById(`home-slide-${current}`);
+            const nextDot = document.getElementById(`indicator-${current}`);
+            
+            if(nextSlide) { 
+                nextSlide.classList.remove('opacity-0', 'z-0'); 
+                nextSlide.classList.add('opacity-100', 'z-10'); 
+            }
+            if(nextDot) { 
+                nextDot.classList.remove('w-4', 'bg-gray-300'); 
+                nextDot.classList.add('w-8', 'bg-purple-600'); 
+            }
+
+        }, 4000); // Change every 4 seconds
     }
 }

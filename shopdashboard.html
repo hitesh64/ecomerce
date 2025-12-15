@@ -447,10 +447,8 @@
                     <button onclick="switchDashTab('profile')" class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Profile Settings</button>
                     
                     <p class="px-3 mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Add Product</p>
-                    <button onclick="preloadCategory('Fashion')" class="w-full text-left p-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 pl-6"><i class="fa-solid fa-shirt w-5"></i> Fashion</button>
-                    <button onclick="preloadCategory('Electronics')" class="w-full text-left p-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 pl-6"><i class="fa-solid fa-plug w-5"></i> Electronics</button>
-                    <button onclick="preloadCategory('Home')" class="w-full text-left p-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 pl-6"><i class="fa-solid fa-couch w-5"></i> Home</button>
-                </div>
+<div id="mobileCategoryContainer" class="space-y-1"></div>
+                
                 <div class="mt-auto border-t pt-4">
                     <button onclick="logout()" class="w-full text-left p-3 text-red-600 font-bold">Logout</button>
                 </div>
@@ -978,6 +976,62 @@
                 });
             } else { document.getElementById('imagePlaceholder').classList.remove('hidden'); container.classList.add('hidden'); }
         }
+        // 1. Icon Mapping for all 19 categories
+const categoryIcons = {
+    "Fashion": "fa-shirt",
+    "Electronics": "fa-plug",
+    "Mobiles": "fa-mobile-screen",
+    "Laptops": "fa-laptop",
+    "Appliances": "fa-blender",
+    "Furniture": "fa-chair",
+    "Beauty": "fa-spray-can-sparkles",
+    "Grocery": "fa-carrot",
+    "Toys": "fa-gamepad",
+    "Sports": "fa-baseball",
+    "Footwear": "fa-shoe-prints",
+    "Watches": "fa-clock",
+    "Jewellery": "fa-gem",
+    "Bags": "fa-suitcase",
+    "Kitchen": "fa-utensils",
+    "Baby Care": "fa-baby",
+    "Automotive": "fa-car",
+    "Books": "fa-book",
+    "Stationery": "fa-pen-ruler"
+};
+
+// 2. Function to render mobile categories
+function renderMobileMenu() {
+    const container = document.getElementById('mobileCategoryContainer');
+    if (!container) return;
+    
+    container.innerHTML = ''; // Clear existing content
+
+    // Loop through all categories in categoryMap
+    Object.keys(categoryMap).forEach(cat => {
+        const icon = categoryIcons[cat] || "fa-tag"; // Default icon if missing
+        
+        container.innerHTML += `
+            <button onclick="handleMobileCategoryClick('${cat}')" 
+                class="w-full text-left p-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 pl-6 flex items-center gap-3 transition">
+                <i class="fa-solid ${icon} w-5 text-center text-blue-500"></i> ${cat}
+            </button>
+        `;
+    });
+}
+
+// 3. Helper to handle click and close menu
+function handleMobileCategoryClick(cat) {
+    preloadCategory(cat);
+    // Close the mobile menu after clicking
+    document.getElementById('mobileMenu').classList.add('hidden');
+}
+
+// 4. Call this function when page loads
+// इसे अपने existing DOMContentLoaded event listener के अंदर जोड़ें
+window.addEventListener('DOMContentLoaded', () => {
+    // ... aapka purana code ...
+    renderMobileMenu(); // <--- यह लाइन जोड़ें
+});
     </script>
 </body>
 </html>
