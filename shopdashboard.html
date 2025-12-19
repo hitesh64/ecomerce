@@ -1,52 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendor Dashboard | Kicks India</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Custom Checkbox Style for Sizes */
-        .size-checkbox:checked + div {
+        .size-checkbox:checked+div {
             background-color: black;
             color: white;
             border-color: black;
         }
-        
+
         /* Sidebar active state styling */
-        .nav-btn.active { background-color: #eff6ff; color: #2563eb; }
+        .nav-btn.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
 
         /* Custom Scrollbar for sidebar */
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 20px; }
-        .custom-scroll:hover::-webkit-scrollbar-thumb { background: #d1d5db; }
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 20px;
+        }
+
+        .custom-scroll:hover::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+        }
     </style>
 </head>
+
 <body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col">
 
-    <div id="viewRegister" class="fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex items-center justify-center hidden p-4">
+    <div id="viewRegister"
+        class="fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-600 fade-in">
             <h2 class="text-2xl font-bold mb-4">Partner Registration</h2>
-             <div class="mb-6 flex justify-center">
+            <div class="mb-6 flex justify-center">
                 <div id="g_id_onload_reg"
-                     data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
-                     data-context="signup"
-                     data-ux_mode="popup"
-                     data-callback="handleVendorGoogleLogin"
-                     data-auto_prompt="false">
+                    data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
+                    data-context="signup" data-ux_mode="popup" data-callback="handleVendorGoogleLogin"
+                    data-auto_prompt="false">
                 </div>
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+                    data-text="signup_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
             </div>
             <div class="relative flex py-2 items-center mb-4">
                 <div class="flex-grow border-t border-gray-200"></div>
@@ -54,13 +91,18 @@
                 <div class="flex-grow border-t border-gray-200"></div>
             </div>
             <form id="registerForm" class="space-y-3">
-                <input type="text" id="regShopName" required class="w-full p-3 border rounded-lg" placeholder="Shop Name">
-                <input type="text" id="regOwnerName" required class="w-full p-3 border rounded-lg" placeholder="Owner Name">
+                <input type="text" id="regShopName" required class="w-full p-3 border rounded-lg"
+                    placeholder="Shop Name">
+                <input type="text" id="regOwnerName" required class="w-full p-3 border rounded-lg"
+                    placeholder="Owner Name">
                 <input type="email" id="regEmail" required class="w-full p-3 border rounded-lg" placeholder="Email">
-                <input type="password" id="regPass" required class="w-full p-3 border rounded-lg" placeholder="Password">
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">Create Account</button>
+                <input type="password" id="regPass" required class="w-full p-3 border rounded-lg"
+                    placeholder="Password">
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">Create
+                    Account</button>
             </form>
-            <p class="text-center mt-4 text-sm"><a href="#" onclick="switchView('login')" class="text-blue-600 font-bold">Login here</a></p>
+            <p class="text-center mt-4 text-sm"><a href="#" onclick="switchView('login')"
+                    class="text-blue-600 font-bold">Login here</a></p>
         </div>
     </div>
 
@@ -69,13 +111,12 @@
             <h2 class="text-2xl font-bold text-center mb-6">Vendor Login</h2>
             <div class="mb-6 flex justify-center">
                 <div id="g_id_onload"
-                     data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleVendorGoogleLogin"
-                     data-auto_prompt="false">
+                    data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
+                    data-context="signin" data-ux_mode="popup" data-callback="handleVendorGoogleLogin"
+                    data-auto_prompt="false">
                 </div>
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+                    data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
             </div>
             <div class="relative flex py-2 items-center mb-4">
                 <div class="flex-grow border-t border-gray-200"></div>
@@ -84,11 +125,13 @@
             </div>
             <form id="loginForm" class="space-y-4">
                 <input type="email" id="loginEmail" required class="w-full p-2 border rounded-lg" placeholder="Email">
-                <input type="password" id="loginPass" required class="w-full p-2 border rounded-lg" placeholder="Password">
+                <input type="password" id="loginPass" required class="w-full p-2 border rounded-lg"
+                    placeholder="Password">
                 <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg">Login</button>
             </form>
             <p id="loginError" class="text-xs text-red-500 font-bold text-center mt-2 hidden"></p>
-            <p class="text-center mt-4 text-sm"><a href="#" onclick="switchView('register')" class="text-blue-600 font-bold">Register Shop</a></p>
+            <p class="text-center mt-4 text-sm"><a href="#" onclick="switchView('register')"
+                    class="text-blue-600 font-bold">Register Shop</a></p>
         </div>
     </div>
 
@@ -102,13 +145,18 @@
             <form id="profileSetupForm" class="space-y-4 text-left">
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Shop Name</label>
-                    <input type="text" id="setupShopName" required class="w-full p-3 border-2 border-blue-100 rounded-lg font-bold text-lg outline-none focus:border-blue-500" placeholder="My Awesome Shop">
+                    <input type="text" id="setupShopName" required
+                        class="w-full p-3 border-2 border-blue-100 rounded-lg font-bold text-lg outline-none focus:border-blue-500"
+                        placeholder="My Awesome Shop">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Mobile Number</label>
-                    <input type="tel" id="setupMobile" required pattern="[0-9]{10}" class="w-full p-3 border-2 border-blue-100 rounded-lg font-bold text-lg outline-none focus:border-blue-500" placeholder="9876543210">
+                    <input type="tel" id="setupMobile" required pattern="[0-9]{10}"
+                        class="w-full p-3 border-2 border-blue-100 rounded-lg font-bold text-lg outline-none focus:border-blue-500"
+                        placeholder="9876543210">
                 </div>
-                <button type="submit" class="w-full bg-black text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition">
+                <button type="submit"
+                    class="w-full bg-black text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition">
                     Complete Setup <i class="fa-solid fa-arrow-right ml-2"></i>
                 </button>
             </form>
@@ -116,11 +164,13 @@
         </div>
     </div>
 
-    <div id="editModal" class="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center hidden p-4 backdrop-blur-sm">
+    <div id="editModal"
+        class="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center hidden p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
                 <h3 class="font-bold text-lg">Edit Product</h3>
-                <button onclick="closeEditModal()" class="text-gray-500 hover:text-black"><i class="fa-solid fa-times text-xl"></i></button>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-black"><i
+                        class="fa-solid fa-times text-xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto custom-scroll">
                 <form id="editForm" class="space-y-4">
@@ -131,7 +181,8 @@
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase">Update Images (Min 3)</label>
-                        <input type="file" id="editImages" accept="image/*" multiple class="w-full text-sm text-gray-500">
+                        <input type="file" id="editImages" accept="image/*" multiple
+                            class="w-full text-sm text-gray-500">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -140,12 +191,13 @@
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500">Brand</label>
-                             <input type="text" id="editBrand" class="w-full p-2 border rounded">
+                            <input type="text" id="editBrand" class="w-full p-2 border rounded">
                         </div>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500">Stock Quantity</label>
-                        <input type="number" id="editStock" class="w-full p-3 border-2 border-blue-100 rounded-lg font-bold text-lg text-blue-600 outline-none">
+                        <input type="number" id="editStock"
+                            class="w-full p-3 border-2 border-blue-100 rounded-lg font-bold text-lg text-blue-600 outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -154,7 +206,8 @@
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500">Category</label>
-                            <input type="text" id="editCategory" class="w-full p-2 border rounded" readonly title="Cannot change category">
+                            <input type="text" id="editCategory" class="w-full p-2 border rounded" readonly
+                                title="Cannot change category">
                         </div>
                     </div>
                     <div>
@@ -164,130 +217,162 @@
                 </form>
             </div>
             <div class="p-4 border-t bg-gray-50 flex gap-3">
-                <button onclick="closeEditModal()" class="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-200 rounded-lg">Cancel</button>
-                <button onclick="saveEdit()" class="flex-1 py-3 bg-black text-white font-bold rounded-lg shadow-lg hover:bg-gray-800">Save Changes</button>
+                <button onclick="closeEditModal()"
+                    class="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-200 rounded-lg">Cancel</button>
+                <button onclick="saveEdit()"
+                    class="flex-1 py-3 bg-black text-white font-bold rounded-lg shadow-lg hover:bg-gray-800">Save
+                    Changes</button>
             </div>
         </div>
     </div>
 
     <div id="viewDashboard" class="hidden fixed inset-0 z-0 flex bg-gray-100">
-        
+
         <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-full">
             <div class="h-16 flex items-center px-6 border-b border-gray-100 shrink-0">
                 <div class="flex items-center gap-2 text-blue-600">
                     <i class="fa-solid fa-store text-xl"></i>
-                    <h1 class="font-black text-lg tracking-tighter text-gray-900">VENDOR<span class="text-blue-600">HUB</span></h1>
+                    <h1 class="font-black text-lg tracking-tighter text-gray-900">VENDOR<span
+                            class="text-blue-600">HUB</span></h1>
                 </div>
             </div>
-            
+
             <div class="flex-1 overflow-y-auto py-4 space-y-1 px-3 custom-scroll">
                 <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Management</p>
-                <button onclick="switchDashTab('inventory')" id="btn-inventory" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-bold bg-blue-50 text-blue-600 transition">
+                <button onclick="switchDashTab('inventory')" id="btn-inventory"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-bold bg-blue-50 text-blue-600 transition">
                     <i class="fa-solid fa-boxes-stacked w-5"></i> Inventory
                 </button>
-                
-                <button onclick="switchDashTab('profile')" id="btn-profile" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+
+                <button onclick="switchDashTab('profile')" id="btn-profile"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-user-gear w-5"></i> Profile Settings
                 </button>
 
-                <p class="px-3 mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Add New Product</p>
-                
-                <button onclick="preloadCategory('Fashion')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <p class="px-3 mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Add New Product
+                </p>
+
+                <button onclick="preloadCategory('Fashion')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-shirt w-5 text-center"></i> Fashion
                 </button>
-                <button onclick="preloadCategory('Electronics')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Electronics')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-plug w-5 text-center"></i> Electronics
                 </button>
-                <button onclick="preloadCategory('Mobiles')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Mobiles')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-mobile-screen w-5 text-center"></i> Mobiles
                 </button>
-                <button onclick="preloadCategory('Laptops')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Laptops')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-laptop w-5 text-center"></i> Laptops
                 </button>
-                <button onclick="preloadCategory('Appliances')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Appliances')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-blender w-5 text-center"></i> Appliances
                 </button>
-                <button onclick="preloadCategory('Furniture')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Furniture')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-chair w-5 text-center"></i> Furniture
                 </button>
-                <button onclick="preloadCategory('Beauty')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Beauty')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-spray-can-sparkles w-5 text-center"></i> Beauty
                 </button>
-                <button onclick="preloadCategory('Grocery')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Grocery')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-carrot w-5 text-center"></i> Grocery
                 </button>
-                <button onclick="preloadCategory('Toys')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Toys')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-gamepad w-5 text-center"></i> Toys
                 </button>
-                <button onclick="preloadCategory('Sports')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Sports')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-baseball w-5 text-center"></i> Sports
                 </button>
-                <button onclick="preloadCategory('Footwear')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Footwear')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-shoe-prints w-5 text-center"></i> Footwear
                 </button>
-                <button onclick="preloadCategory('Watches')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Watches')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-clock w-5 text-center"></i> Watches
                 </button>
-                <button onclick="preloadCategory('Jewellery')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Jewellery')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-gem w-5 text-center"></i> Jewellery
                 </button>
-                <button onclick="preloadCategory('Bags')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Bags')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-suitcase w-5 text-center"></i> Bags
                 </button>
-                <button onclick="preloadCategory('Kitchen')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Kitchen')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-utensils w-5 text-center"></i> Kitchen
                 </button>
-                <button onclick="preloadCategory('Baby Care')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Baby Care')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-baby w-5 text-center"></i> Baby Care
                 </button>
-                <button onclick="preloadCategory('Automotive')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Automotive')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-car w-5 text-center"></i> Automotive
                 </button>
-                <button onclick="preloadCategory('Books')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Books')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-book w-5 text-center"></i> Books
                 </button>
-                <button onclick="preloadCategory('Stationery')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="preloadCategory('Stationery')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-pen-ruler w-5 text-center"></i> Stationery
                 </button>
             </div>
 
             <div class="p-4 border-t border-gray-100 shrink-0">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm" id="sbAvatar">S</div>
+                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm"
+                        id="sbAvatar">S</div>
                     <div class="overflow-hidden">
                         <p class="text-sm font-bold text-gray-900 truncate" id="sbShopName">Shop Name</p>
                         <p class="text-xs text-gray-500 truncate" id="sbEmail">Email</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 flex items-center justify-center gap-2">
+                <button onclick="logout()"
+                    class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-right-from-bracket"></i> Sign Out
                 </button>
             </div>
         </aside>
 
         <div class="flex-1 flex flex-col h-full overflow-hidden relative">
-            <header class="h-16 bg-white border-b border-gray-200 flex md:hidden items-center justify-between px-4 shrink-0 z-20 relative">
+            <header
+                class="h-16 bg-white border-b border-gray-200 flex md:hidden items-center justify-between px-4 shrink-0 z-20 relative">
                 <div class="font-black text-lg tracking-tighter">VENDOR<span class="text-blue-600">HUB</span></div>
-                <button onclick="document.getElementById('mobileMenu').classList.remove('hidden')" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <button onclick="document.getElementById('mobileMenu').classList.remove('hidden')"
+                    class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
             </header>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
-                
+
                 <div id="view-inventory" class="max-w-6xl mx-auto">
                     <div class="flex justify-between items-end mb-6">
                         <div>
                             <h2 class="text-2xl font-black text-gray-900">Live Inventory</h2>
                             <p class="text-sm text-gray-500">Manage your active listings and stock.</p>
                         </div>
-                        <span id="itemCount" class="bg-white border border-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">Loading...</span>
+                        <span id="itemCount"
+                            class="bg-white border border-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">Loading...</span>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left whitespace-nowrap">
-                                <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b border-gray-100">
+                                <thead
+                                    class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b border-gray-100">
                                     <tr>
                                         <th class="px-6 py-4">Product</th>
                                         <th class="px-6 py-4">Category</th>
@@ -302,7 +387,8 @@
                         </div>
                         <div id="emptyState" class="text-center py-20 hidden">
                             <h3 class="text-gray-900 font-bold">No products found</h3>
-                            <p class="text-gray-500 text-xs mt-1">Select a category from the sidebar to add products.</p>
+                            <p class="text-gray-500 text-xs mt-1">Select a category from the sidebar to add products.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -315,9 +401,10 @@
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
                         <form id="profileUpdateForm" onsubmit="handleProfileUpdate(event)" class="space-y-6">
-                            
+
                             <div class="flex items-center gap-4 border-b border-gray-100 pb-6">
-                                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-2xl" id="profileAvatarBig">S</div>
+                                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-2xl"
+                                    id="profileAvatarBig">S</div>
                                 <div>
                                     <h3 class="font-bold text-lg" id="profileNameDisplay">Shop Name</h3>
                                     <p class="text-sm text-gray-500" id="profileEmailDisplay">email@example.com</p>
@@ -326,25 +413,34 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Shop Name</label>
-                                    <input type="text" id="pShopName" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition font-bold">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Shop
+                                        Name</label>
+                                    <input type="text" id="pShopName" required
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition font-bold">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Owner Name</label>
-                                    <input type="text" id="pOwnerName" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Owner
+                                        Name</label>
+                                    <input type="text" id="pOwnerName" required
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Mobile Number</label>
-                                    <input type="tel" id="pMobile" pattern="[0-9]{10}" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Mobile
+                                        Number</label>
+                                    <input type="tel" id="pMobile" pattern="[0-9]{10}" required
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email (Read Only)</label>
-                                    <input type="email" id="pEmail" readonly class="w-full p-3 bg-gray-100 border border-gray-200 rounded-lg outline-none text-gray-500 cursor-not-allowed">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email (Read
+                                        Only)</label>
+                                    <input type="email" id="pEmail" readonly
+                                        class="w-full p-3 bg-gray-100 border border-gray-200 rounded-lg outline-none text-gray-500 cursor-not-allowed">
                                 </div>
                             </div>
-                            
+
                             <div class="pt-2">
-                                <button type="submit" id="btnSaveProfile" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transform active:scale-[0.98] transition flex items-center justify-center gap-2">
+                                <button type="submit" id="btnSaveProfile"
+                                    class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transform active:scale-[0.98] transition flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-save"></i> Save Changes
                                 </button>
                             </div>
@@ -356,78 +452,101 @@
                     <div class="mb-6">
                         <h2 class="text-2xl font-black text-gray-900">Add Product</h2>
                         <div class="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                             <span>Category:</span>
-                             <span id="displayCategoryBadge" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase text-xs"></span>
+                            <span>Category:</span>
+                            <span id="displayCategoryBadge"
+                                class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase text-xs"></span>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
                         <form id="addProductForm" class="space-y-6">
-                            
+
                             <input type="hidden" id="mainCategory">
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Product Images (Min 3)</label>
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 relative transition group">
-                                    <input type="file" id="productImages" accept="image/*" multiple required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                    <div id="imagePlaceholder" class="text-gray-400 group-hover:text-blue-500 transition">
-                                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Product Images (Min
+                                    3)</label>
+                                <div
+                                    class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 relative transition group">
+                                    <input type="file" id="productImages" accept="image/*" multiple required
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                    <div id="imagePlaceholder"
+                                        class="text-gray-400 group-hover:text-blue-500 transition">
+                                        <div
+                                            class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition">
                                             <i class="fa-solid fa-images text-xl"></i>
                                         </div>
                                         <p class="text-sm font-bold">Click to upload images</p>
                                     </div>
-                                    <div id="uploadPreviews" class="hidden grid grid-cols-3 gap-2 mt-4 relative z-0"></div>
+                                    <div id="uploadPreviews" class="hidden grid grid-cols-3 gap-2 mt-4 relative z-0">
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Product Name</label>
-                                    <input type="text" id="productName" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Product
+                                        Name</label>
+                                    <input type="text" id="productName" required
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Brand Name</label>
-                                        <input type="text" id="productBrand" required placeholder="e.g. Nike, Apple" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Brand
+                                            Name</label>
+                                        <input type="text" id="productBrand" required placeholder="e.g. Nike, Apple"
+                                            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                     </div>
-                                    
+
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sub Category</label>
-                                        <select id="subCategory" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sub
+                                            Category</label>
+                                        <select id="subCategory" required
+                                            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                             <option value="">Select Sub-Category</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Search Tags (Optional)</label>
-                                    <input type="text" id="productTags" placeholder="Summer, Sale, 5G..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Search Tags
+                                        (Optional)</label>
+                                    <input type="text" id="productTags" placeholder="Summer, Sale, 5G..."
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
-                                    <textarea id="productDesc" required rows="3" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition"></textarea>
+                                    <label
+                                        class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
+                                    <textarea id="productDesc" required rows="3"
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition"></textarea>
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Available Variants / Sizes</label>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Available Variants /
+                                    Sizes</label>
                                 <div class="flex flex-wrap gap-2" id="sizeSelector"></div>
                                 <p class="text-[10px] text-gray-400 mt-1">* Check all that apply</p>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price (₹)</label>
-                                    <input type="number" id="productPrice" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price
+                                        (₹)</label>
+                                    <input type="number" id="productPrice" required
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Stock Qty</label>
-                                    <input type="number" id="productStock" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Stock
+                                        Qty</label>
+                                    <input type="number" id="productStock" required
+                                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition">
                                 </div>
                             </div>
 
-                            <button type="submit" id="btnPublish" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transform active:scale-[0.98] transition flex items-center justify-center gap-2">
+                            <button type="submit" id="btnPublish"
+                                class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transform active:scale-[0.98] transition flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-paper-plane"></i> Submit for Approval
                             </button>
                         </form>
@@ -436,33 +555,39 @@
             </main>
         </div>
 
-        <div id="mobileMenu" class="fixed inset-0 z-50 bg-black/50 hidden backdrop-blur-sm" onclick="this.classList.add('hidden')">
+        <div id="mobileMenu" class="fixed inset-0 z-50 bg-black/50 hidden backdrop-blur-sm"
+            onclick="this.classList.add('hidden')">
             <aside class="w-64 bg-white h-full shadow-2xl flex flex-col p-4" onclick="event.stopPropagation()">
                 <div class="flex justify-between items-center mb-6 border-b pb-4">
                     <h2 class="font-black text-lg">MENU</h2>
-                    <button onclick="document.getElementById('mobileMenu').classList.add('hidden')"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button onclick="document.getElementById('mobileMenu').classList.add('hidden')"><i
+                            class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <div class="space-y-2 overflow-y-auto">
-                    <button onclick="switchDashTab('inventory')" class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Inventory</button>
-                    <button onclick="switchDashTab('profile')" class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Profile Settings</button>
-                    
-                    <p class="px-3 mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Add Product</p>
-<div id="mobileCategoryContainer" class="space-y-1"></div>
-                
-                <div class="mt-auto border-t pt-4">
-                    <button onclick="logout()" class="w-full text-left p-3 text-red-600 font-bold">Logout</button>
-                </div>
+                    <button onclick="switchDashTab('inventory')"
+                        class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Inventory</button>
+                    <button onclick="switchDashTab('profile')"
+                        class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Profile
+                        Settings</button>
+
+                    <p class="px-3 mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Add Product
+                    </p>
+                    <div id="mobileCategoryContainer" class="space-y-1"></div>
+
+                    <div class="mt-auto border-t pt-4">
+                        <button onclick="logout()" class="w-full text-left p-3 text-red-600 font-bold">Logout</button>
+                    </div>
             </aside>
         </div>
     </div>
 
     <script>
-const API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000/api' 
-    : '/api';
-        const KEY_SESSION = 'kicks_vendor_session'; 
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:5000/api'
+            : '/api';
+        const KEY_SESSION = 'kicks_vendor_session';
         let currentSessionUser = null;
-        let myProductsCache = []; 
+        let myProductsCache = [];
 
         // --- 1. EXPANDED CATEGORY DATA (19 CATEGORIES) ---
         const categoryMap = {
@@ -511,7 +636,7 @@ const API_URL = window.location.hostname === 'localhost'
             document.getElementById('profileSetupForm').addEventListener('submit', handleProfileSetup);
 
             const session = localStorage.getItem(KEY_SESSION);
-            if(session) {
+            if (session) {
                 currentSessionUser = JSON.parse(session);
                 checkProfileStatus();
             } else {
@@ -523,18 +648,18 @@ const API_URL = window.location.hostname === 'localhost'
         function preloadCategory(catName) {
             // 1. Switch View
             switchDashTab('add-product');
-            
+
             // 2. Set Hidden Main Category Value
             const hiddenInput = document.getElementById('mainCategory');
             hiddenInput.value = catName;
-            
+
             // 3. Display Badge for User
             document.getElementById('displayCategoryBadge').innerText = catName;
 
             // 4. Populate Sub-Categories
             const subSelect = document.getElementById('subCategory');
             subSelect.innerHTML = '<option value="">Select Sub-Category</option>';
-            if(categoryMap[catName]) {
+            if (categoryMap[catName]) {
                 categoryMap[catName].forEach(sub => {
                     subSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
                 });
@@ -547,8 +672,8 @@ const API_URL = window.location.hostname === 'localhost'
             // Try finding exact match, else check specific keys, else Default
             let sizes = sizeOptions[catName] || sizeOptions["Default"];
             if (catName === 'Jewellery' && categoryMap[catName].includes('Rings')) {
-                 // Logic could be more complex, but keeping simple for now
-                 // Using general jewellery sizes or ring sizes based on sub selection could be added
+                // Logic could be more complex, but keeping simple for now
+                // Using general jewellery sizes or ring sizes based on sub selection could be added
             }
 
             container.innerHTML = sizes.map(s => `
@@ -556,7 +681,7 @@ const API_URL = window.location.hostname === 'localhost'
                     <input type="checkbox" name="sizes" value="${s}" class="peer hidden size-checkbox">
                     <div class="min-w-[40px] px-3 py-1.5 flex items-center justify-center border rounded-lg font-bold text-sm text-gray-500 hover:border-blue-500 transition bg-white">${s}</div>
                 </label>`).join('');
-            
+
             // 6. Focus & Scroll
             document.getElementById('productName').focus();
             document.getElementById('view-add-product').scrollIntoView({ behavior: 'smooth' });
@@ -577,7 +702,7 @@ const API_URL = window.location.hostname === 'localhost'
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
                 }
             }
         });
@@ -586,7 +711,7 @@ const API_URL = window.location.hostname === 'localhost'
         function decodeJwtResponse(token) {
             var base64Url = token.split('.')[1];
             var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
             return JSON.parse(jsonPayload);
@@ -605,15 +730,15 @@ const API_URL = window.location.hostname === 'localhost'
                         role: 'vendor'
                     })
                 });
-                
-                if(!res.ok) throw new Error("Google Login Failed");
+
+                if (!res.ok) throw new Error("Google Login Failed");
                 const user = await res.json();
-                
+
                 currentSessionUser = user;
                 localStorage.setItem(KEY_SESSION, JSON.stringify(user));
                 checkProfileStatus();
 
-            } catch(e) { alert(e.message); }
+            } catch (e) { alert(e.message); }
         }
 
         async function handleRegister(e) {
@@ -630,7 +755,7 @@ const API_URL = window.location.hostname === 'localhost'
                     body: JSON.stringify({ name, email, password, shopName, role: 'vendor' })
                 });
                 const data = await res.json();
-                if(!res.ok) throw new Error(data.error);
+                if (!res.ok) throw new Error(data.error);
                 handleLoginManual(email, password);
             } catch (err) { alert(err.message); }
         }
@@ -641,128 +766,128 @@ const API_URL = window.location.hostname === 'localhost'
             const password = document.getElementById('loginPass').value;
             handleLoginManual(email, password);
         }
-// UPDATE THIS FUNCTION IN shopdashboard.html
-async function handleLoginManual(email, password) {
-    try {
-        const res = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                email, 
-                password,
-                role: 'vendor' // <--- YE LINE ADD KARNI HAI ZAROORI
-            })
-        });
-        const data = await res.json();
-        if(!res.ok) {
-            document.getElementById('loginError').textContent = data.error || data.message;
-            document.getElementById('loginError').classList.remove('hidden');
-            return;
+        // UPDATE THIS FUNCTION IN shopdashboard.html
+        async function handleLoginManual(email, password) {
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        role: 'vendor' // <--- YE LINE ADD KARNI HAI ZAROORI
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    document.getElementById('loginError').textContent = data.error || data.message;
+                    document.getElementById('loginError').classList.remove('hidden');
+                    return;
+                }
+                currentSessionUser = data;
+                localStorage.setItem(KEY_SESSION, JSON.stringify(data));
+                checkProfileStatus();
+            } catch (err) { alert("Server Connection Failed"); }
         }
-        currentSessionUser = data;
-        localStorage.setItem(KEY_SESSION, JSON.stringify(data));
-        checkProfileStatus();
-    } catch (err) { alert("Server Connection Failed"); }
-}
-       function checkProfileStatus() {
-    if (!currentSessionUser) return switchView('login');
+        function checkProfileStatus() {
+            if (!currentSessionUser) return switchView('login');
 
-    // --- MAGIC AUTO-SYNC START (Ye code add karein) ---
-    // Ye background mein server ko batata hai ki "Main Vendor hu, mujhe list mein dikhao"
-    if (currentSessionUser.role === 'vendor' && currentSessionUser.shopName) {
-        console.log("Running Auto-Sync for Vendor...");
-        fetch(`${API_URL}/user/update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            // --- MAGIC AUTO-SYNC START (Ye code add karein) ---
+            // Ye background mein server ko batata hai ki "Main Vendor hu, mujhe list mein dikhao"
+            if (currentSessionUser.role === 'vendor' && currentSessionUser.shopName) {
+                console.log("Running Auto-Sync for Vendor...");
+                fetch(`${API_URL}/user/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentSessionUser.email,
+                        shopName: currentSessionUser.shopName,
+                        ownerName: currentSessionUser.name,
+                        mobile: currentSessionUser.mobile || "N/A"
+                    })
+                }).then(() => console.log("✅ Vendor Auto-Synced to WebAdmin"))
+                    .catch(err => console.error("Sync Failed", err));
+            }
+            // --- MAGIC AUTO-SYNC END ---
+
+            // ... Baki ka purana code waisa hi rahega ...
+            const isMobileMissing = !currentSessionUser.mobile || currentSessionUser.mobile.trim() === "";
+            const isShopMissing = !currentSessionUser.shopName || currentSessionUser.shopName.trim() === "";
+
+            if (isMobileMissing || isShopMissing) {
+                // ... (Old Logic)
+                if (currentSessionUser.shopName) document.getElementById('setupShopName').value = currentSessionUser.shopName;
+                if (currentSessionUser.mobile) document.getElementById('setupMobile').value = currentSessionUser.mobile;
+                switchView('profileSetup');
+            } else {
+                loadDashboard();
+            }
+        }
+        async function handleProfileSetup(e) {
+            e.preventDefault();
+            const shopName = document.getElementById('setupShopName').value;
+            const mobile = document.getElementById('setupMobile').value;
+
+            if (!shopName || !mobile) return alert("Please fill all details");
+
+            // UI Loading
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Setting up...";
+            btn.disabled = true;
+
+            const updateData = {
                 email: currentSessionUser.email,
-                shopName: currentSessionUser.shopName,
-                ownerName: currentSessionUser.name,
-                mobile: currentSessionUser.mobile || "N/A"
-            })
-        }).then(() => console.log("✅ Vendor Auto-Synced to WebAdmin"))
-          .catch(err => console.error("Sync Failed", err));
-    }
-    // --- MAGIC AUTO-SYNC END ---
+                shopName: shopName,
+                mobile: mobile,
+                phone: mobile,
+                role: 'vendor'
+            };
 
-    // ... Baki ka purana code waisa hi rahega ...
-    const isMobileMissing = !currentSessionUser.mobile || currentSessionUser.mobile.trim() === "";
-    const isShopMissing = !currentSessionUser.shopName || currentSessionUser.shopName.trim() === "";
+            try {
+                // Update User in DB
+                const res = await fetch(`${API_URL}/user/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
 
-    if (isMobileMissing || isShopMissing) {
-        // ... (Old Logic)
-        if(currentSessionUser.shopName) document.getElementById('setupShopName').value = currentSessionUser.shopName;
-        if(currentSessionUser.mobile) document.getElementById('setupMobile').value = currentSessionUser.mobile;
-        switchView('profileSetup');
-    } else {
-        loadDashboard();
-    }
-}
-async function handleProfileSetup(e) {
-        e.preventDefault();
-        const shopName = document.getElementById('setupShopName').value;
-        const mobile = document.getElementById('setupMobile').value;
-        
-        if(!shopName || !mobile) return alert("Please fill all details");
+                if (!res.ok) throw new Error("Setup Failed");
 
-        // UI Loading
-        const btn = e.target.querySelector('button');
-        const originalText = btn.innerText;
-        btn.innerText = "Setting up...";
-        btn.disabled = true;
+                // Update Local Session
+                const updatedUser = { ...currentSessionUser, ...updateData };
+                currentSessionUser = updatedUser;
+                localStorage.setItem(KEY_SESSION, JSON.stringify(currentSessionUser));
 
-        const updateData = {
-            email: currentSessionUser.email,
-            shopName: shopName,
-            mobile: mobile,
-            phone: mobile,
-            role: 'vendor'
-        };
+                alert("Setup Complete! Welcome to VendorHub.");
+                checkProfileStatus(); // Will now redirect to Dashboard
 
-        try {
-            // Update User in DB
-            const res = await fetch(`${API_URL}/user/update`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updateData)
-            });
-
-            if(!res.ok) throw new Error("Setup Failed");
-
-            // Update Local Session
-            const updatedUser = { ...currentSessionUser, ...updateData };
-            currentSessionUser = updatedUser;
-            localStorage.setItem(KEY_SESSION, JSON.stringify(currentSessionUser));
-            
-            alert("Setup Complete! Welcome to VendorHub.");
-            checkProfileStatus(); // Will now redirect to Dashboard
-
-        } catch(err) {
-            console.error(err);
-            alert("Connection Error: " + err.message);
-            btn.innerText = originalText;
-            btn.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert("Connection Error: " + err.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
-    }
 
-    // 2. Load Profile Data (For Profile Settings Tab)
-    function loadProfileData() {
-        if(!currentSessionUser) return;
-        
-        // Fill Inputs
-        document.getElementById('pShopName').value = currentSessionUser.shopName || '';
-        document.getElementById('pOwnerName').value = currentSessionUser.name || currentSessionUser.ownerName || '';
-        document.getElementById('pMobile').value = currentSessionUser.mobile || currentSessionUser.phone || '';
-        document.getElementById('pEmail').value = currentSessionUser.email || '';
-        
-        // Update Header UI
-        document.getElementById('profileNameDisplay').innerText = currentSessionUser.shopName || 'My Shop';
-        document.getElementById('profileEmailDisplay').innerText = currentSessionUser.email;
-        
-        if(currentSessionUser.shopName) {
-            document.getElementById('profileAvatarBig').innerText = currentSessionUser.shopName[0].toUpperCase();
+        // 2. Load Profile Data (For Profile Settings Tab)
+        function loadProfileData() {
+            if (!currentSessionUser) return;
+
+            // Fill Inputs
+            document.getElementById('pShopName').value = currentSessionUser.shopName || '';
+            document.getElementById('pOwnerName').value = currentSessionUser.name || currentSessionUser.ownerName || '';
+            document.getElementById('pMobile').value = currentSessionUser.mobile || currentSessionUser.phone || '';
+            document.getElementById('pEmail').value = currentSessionUser.email || '';
+
+            // Update Header UI
+            document.getElementById('profileNameDisplay').innerText = currentSessionUser.shopName || 'My Shop';
+            document.getElementById('profileEmailDisplay').innerText = currentSessionUser.email;
+
+            if (currentSessionUser.shopName) {
+                document.getElementById('profileAvatarBig').innerText = currentSessionUser.shopName[0].toUpperCase();
+            }
         }
-    }
         // NEW: Handle Profile Update (Live Accurate)
         async function handleProfileUpdate(e) {
             e.preventDefault();
@@ -779,35 +904,39 @@ async function handleProfileSetup(e) {
             };
 
             try {
-                // Simulate API Call (Replace with actual fetch if backend ready)
+                // Real API Call with Authorization
                 const res = await fetch(`${API_URL}/user/update`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentSessionUser.token}`
+                    },
                     body: JSON.stringify(updatedData)
                 });
-                
-                // If backend not ready, we simulate success for UI demo:
-                // if(!res.ok) throw new Error("Update Failed"); 
-                // const newUser = await res.json();
 
-                // Simulation for "Live Accurate" feel if backend returns same object or simple success
-                const newUser = { ...currentSessionUser, ...updatedData };
-                
+                if (!res.ok) throw new Error("Update Failed");
+                const newUserResponse = await res.json();
+
+                // Merge response with current session data to ensure we have all fields
+                const newUser = { ...currentSessionUser, ...newUserResponse };
+
                 // 1. Update Session
                 currentSessionUser = newUser;
                 localStorage.setItem(KEY_SESSION, JSON.stringify(newUser));
 
                 // 2. Update Sidebar Immediately (DOM manipulation)
-                document.getElementById('sbShopName').textContent = newUser.shopName;
-                document.getElementById('sbAvatar').textContent = newUser.shopName[0].toUpperCase();
-                
-                // 3. Update Profile View Header
-                document.getElementById('profileNameDisplay').textContent = newUser.shopName;
-                document.getElementById('profileAvatarBig').textContent = newUser.shopName[0].toUpperCase();
+                if (newUser.shopName) {
+                    document.getElementById('sbShopName').textContent = newUser.shopName;
+                    document.getElementById('sbAvatar').textContent = newUser.shopName[0].toUpperCase();
+                    // 3. Update Profile View Header
+                    document.getElementById('profileNameDisplay').textContent = newUser.shopName;
+                    document.getElementById('profileAvatarBig').textContent = newUser.shopName[0].toUpperCase();
+                }
 
                 alert("Profile Updated Successfully!");
 
             } catch (err) {
+                console.error(err);
                 alert("Failed to update profile: " + err.message);
             } finally {
                 btn.innerHTML = originalText;
@@ -826,13 +955,13 @@ async function handleProfileSetup(e) {
                 const fileInput = document.getElementById('productImages');
                 const catVal = document.getElementById('mainCategory').value;
 
-                if(!catVal) throw new Error("Please select a category from the sidebar first.");
-                if(fileInput.files.length < 3) throw new Error("Please select at least 3 images.");
-                if(selectedSizes.length === 0) throw new Error("Select at least one variant/size.");
+                if (!catVal) throw new Error("Please select a category from the sidebar first.");
+                if (fileInput.files.length < 3) throw new Error("Please select at least 3 images.");
+                if (selectedSizes.length === 0) throw new Error("Select at least one variant/size.");
 
                 const imagePromises = Array.from(fileInput.files).map(compressImage);
                 const base64Images = await Promise.all(imagePromises);
-                
+
                 // Construct Tag Array
                 const tagString = document.getElementById('productTags').value;
                 const tagsArray = tagString ? tagString.split(',').map(t => t.trim()) : [];
@@ -855,26 +984,26 @@ async function handleProfileSetup(e) {
                     status: 'Pending Review'
                 };
 
-               const res = await fetch(`${API_URL}/products`, {
-    method: 'POST',
-    headers: { 
-        'Content-Type': 'application/json',
-        // ✅ यह लाइन सबसे जरूरी है (Token भेजना)
-        'Authorization': `Bearer ${currentSessionUser.token}` 
-    },
-    body: JSON.stringify(productData)
-});
-                
-                if(!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.message || errorData.error || "Server rejected request");
-}
+                const res = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // ✅ यह लाइन सबसे जरूरी है (Token भेजना)
+                        'Authorization': `Bearer ${currentSessionUser.token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || errorData.error || "Server rejected request");
+                }
 
                 alert("Product Sent to WebAdmin for Approval!");
                 e.target.reset();
                 document.getElementById('uploadPreviews').classList.add('hidden');
                 document.getElementById('imagePlaceholder').classList.remove('hidden');
-                
+
                 switchDashTab('inventory');
                 fetchProducts();
 
@@ -899,13 +1028,13 @@ async function handleProfileSetup(e) {
             const tbody = document.getElementById('productTableBody');
             document.getElementById('itemCount').textContent = `${products.length} Items`;
             tbody.innerHTML = '';
-            if(products.length === 0) { document.getElementById('emptyState').classList.remove('hidden'); return; }
+            if (products.length === 0) { document.getElementById('emptyState').classList.remove('hidden'); return; }
             document.getElementById('emptyState').classList.add('hidden');
             products.forEach(p => {
                 const statusClass = p.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
                 const mainImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || '');
                 const subText = p.subCategory ? ` > ${p.subCategory}` : '';
-                
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b last:border-0 transition">
                         <td class="px-6 py-4 flex items-center gap-4">
@@ -926,7 +1055,7 @@ async function handleProfileSetup(e) {
 
         function openEditModal(id) {
             const p = myProductsCache.find(x => x.id === id);
-            if(!p) return;
+            if (!p) return;
             document.getElementById('editId').value = p.id;
             document.getElementById('editName').value = p.name;
             document.getElementById('editBrand').value = p.brand;
@@ -937,7 +1066,7 @@ async function handleProfileSetup(e) {
             const container = document.getElementById('editPreviewContainer');
             container.innerHTML = '';
             const imgs = p.images || [p.image];
-            imgs.forEach(src => { if(src) container.innerHTML += `<img src="${src}" class="w-16 h-16 object-cover rounded border shrink-0">`; });
+            imgs.forEach(src => { if (src) container.innerHTML += `<img src="${src}" class="w-16 h-16 object-cover rounded border shrink-0">`; });
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -952,8 +1081,8 @@ async function handleProfileSetup(e) {
                 status: 'Pending Review' // Re-trigger approval if edited
             };
             const imgInput = document.getElementById('editImages');
-            if(imgInput.files.length > 0) {
-                if(imgInput.files.length < 3) return alert("Upload at least 3 images.");
+            if (imgInput.files.length > 0) {
+                if (imgInput.files.length < 3) return alert("Upload at least 3 images.");
                 const imagePromises = Array.from(imgInput.files).map(compressImage);
                 const newImgs = await Promise.all(imagePromises);
                 updates.images = newImgs;
@@ -962,27 +1091,41 @@ async function handleProfileSetup(e) {
             try {
                 const res = await fetch(`${API_URL}/products/${id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentSessionUser.token}`
+                    },
                     body: JSON.stringify(updates)
                 });
-                if(res.ok) { alert("Product Updated & Sent for Review!"); closeEditModal(); fetchProducts(); }
-            } catch (e) { alert("Update failed"); }
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || errorData.error || "Update failed");
+                }
+
+                alert("Product Updated & Sent for Review!");
+                closeEditModal();
+                fetchProducts();
+            } catch (e) {
+                console.error(e);
+                alert("Update failed: " + e.message);
+            }
         }
 
         async function deleteProduct(id) {
-            if(!confirm("Are you sure you want to delete this product?")) return;
+            if (!confirm("Are you sure you want to delete this product?")) return;
             try {
                 const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
-                if(res.ok) fetchProducts();
+                if (res.ok) fetchProducts();
             } catch (e) { alert("Delete failed"); }
         }
 
         function switchView(view) {
-            ['viewRegister','viewLogin','viewDashboard','viewProfileSetup'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['viewRegister', 'viewLogin', 'viewDashboard', 'viewProfileSetup'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if (view === 'login') document.getElementById('viewLogin').classList.remove('hidden');
             else if (view === 'register') document.getElementById('viewRegister').classList.remove('hidden');
             else if (view === 'profileSetup') document.getElementById('viewProfileSetup').classList.remove('hidden');
-            else document.getElementById('viewDashboard').classList.remove('hidden'); 
+            else document.getElementById('viewDashboard').classList.remove('hidden');
         }
 
         function loadDashboard() {
@@ -990,7 +1133,7 @@ async function handleProfileSetup(e) {
             document.getElementById('sbEmail').textContent = currentSessionUser.email;
             document.getElementById('sbAvatar').textContent = currentSessionUser.shopName ? currentSessionUser.shopName[0].toUpperCase() : 'U';
             switchView('dashboard');
-            switchDashTab('inventory'); 
+            switchDashTab('inventory');
             fetchProducts();
         }
 
@@ -998,7 +1141,7 @@ async function handleProfileSetup(e) {
             document.getElementById('view-inventory').classList.add('hidden');
             document.getElementById('view-add-product').classList.add('hidden');
             document.getElementById('view-profile').classList.add('hidden'); // Hide profile view
-            
+
             // Reset Sidebar Buttons Styles
             const navBtns = document.querySelectorAll('.nav-btn');
             navBtns.forEach(btn => {
@@ -1007,15 +1150,15 @@ async function handleProfileSetup(e) {
             });
 
             const activeBtn = document.getElementById(`btn-${tab}`);
-            if(activeBtn) {
+            if (activeBtn) {
                 activeBtn.classList.add('active', 'bg-blue-50', 'text-blue-600', 'font-bold');
                 activeBtn.classList.remove('font-medium', 'text-gray-600');
             }
-            
+
             document.getElementById(`view-${tab}`).classList.remove('hidden');
 
             // NEW: Load profile data if switching to profile tab
-            if(tab === 'profile') {
+            if (tab === 'profile') {
                 loadProfileData();
             }
         }
@@ -1026,7 +1169,7 @@ async function handleProfileSetup(e) {
             const files = e.target.files;
             const container = document.getElementById('uploadPreviews');
             container.innerHTML = '';
-            if(files.length > 0) {
+            if (files.length > 0) {
                 document.getElementById('imagePlaceholder').classList.add('hidden');
                 container.classList.remove('hidden');
                 Array.from(files).forEach(file => {
@@ -1037,61 +1180,62 @@ async function handleProfileSetup(e) {
             } else { document.getElementById('imagePlaceholder').classList.remove('hidden'); container.classList.add('hidden'); }
         }
         // 1. Icon Mapping for all 19 categories
-const categoryIcons = {
-    "Fashion": "fa-shirt",
-    "Electronics": "fa-plug",
-    "Mobiles": "fa-mobile-screen",
-    "Laptops": "fa-laptop",
-    "Appliances": "fa-blender",
-    "Furniture": "fa-chair",
-    "Beauty": "fa-spray-can-sparkles",
-    "Grocery": "fa-carrot",
-    "Toys": "fa-gamepad",
-    "Sports": "fa-baseball",
-    "Footwear": "fa-shoe-prints",
-    "Watches": "fa-clock",
-    "Jewellery": "fa-gem",
-    "Bags": "fa-suitcase",
-    "Kitchen": "fa-utensils",
-    "Baby Care": "fa-baby",
-    "Automotive": "fa-car",
-    "Books": "fa-book",
-    "Stationery": "fa-pen-ruler"
-};
+        const categoryIcons = {
+            "Fashion": "fa-shirt",
+            "Electronics": "fa-plug",
+            "Mobiles": "fa-mobile-screen",
+            "Laptops": "fa-laptop",
+            "Appliances": "fa-blender",
+            "Furniture": "fa-chair",
+            "Beauty": "fa-spray-can-sparkles",
+            "Grocery": "fa-carrot",
+            "Toys": "fa-gamepad",
+            "Sports": "fa-baseball",
+            "Footwear": "fa-shoe-prints",
+            "Watches": "fa-clock",
+            "Jewellery": "fa-gem",
+            "Bags": "fa-suitcase",
+            "Kitchen": "fa-utensils",
+            "Baby Care": "fa-baby",
+            "Automotive": "fa-car",
+            "Books": "fa-book",
+            "Stationery": "fa-pen-ruler"
+        };
 
-// 2. Function to render mobile categories
-function renderMobileMenu() {
-    const container = document.getElementById('mobileCategoryContainer');
-    if (!container) return;
-    
-    container.innerHTML = ''; // Clear existing content
+        // 2. Function to render mobile categories
+        function renderMobileMenu() {
+            const container = document.getElementById('mobileCategoryContainer');
+            if (!container) return;
 
-    // Loop through all categories in categoryMap
-    Object.keys(categoryMap).forEach(cat => {
-        const icon = categoryIcons[cat] || "fa-tag"; // Default icon if missing
-        
-        container.innerHTML += `
+            container.innerHTML = ''; // Clear existing content
+
+            // Loop through all categories in categoryMap
+            Object.keys(categoryMap).forEach(cat => {
+                const icon = categoryIcons[cat] || "fa-tag"; // Default icon if missing
+
+                container.innerHTML += `
             <button onclick="handleMobileCategoryClick('${cat}')" 
                 class="w-full text-left p-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 pl-6 flex items-center gap-3 transition">
                 <i class="fa-solid ${icon} w-5 text-center text-blue-500"></i> ${cat}
             </button>
         `;
-    });
-}
+            });
+        }
 
-// 3. Helper to handle click and close menu
-function handleMobileCategoryClick(cat) {
-    preloadCategory(cat);
-    // Close the mobile menu after clicking
-    document.getElementById('mobileMenu').classList.add('hidden');
-}
+        // 3. Helper to handle click and close menu
+        function handleMobileCategoryClick(cat) {
+            preloadCategory(cat);
+            // Close the mobile menu after clicking
+            document.getElementById('mobileMenu').classList.add('hidden');
+        }
 
-// 4. Call this function when page loads
-// इसे अपने existing DOMContentLoaded event listener के अंदर जोड़ें
-window.addEventListener('DOMContentLoaded', () => {
-    // ... aapka purana code ...
-    renderMobileMenu(); // <--- यह लाइन जोड़ें
-});
+        // 4. Call this function when page loads
+        // इसे अपने existing DOMContentLoaded event listener के अंदर जोड़ें
+        window.addEventListener('DOMContentLoaded', () => {
+            // ... aapka purana code ...
+            renderMobileMenu(); // <--- यह लाइन जोड़ें
+        });
     </script>
 </body>
+
 </html>
