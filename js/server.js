@@ -37,28 +37,29 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
-
-// server.js में verifyToken फंक्शन को इससे बदलें:
-
+// REPLACE verifyToken FUNCTION IN server.js
 const verifyToken = (roles = []) => {
     return (req, res, next) => {
         const authHeader = req.headers['authorization'];
-        
-        // Token format "Bearer <token>" होता है
         const token = authHeader && authHeader.split(' ')[1]; 
 
         if (!token) {
+            console.log("❌ Blocked: No Token Provided");
             return res.status(403).json({ message: "Login Required (No Token)" });
         }
 
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
-                return res.status(401).json({ message: "Session Expired. Please Login Again." });
+                console.log("❌ Blocked: Invalid/Expired Token");
+                return res.status(401).json({ message: "Session Expired" });
             }
             
-            // Check Role (Optional)
+            // --- DEBUG LOG ---
+            // console.log(`User: ${decoded.id}, Role: ${decoded.role}, Required: ${roles}`);
+
             if (roles.length > 0 && !roles.includes(decoded.role)) {
-                return res.status(403).json({ message: "Access Denied" });
+                console.log(`⛔ Access Denied! User Role: '${decoded.role}' | Required: '${roles}'`);
+                return res.status(403).json({ message: `Access Denied. You are a '${decoded.role}', but '${roles}' is required.` });
             }
             
             req.user = decoded;
@@ -66,6 +67,79 @@ const verifyToken = (roles = []) => {
         });
     };
 };
+// --- MAGIC FIX ROUTE (Paste this before app.listen) ---
+app.get('/api/make-me-vendor/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        
+        // 1. Find and Update User
+        const user = await User.findOneAndUpdate(
+            { email: email },
+            { $set: { role: 'vendor', shopName: 'My Kicks Shop' } }, // Role force update
+            { new: true }
+        );
+
+        if (!user) return res.send(`❌ User with email ${email} not found! Register first.`);
+
+        // 2. Ensure Vendor Entry Exists
+        await Vendor.findOneAndUpdate(
+            { email: email },
+            { 
+                shopName: user.shopName, 
+                ownerName: user.name, 
+                email: user.email, 
+                joined: new Date().toLocaleDateString() 
+            },
+            { upsert: true }
+        );
+
+        res.send(`
+            <h1>✅ SUCCESS!</h1>
+            <p>User <b>${email}</b> is now a <b>VENDOR</b>.</p>
+            <p>Role in DB: <b>${user.role}</b></p>
+            <hr>
+            <h3>⚠️ VERY IMPORTANT NEXT STEP:</h3>
+            <ol>
+                <li>Go back to Dashboard</li>
+                <li><b>LOGOUT</b> immediately</li>
+                <li>Login again to get a new Access Token</li>
+            </ol>
+        `);
+    } catch (e) {
+        res.send(`❌ Error: ${e.message}`);
+    }
+});
+// --- MAGIC FIX ROUTE (Paste in server.js before app.listen) ---
+app.get('/api/upgrade-me/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        
+        // 1. Role update karke Vendor set karein
+        const user = await User.findOneAndUpdate(
+            { email: email },
+            { $set: { role: 'vendor', shopName: 'My Kicks Shop' } }, 
+            { new: true }
+        );
+
+        if (!user) return res.send("❌ User nahi mila. Pehle Register karein.");
+
+        // 2. Vendor Table mein bhi entry pakki karein
+        await Vendor.findOneAndUpdate(
+            { email: email },
+            { 
+                shopName: user.shopName, 
+                ownerName: user.name, 
+                email: user.email, 
+                joined: new Date().toLocaleDateString() 
+            },
+            { upsert: true }
+        );
+
+        res.send(`<h1>✅ DONE! Ab aap VENDOR hain. Turant LOGOUT karke LOGIN karein.</h1>`);
+    } catch (e) {
+        res.send("Error: " + e.message);
+    }
+});
 // ==========================================
 // 2. MONGODB CONNECTION
 // ==========================================
@@ -293,82 +367,127 @@ app.post('/api/auth/register', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// --- UPDATE THIS IN SERVER.JS ---
 app.post('/api/auth/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
         const cleanEmail = email.toLowerCase().trim();
+        
         const user = await User.findOne({ email: cleanEmail });
         
-        if (user && (await bcrypt.compare(password, user.password))) {
-            const userObj = user.toObject(); delete userObj.password;
-            res.json({ ...userObj, token: generateToken(user._id, user.role) });
-        } else {
-            res.status(400).json({ error: "Invalid Credentials" });
-        }
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
+        if (!user) return res.status(400).json({ error: "User not found. Please Register first." });
 
+        // --- NEW LOGIC: Auto-Set Password for Google Users ---
+        // Agar user Google wala hai aur uska password set nahi hai, 
+        // to jo password abhi dala gaya hai, usse hi permanent set kar do.
+        if (!user.password && user.isGoogle) {
+            console.log(`Setting new password for Google user: ${cleanEmail}`);
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+            await user.save();
+        }
+
+        // Check Password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ error: "Invalid Password" });
+
+        // --- Role & Vendor Sync Logic (Existing) ---
+        if (role === 'vendor' || user.role === 'vendor') {
+            if (user.role !== 'vendor') {
+                user.role = 'vendor';
+                user.shopName = user.shopName || (user.name + "'s Shop");
+                await user.save();
+            }
+            await Vendor.findOneAndUpdate(
+                { email: cleanEmail },
+                { 
+                    shopName: user.shopName || "My Shop", 
+                    ownerName: user.name, 
+                    email: cleanEmail,
+                    mobile: user.mobile,
+                    joined: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : new Date().toLocaleDateString() 
+                },
+                { upsert: true, new: true }
+            );
+        }
+
+        const userObj = user.toObject(); delete userObj.password;
+        res.json({ ...userObj, token: generateToken(user._id, user.role) });
+
+    } catch (e) { 
+        console.error(e);
+        res.status(500).json({ error: e.message }); 
+    }
+});
 app.post('/api/auth/google', async (req, res) => {
     try {
-        const { name, email, picture, role } = req.body;
-        let user = await User.findOne({ email });
-        if (!user) {
-             const salt = await bcrypt.genSalt(10);
-             const dummyPass = await bcrypt.hash('GOOGLE_LOGIN_SECURE', salt);
-             user = new User({ name, email, picture, isGoogle: true, password: dummyPass, role: role || 'customer' });
-             await user.save();
-        }
-        res.json({ ...user.toObject(), token: generateToken(user._id, user.role) });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// --- DRIVER ---
-app.post('/api/driver/register', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const cleanEmail = email.toLowerCase().trim();
-        const existing = await DeliveryUser.findOne({ email: cleanEmail });
-        if (existing) return res.status(400).json({ message: "Email already exists" });
+        const { name, email, picture, token, role } = req.body;
         
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        const newDriver = new DeliveryUser({ name, email: cleanEmail, password: hashedPassword });
-        await newDriver.save();
-        res.json(newDriver);
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
+        let userEmail = email;
+        let userName = name;
+        let userPicture = picture;
 
-app.post('/api/driver/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const cleanEmail = email.toLowerCase().trim();
-        const user = await DeliveryUser.findOne({ email: cleanEmail });
-        
-        if (!user) return res.status(400).json({ message: "User not found" });
-
-        if (password === "Reset@123") {
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            await DeliveryUser.findByIdAndUpdate(user._id, { password: hashedPassword });
-            const userObj = user.toObject(); delete userObj.password;
-            return res.json({ ...userObj, token: generateToken(user._id, 'driver') });
+        // Token Decode Logic
+        if (token) {
+            try {
+                const parts = token.split('.');
+                const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+                userEmail = payload.email;
+                userName = payload.name;
+                userPicture = payload.picture;
+            } catch (err) {}
         }
 
-        let isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch && user.password === password) { 
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            await DeliveryUser.findByIdAndUpdate(user._id, { password: hashedPassword });
-            isMatch = true;
-        }
+        if (!userEmail) return res.status(400).json({ error: "No email provided" });
 
-        if (isMatch) {
-             const userObj = user.toObject(); delete userObj.password;
-             res.json({ ...userObj, token: generateToken(user._id, 'driver') });
+        let user = await User.findOne({ email: userEmail });
+
+        if (user) {
+            // Existing User Update
+            user.picture = userPicture; 
+            if (!user.isGoogle) user.isGoogle = true; 
+
+            if (role === 'vendor' && user.role !== 'vendor') {
+                user.role = 'vendor';
+            }
+            await user.save();
         } else {
-             res.status(400).json({ message: "Invalid credentials" });
+            // Create New User
+            // ✅ FIX: Password ko NULL rakhein (Dummy Hash mat dalein)
+            // Isse Manual Login route isse pakad lega aur naya password set kar dega.
+            
+            const userRole = role || 'customer';
+            
+            user = new User({ 
+                name: userName || 'User', 
+                email: userEmail, 
+                picture: userPicture || '', 
+                password: null, // ✅ CHANGE HERE: No Dummy Password
+                isGoogle: true, 
+                role: userRole,
+                shopName: '' 
+            });
+            await user.save();
+
+            if (userRole === 'vendor') {
+                await Vendor.findOneAndUpdate(
+                    { email: userEmail },
+                    { 
+                        shopName: '', 
+                        ownerName: userName, 
+                        email: userEmail, 
+                        joined: new Date().toLocaleDateString() 
+                    },
+                    { upsert: true }
+                );
+            }
         }
-    } catch (err) { res.status(500).json({ error: err.message }); }
+
+        res.json({ ...user.toObject(), token: generateToken(user._id, user.role) });
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.post('/api/driver/google', async (req, res) => {
@@ -399,7 +518,36 @@ app.get('/api/config/sunday-status', (req, res) => {
 // ==========================================
 // 6. CORE CRUD ROUTES
 // ==========================================
+// --- EMERGENCY FIX ROUTE ---
+app.get('/api/fix-role/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        // 1. User Table Update
+        const user = await User.findOneAndUpdate(
+            { email: email },
+            { role: 'vendor', shopName: 'My New Shop' },
+            { new: true }
+        );
 
+        if(!user) return res.send("❌ User not found");
+
+        // 2. Vendor Table Update
+        await Vendor.findOneAndUpdate(
+            { email: email },
+            { 
+                shopName: user.shopName, 
+                ownerName: user.name, 
+                email: user.email, 
+                joined: new Date().toLocaleDateString() 
+            },
+            { upsert: true }
+        );
+
+        res.send(`✅ SUCCESS: ${email} is now a VENDOR. Please Logout & Login again.`);
+    } catch(e) {
+        res.send("❌ Error: " + e.message);
+    }
+});
 // Drivers
 app.get('/api/users', verifyToken(['admin']), async (req, res) => res.json(await DeliveryUser.find()));
 
@@ -427,20 +575,24 @@ app.put('/api/users/update/:email', verifyToken(['admin']), async (req, res) => 
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Profiles
+/// --- UPDATE THIS IN SERVER.JS ---
 app.post('/api/user/update', async (req, res) => {
     try {
         const { email, ...updates } = req.body;
         const cleanEmail = email.toLowerCase().trim();
+        
+        // 1. User Table Update
         const user = await User.findOneAndUpdate({ email: cleanEmail }, updates, { new: true });
         
+        // 2. Vendor Table Sync (Agar user vendor hai)
         if (user && (user.role === 'vendor' || updates.shopName)) {
             await Vendor.findOneAndUpdate({ email: cleanEmail }, {
                 shopName: user.shopName,
                 ownerName: user.name,
                 mobile: user.mobile,
                 phone: user.mobile,
-                address: user.address
+                address: user.address,
+                email: cleanEmail // Ensure email key exists
             }, { upsert: true });
         }
         res.json(user);
@@ -454,7 +606,82 @@ app.put('/api/driver/update', async (req, res) => {
         res.json(user);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
+// ==========================================
+// DRIVER AUTH (MANUAL LOGIN & REGISTER)
+// ==========================================
 
+// 1. Driver Register
+app.post('/api/driver/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const cleanEmail = email.toLowerCase().trim();
+
+        // Check if driver already exists
+        const exists = await DeliveryUser.findOne({ email: cleanEmail });
+        if (exists) return res.status(400).json({ message: "Driver email already exists" });
+
+        // Hash Password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create New Driver
+        const newDriver = new DeliveryUser({
+            name,
+            email: cleanEmail,
+            password: hashedPassword,
+            status: 'pending', // Admin verification ke liye pending
+            role: 'driver',
+            wallet: 0
+        });
+
+        await newDriver.save();
+        res.json({ ...newDriver.toObject(), token: generateToken(newDriver._id, 'driver') });
+
+    } catch (e) {
+        console.error("Driver Register Error:", e);
+        res.status(500).json({ message: "Server Error" });
+    }
+});
+
+// 2. Driver Login
+app.post('/api/driver/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and Password are required" });
+        }
+
+        const cleanEmail = email.toLowerCase().trim();
+        const driver = await DeliveryUser.findOne({ email: cleanEmail });
+        
+        if (!driver) return res.status(404).json({ message: "Driver not found" });
+
+        // --- NEW LOGIC: Auto-Set Password for Google Driver ---
+        // Agar driver ke paas password nahi hai (Google account), 
+        // to abhi jo password dala hai wo set kar do.
+        if (!driver.password) {
+            console.log(`Setting new password for Google Driver: ${cleanEmail}`);
+            const salt = await bcrypt.genSalt(10);
+            driver.password = await bcrypt.hash(password, salt);
+            await driver.save();
+        }
+
+        // Check Password
+        const isMatch = await bcrypt.compare(password, driver.password);
+        if (!isMatch) return res.status(400).json({ message: "Invalid Password" });
+
+        // Success
+        const driverObj = driver.toObject();
+        delete driverObj.password;
+        
+        res.json({ ...driverObj, token: generateToken(driver._id, 'driver') });
+
+    } catch (e) {
+        console.error("Driver Login Error:", e);
+        res.status(500).json({ message: "Server Error: " + e.message });
+    }
+});
 // Vendors
 app.get('/api/vendors', verifyToken(['admin']), async (req, res) => res.json(await Vendor.find()));
 
@@ -893,8 +1120,9 @@ app.post('/api/reels', verifyToken(['customer', 'admin', 'vendor']), async (req,
     }
 });
 
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`🚀 Secure Kicks Server running on port ${PORT}`));
+}
+
+// Export the app so Vercel can run it as a serverless function
 module.exports = app;
-// ==========================================
-// START SERVER
-// ==========================================
-app.listen(PORT, () => console.log(`🚀 Secure Kicks Server running on port ${PORT}`));

@@ -457,8 +457,9 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-   const API_URL = 'https://ecomerce-mocha-one.vercel.app/api';
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : '/api';
         const KEY_SESSION = 'kicks_vendor_session'; 
         let currentSessionUser = null;
         let myProductsCache = []; 
@@ -640,76 +641,128 @@
             const password = document.getElementById('loginPass').value;
             handleLoginManual(email, password);
         }
-
-        async function handleLoginManual(email, password) {
-            try {
-                const res = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if(!res.ok) {
-                    document.getElementById('loginError').textContent = data.error;
-                    document.getElementById('loginError').classList.remove('hidden');
-                    return;
-                }
-                currentSessionUser = data;
-                localStorage.setItem(KEY_SESSION, JSON.stringify(data));
-                checkProfileStatus();
-            } catch (err) { alert("Server Connection Failed"); }
+// UPDATE THIS FUNCTION IN shopdashboard.html
+async function handleLoginManual(email, password) {
+    try {
+        const res = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email, 
+                password,
+                role: 'vendor' // <--- YE LINE ADD KARNI HAI ZAROORI
+            })
+        });
+        const data = await res.json();
+        if(!res.ok) {
+            document.getElementById('loginError').textContent = data.error || data.message;
+            document.getElementById('loginError').classList.remove('hidden');
+            return;
         }
+        currentSessionUser = data;
+        localStorage.setItem(KEY_SESSION, JSON.stringify(data));
+        checkProfileStatus();
+    } catch (err) { alert("Server Connection Failed"); }
+}
+       function checkProfileStatus() {
+    if (!currentSessionUser) return switchView('login');
 
-        function checkProfileStatus() {
-            if (!currentSessionUser) return switchView('login');
-            if (!currentSessionUser.mobile || !currentSessionUser.shopName) {
-                if(currentSessionUser.shopName) document.getElementById('setupShopName').value = currentSessionUser.shopName;
-                if(currentSessionUser.mobile) document.getElementById('setupMobile').value = currentSessionUser.mobile;
-                switchView('profileSetup');
-            } else {
-                loadDashboard();
-            }
-        }
+    // --- MAGIC AUTO-SYNC START (Ye code add karein) ---
+    // Ye background mein server ko batata hai ki "Main Vendor hu, mujhe list mein dikhao"
+    if (currentSessionUser.role === 'vendor' && currentSessionUser.shopName) {
+        console.log("Running Auto-Sync for Vendor...");
+        fetch(`${API_URL}/user/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email: currentSessionUser.email,
+                shopName: currentSessionUser.shopName,
+                ownerName: currentSessionUser.name,
+                mobile: currentSessionUser.mobile || "N/A"
+            })
+        }).then(() => console.log("✅ Vendor Auto-Synced to WebAdmin"))
+          .catch(err => console.error("Sync Failed", err));
+    }
+    // --- MAGIC AUTO-SYNC END ---
 
-        async function handleProfileSetup(e) {
-            e.preventDefault();
-            const mobile = document.getElementById('setupMobile').value;
-            const shopName = document.getElementById('setupShopName').value;
+    // ... Baki ka purana code waisa hi rahega ...
+    const isMobileMissing = !currentSessionUser.mobile || currentSessionUser.mobile.trim() === "";
+    const isShopMissing = !currentSessionUser.shopName || currentSessionUser.shopName.trim() === "";
+
+    if (isMobileMissing || isShopMissing) {
+        // ... (Old Logic)
+        if(currentSessionUser.shopName) document.getElementById('setupShopName').value = currentSessionUser.shopName;
+        if(currentSessionUser.mobile) document.getElementById('setupMobile').value = currentSessionUser.mobile;
+        switchView('profileSetup');
+    } else {
+        loadDashboard();
+    }
+}
+async function handleProfileSetup(e) {
+        e.preventDefault();
+        const shopName = document.getElementById('setupShopName').value;
+        const mobile = document.getElementById('setupMobile').value;
+        
+        if(!shopName || !mobile) return alert("Please fill all details");
+
+        // UI Loading
+        const btn = e.target.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "Setting up...";
+        btn.disabled = true;
+
+        const updateData = {
+            email: currentSessionUser.email,
+            shopName: shopName,
+            mobile: mobile,
+            phone: mobile,
+            role: 'vendor'
+        };
+
+        try {
+            // Update User in DB
+            const res = await fetch(`${API_URL}/user/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+
+            if(!res.ok) throw new Error("Setup Failed");
+
+            // Update Local Session
+            const updatedUser = { ...currentSessionUser, ...updateData };
+            currentSessionUser = updatedUser;
+            localStorage.setItem(KEY_SESSION, JSON.stringify(currentSessionUser));
             
-            try {
-                const res = await fetch(`${API_URL}/user/update`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: currentSessionUser.email, 
-                        mobile: mobile,
-                        shopName: shopName
-                    })
-                });
-                const data = await res.json();
-                if(data) {
-                    currentSessionUser = data;
-                    localStorage.setItem(KEY_SESSION, JSON.stringify(data));
-                    checkProfileStatus(); 
-                }
-            } catch (err) { alert(err.message); }
+            alert("Setup Complete! Welcome to VendorHub.");
+            checkProfileStatus(); // Will now redirect to Dashboard
+
+        } catch(err) {
+            console.error(err);
+            alert("Connection Error: " + err.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
+    }
 
-        // --- DASHBOARD FUNCTIONS ---
-
-        // NEW: Load Data into Profile Inputs
-        function loadProfileData() {
-            if(!currentSessionUser) return;
-            document.getElementById('pShopName').value = currentSessionUser.shopName || '';
-            document.getElementById('pOwnerName').value = currentSessionUser.name || '';
-            document.getElementById('pMobile').value = currentSessionUser.mobile || '';
-            document.getElementById('pEmail').value = currentSessionUser.email || '';
-            
-            document.getElementById('profileNameDisplay').textContent = currentSessionUser.shopName || 'Shop Name';
-            document.getElementById('profileEmailDisplay').textContent = currentSessionUser.email;
-            document.getElementById('profileAvatarBig').textContent = currentSessionUser.shopName ? currentSessionUser.shopName[0].toUpperCase() : 'U';
+    // 2. Load Profile Data (For Profile Settings Tab)
+    function loadProfileData() {
+        if(!currentSessionUser) return;
+        
+        // Fill Inputs
+        document.getElementById('pShopName').value = currentSessionUser.shopName || '';
+        document.getElementById('pOwnerName').value = currentSessionUser.name || currentSessionUser.ownerName || '';
+        document.getElementById('pMobile').value = currentSessionUser.mobile || currentSessionUser.phone || '';
+        document.getElementById('pEmail').value = currentSessionUser.email || '';
+        
+        // Update Header UI
+        document.getElementById('profileNameDisplay').innerText = currentSessionUser.shopName || 'My Shop';
+        document.getElementById('profileEmailDisplay').innerText = currentSessionUser.email;
+        
+        if(currentSessionUser.shopName) {
+            document.getElementById('profileAvatarBig').innerText = currentSessionUser.shopName[0].toUpperCase();
         }
-
+    }
         // NEW: Handle Profile Update (Live Accurate)
         async function handleProfileUpdate(e) {
             e.preventDefault();
@@ -802,13 +855,20 @@
                     status: 'Pending Review'
                 };
 
-                const res = await fetch(`${API_URL}/products`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(productData)
-                });
+               const res = await fetch(`${API_URL}/products`, {
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json',
+        // ✅ यह लाइन सबसे जरूरी है (Token भेजना)
+        'Authorization': `Bearer ${currentSessionUser.token}` 
+    },
+    body: JSON.stringify(productData)
+});
                 
-                if(!res.ok) throw new Error("Failed to save product");
+                if(!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || errorData.error || "Server rejected request");
+}
 
                 alert("Product Sent to WebAdmin for Approval!");
                 e.target.reset();

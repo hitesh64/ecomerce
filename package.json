@@ -1,15 +1,7 @@
 {
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "body-parser": "^2.2.1",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^4.22.1",
     "express-mongo-sanitize": "^2.2.0",
-    "helmet": "^8.1.0",
     "hpp": "^0.2.3",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.0.1",
     "xss-clean": "^0.1.4"
   }
 }

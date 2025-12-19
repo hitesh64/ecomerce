@@ -43,46 +43,84 @@
 </head>
 <body class="h-screen flex flex-col text-gray-900 overflow-hidden">
 
-    <div id="auth-view" class="fixed inset-0 z-50 bg-white flex flex-col p-8 justify-center overflow-y-auto">
-        <div class="max-w-sm mx-auto w-full text-center">
-            <div class="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-xl">
-                <i data-lucide="truck" class="w-10 h-10 text-white"></i>
-            </div>
-            <h1 class="text-3xl font-black mb-2">Delivery Partner</h1>
+ <div id="auth-view" class="fixed inset-0 z-50 bg-white flex flex-col p-8 justify-center overflow-y-auto">
+    <div class="max-w-sm mx-auto w-full text-center">
+        <div class="w-20 h-20 bg-black rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-xl">
+            <i data-lucide="truck" class="w-10 h-10 text-white"></i>
+        </div>
+        <h1 class="text-3xl font-black mb-2">Delivery Partner</h1>
+        
+        <div id="g_id_onload"
+             data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="handleDriverGoogleLogin"
+             data-auto_prompt="false">
+        </div>
+
+        <div id="login-form-container">
+            <p class="text-gray-500 font-medium mb-6">Login to start your shift</p>
             
-            <div id="login-form-container">
-                <p class="text-gray-500 font-medium mb-6">Login to start your shift</p>
-              <div id="g_id_onload" data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com" ...>
-                <div class="g_id_signin mb-6" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
-
-                <div class="relative flex py-2 items-center mb-6">
-                    <div class="flex-grow border-t border-gray-200"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Email</span>
-                    <div class="flex-grow border-t border-gray-200"></div>
+            <div class="flex justify-center mb-6">
+                <div class="g_id_signin" 
+                     data-type="standard" 
+                     data-shape="rectangular" 
+                     data-theme="outline" 
+                     data-text="signin_with" 
+                     data-size="large" 
+                     data-logo_alignment="left" 
+                     data-width="300">
                 </div>
-
-                <form onsubmit="handleManualLogin(event)" class="space-y-4">
-                    <input type="email" id="login-email" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Email" required>
-                    <input type="password" id="login-pass" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Password" required>
-                    <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Login</button>
-                </form>
-                <p id="login-error" class="mt-4 text-xs text-red-600 font-bold hidden"></p>
-                <p class="mt-4 text-xs text-gray-400">New user? <button onclick="toggleAuthMode('register')" class="text-blue-600 font-bold underline">Register Here</button></p>
             </div>
 
-            <div id="register-form-container" class="hidden">
-                <p class="text-gray-500 font-medium mb-6">Create a new account</p>
-                <form onsubmit="handleRegister(event)" class="space-y-4">
-                    <input type="text" id="reg-name" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Full Name" required>
-                    <input type="email" id="reg-email" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Email Address" required>
-                    <input type="password" id="reg-pass" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Create Password" required>
-                    <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Create Account</button>
-                </form>
-                <p class="mt-4 text-xs text-gray-400">Already have an account? <button onclick="toggleAuthMode('login')" class="text-blue-600 font-bold underline">Login Here</button></p>
+            <div class="relative flex py-2 items-center mb-6">
+                <div class="flex-grow border-t border-gray-200"></div>
+                <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Email</span>
+                <div class="flex-grow border-t border-gray-200"></div>
             </div>
+
+            <form onsubmit="handleManualLogin(event)" class="space-y-4">
+                <input type="email" id="login-email" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Email" required>
+                <input type="password" id="login-pass" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Password" required>
+                
+                <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Login</button>
+            </form>
+            
+            <p id="login-error" class="mt-4 text-xs text-red-600 font-bold hidden"></p>
+            
+            
+            
+            <p class="mt-6 text-sm text-gray-400">New user? 
+                <button type="button" onclick="toggleAuthMode('register')" class="text-blue-600 font-bold underline cursor-pointer">Register Here</button>
+            </p>
+        </div>
+
+        <div id="register-form-container" class="hidden">
+            <p class="text-gray-500 font-medium mb-6">Create a new account</p>
+            
+            <div class="flex justify-center mb-4">
+                <div class="g_id_signin" data-type="standard" data-width="300"></div>
+            </div>
+
+            <div class="relative flex py-2 items-center mb-4">
+                <div class="flex-grow border-t border-gray-200"></div>
+                <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Manual</span>
+                <div class="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <form onsubmit="handleRegister(event)" class="space-y-4">
+                <input type="text" id="reg-name" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Full Name" required>
+                <input type="email" id="reg-email" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Email Address" required>
+                <input type="password" id="reg-pass" class="w-full p-4 bg-gray-50 border rounded-2xl font-bold focus:border-black outline-none" placeholder="Create Password" required>
+                <button type="submit" class="w-full py-4 bg-black text-white font-bold rounded-2xl shadow-lg text-lg status-btn">Create Account</button>
+            </form>
+            
+            <p class="mt-6 text-sm text-gray-400">Already have an account? 
+                <button type="button" onclick="toggleAuthMode('login')" class="text-blue-600 font-bold underline cursor-pointer">Login Here</button>
+            </p>
         </div>
     </div>
-
+</div>
     <div id="setup-view" class="fixed inset-0 z-[60] bg-white hidden flex flex-col p-8 justify-center">
         <div class="max-w-sm mx-auto w-full overflow-y-auto max-h-screen custom-scroll">
             <button onclick="handleLogout()" class="mb-6 flex items-center gap-2 text-gray-500 font-bold text-sm hover:text-black transition group">
@@ -389,7 +427,10 @@
     </div>
 
 <script>
- const API_URL = 'https://ecomerce-mocha-one.vercel.app/api';
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : '/api';
+
     const DB_SESSION = 'kicks_del_session'; 
     const DELIVERY_RATE = 20; 
     
@@ -399,40 +440,38 @@
     let currentUser = null;
     let isEditingProfile = false;
 
-    // --- INIT & AUTH ---
+    window.onload = init;
+
     async function init() {
         if(typeof lucide !== 'undefined') lucide.createIcons();
         
-        const session = localStorage.getItem(DB_SESSION);
-        if(session) {
-            currentUser = JSON.parse(session);
-            try {
-                // Initial check
-                const res = await fetch(`${API_URL}/driver/login`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ email: currentUser.email, password: currentUser.password })
-                });
-
-                if(res.ok) {
-                    const dbUser = await res.json();
-                    currentUser = dbUser;
-                    localStorage.setItem(DB_SESSION, JSON.stringify(currentUser));
-                    routeUser(currentUser);
+        try {
+            // 1. Check LocalStorage
+            const session = localStorage.getItem(DB_SESSION);
+            
+            if(session) {
+                // 2. Load User Data
+                const user = JSON.parse(session);
+                
+                // Check agar data valid hai
+                if (user && user.email) {
+                    console.log("✅ Session Restored for:", user.email);
+                    currentUser = user; // Global variable update
+                    routeUser(currentUser); // Seedha Dashboard dikhao
                 } else {
+                    // Data corrupted hai to logout karo
+                    console.warn("❌ Invalid Session");
                     handleLogout();
                 }
-            } catch(e) {
-                console.error("Connection Error", e);
-                // Allow offline usage if session exists but network fails? 
-                // For now, let's just proceed with cached user but try to route.
-                routeUser(currentUser);
+            } else {
+                // Koi session nahi hai, Login screen dikhao
+                document.getElementById('auth-view').classList.remove('hidden');
             }
-        } else {
+        } catch (e) {
+            console.error("Init Error:", e);
             document.getElementById('auth-view').classList.remove('hidden');
         }
     }
-
     function routeUser(user) {
         document.getElementById('auth-view').classList.add('hidden');
         document.getElementById('setup-view').classList.add('hidden');
@@ -702,8 +741,13 @@
         if(typeof lucide !== 'undefined') lucide.createIcons();
     }
     // --- AUTH LOGIC ---
+   // --- UPDATED AUTH LOGIC ---
+
+    // 1. Toggle Login/Register Forms
     function toggleAuthMode(mode) {
+        console.log("Switching to:", mode); // Debugging check
         document.getElementById('login-error').classList.add('hidden');
+        
         if (mode === 'register') {
             document.getElementById('login-form-container').classList.add('hidden');
             document.getElementById('register-form-container').classList.remove('hidden');
@@ -713,72 +757,112 @@
         }
     }
 
+    // 2. Google Login Decoder
     function decodeJwtResponse(token) {
-        var base64Url = token.split('.')[1];
-        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    }
-
-    async function handleGoogleLogin(response) {
-        const data = decodeJwtResponse(response.credential);
         try {
-            const res = await fetch(`${API_URL}/driver/google`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email: data.email, name: data.name })
-            });
-            const user = await res.json();
-            finalizeLogin(user);
-        } catch(err) { console.error(err); alert("Google Login Failed"); }
-    }
-
-    async function handleManualLogin(e) {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const pass = document.getElementById('login-pass').value;
-        const errorMsg = document.getElementById('login-error');
-        errorMsg.classList.add('hidden');
-        
-        try {
-            const res = await fetch(`${API_URL}/driver/login`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password: pass })
-            });
-            const data = await res.json();
-            if(!res.ok) {
-                errorMsg.innerText = data.message || "Login Failed";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-            finalizeLogin(data);
-        } catch(err) { 
-            errorMsg.innerText = "Network Error"; 
-            errorMsg.classList.remove('hidden'); 
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch(e) {
+            console.error("Token Decode Error", e);
+            return null;
         }
     }
 
+    // 3. Handle Google Login (Backend Connection)
+    async function handleDriverGoogleLogin(response) {
+        console.log("Google Response Recieved");
+        const data = decodeJwtResponse(response.credential);
+        
+        if(!data) return alert("Google Login Error: Could not decode token");
+
+        try {
+            // Backend call to Create or Login User
+            const res = await fetch(`${API_URL}/driver/google`, {
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email: data.email, name: data.name })
+            });
+
+            const user = await res.json();
+            
+            if(!res.ok) {
+                alert("Login Error: " + (user.error || user.message));
+                return;
+            }
+
+            console.log("Google Login Success:", user);
+            finalizeLogin(user);
+
+        } catch(err) { 
+            console.error(err); 
+            alert("Server Connection Failed. Is Server Running?"); 
+        }
+    }
+
+    // 4. Handle Manual Register
     async function handleRegister(e) {
         e.preventDefault();
         const name = document.getElementById('reg-name').value;
         const email = document.getElementById('reg-email').value;
         const pass = document.getElementById('reg-pass').value;
+        
         try {
             const res = await fetch(`${API_URL}/driver/register`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ name, email, password: pass })
             });
+            
+            const data = await res.json();
+            
             if(!res.ok) {
-                const errData = await res.json();
-                alert(errData.message || "Registration Failed");
+                alert(data.message || "Registration Failed");
                 return;
             }
-            alert("Account Created!");
-            toggleAuthMode('login');
-        } catch(err) { alert("Connection Failed"); }
+            
+            alert("Account Created! You are now logged in.");
+            finalizeLogin(data); // Auto login after register
+
+        } catch(err) { 
+            console.error(err);
+            alert("Connection Failed"); 
+        }
     }
 
+    // 5. Handle Manual Login
+    async function handleManualLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        const errorMsg = document.getElementById('login-error');
+        
+        errorMsg.classList.add('hidden');
+        
+        try {
+            const res = await fetch(`${API_URL}/driver/login`, {
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password: pass })
+            });
+            
+            const data = await res.json();
+            
+            if(!res.ok) {
+                errorMsg.innerText = data.message || "Driver not found or Invalid Password";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            
+            finalizeLogin(data);
+        } catch(err) { 
+            errorMsg.innerText = "Network Error (Server Down?)"; 
+            errorMsg.classList.remove('hidden'); 
+        }
+    }
     function finalizeLogin(user) {
         localStorage.setItem(DB_SESSION, JSON.stringify(user));
         currentUser = user;
@@ -959,8 +1043,7 @@
             document.getElementById('today-earnings').innerText = "₹" + totalEarnings;
         } catch(e) { console.error("Failed to fetch orders"); }
     }
-
-    async function updateStatus(id, newStatus) {
+async function updateStatus(id, newStatus) {
         if(!confirm(`Confirm status update to: ${newStatus}?`)) return;
 
         const btn = document.getElementById(`btn-${id}`);
@@ -970,7 +1053,11 @@
         try {
             const res = await fetch(`${API_URL}/update-order-status`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // ✅ FIX: Token Added here
+                    'Authorization': `Bearer ${currentUser.token}` 
+                },
                 body: JSON.stringify({ id: String(id), status: newStatus })
             });
 
@@ -978,15 +1065,16 @@
                 // Local Optimistic Update
                 refreshData(true);
             } else {
-                alert("Server Error");
+                const data = await res.json();
+                alert("Error: " + (data.message || "Server Rejected Request"));
                 if(btn) { btn.innerText = originalText; btn.disabled = false; }
             }
         } catch(e) {
             console.error("Network Error:", e);
+            alert("Network Error: Is Server Running?");
             if(btn) { btn.innerText = originalText; btn.disabled = false; }
         }
     }
-
     function switchTab(tab) {
         const btnActive = document.getElementById('tab-active');
         const btnPool = document.getElementById('tab-pool');
@@ -1153,7 +1241,11 @@
             // Sends OTP to backend to check against SecretOTP in Order Model
             const res = await fetch(`${API_URL}/update-order-status`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // ✅ FIX: Token Added here too
+                    'Authorization': `Bearer ${currentUser.token}`
+                },
                 body: JSON.stringify({ 
                     id: String(orderId), 
                     status: statusType, // 'Delivered' or 'Return Completed'
@@ -1181,7 +1273,6 @@
             if(btn) { btn.innerText = "Verify & Complete"; btn.disabled = false; }
         }
     }
-
     // --- BILL VIEW ---
     function viewOrderBill(orderId) {
         const order = globalOrdersCache.find(o => String(o.id) === String(orderId) || String(o._id) === String(orderId));

@@ -478,7 +478,9 @@
         }
     </style>
 <script>
-    const API_URL = 'https://ecomerce-mocha-one.vercel.app/api';
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : '/api';
     const DB_SESSION = 'kicks_admin_session';
     
     let currentUser = null;
@@ -488,23 +490,74 @@
     let allVendors = [];
     let allReturnRequests = [];
 
-    // --- INIT ---
-    async function init() {
-        if(typeof lucide !== 'undefined') lucide.createIcons();
-        
+   window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+    
+    try {
+        // LocalStorage se session check karein
         const session = localStorage.getItem(DB_SESSION);
+        
         if(session) {
+            // 1. Session Found
             currentUser = JSON.parse(session);
-            if(currentUser.token) {
-                routeUser(currentUser);
+            
+            // 2. Check minimal requirements
+            if(currentUser && currentUser.token) {
+                console.log("✅ Restoring Session for:", currentUser.email);
+                routeUser(currentUser); // Dashboard dikhao
             } else {
-                handleLogout();
+                console.warn("❌ Invalid Session Data");
+                handleLogout(); // Bad data, clear it
             }
         } else {
+            console.log("ℹ️ No Session Found, showing login");
             document.getElementById('auth-view').classList.remove('hidden');
         }
+    } catch (e) {
+        console.error("Init Error:", e);
+        // Agar koi error aaye to login screen dikha do (Safe fallback)
+        document.getElementById('auth-view').classList.remove('hidden');
     }
+}
 
+function routeUser(user) {
+    try {
+        // 1. Hide Login Screen & Show Dashboard (IMMEDIATELY)
+        const authView = document.getElementById('auth-view');
+        const dashLayout = document.getElementById('dashboard-layout');
+        
+        if(authView) authView.classList.add('hidden');
+        if(dashLayout) dashLayout.classList.remove('hidden');
+
+        // 2. Safe UI Updates (Crash Proof)
+        // Agar koi element nahi mila to crash nahi hoga
+        const nameEl = document.getElementById('admin-name');
+        const emailEl = document.getElementById('admin-email');
+        const avatarEl = document.getElementById('admin-avatar');
+
+        if(nameEl) nameEl.innerText = user.name || 'Admin';
+        if(emailEl) emailEl.innerText = user.email || 'admin@kicks.in';
+        
+        if(avatarEl) {
+            if(user.picture) {
+                avatarEl.innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover rounded-full">`;
+            } else {
+                const initial = (user.name && user.name[0]) ? user.name[0].toUpperCase() : 'A';
+                avatarEl.innerText = initial;
+            }
+        }
+        
+        // 3. Load Data
+        switchTab('dashboard');
+
+    } catch(e) {
+        console.error("RouteUser Error:", e);
+        // Agar UI render fail ho jaye, to logout karo taaki user fanse nahi
+        handleLogout();
+    }
+}
     // --- GOOGLE LOGIN ---
     function decodeJwtResponse(token) {
         var base64Url = token.split('.')[1];
@@ -743,25 +796,43 @@
     }, 5000); // Changed from 3000 to 5000
 }
 
-    // --- DASHBOARD ---
     async function loadDashboardData() {
-        try {
-            // Load pending products
-            const productsRes = await fetch(`${API_URL}/products`);
-            const products = await productsRes.json();
-            allProducts = products;
-            
-            // Load vendors for shop info
-            const vendorsRes = await fetch(`${API_URL}/vendors`);
+    try {
+        // 1. Load products (Public Route - Token Optional but good practice)
+        const productsRes = await fetch(`${API_URL}/products`);
+        const products = await productsRes.json();
+        allProducts = products;
+        
+        // 2. Load vendors (SECURE ROUTE - TOKEN REQUIRED)
+        // Yahan 'Authorization' header add karna zaroori hai
+        const vendorsRes = await fetch(`${API_URL}/vendors`, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}` // <--- YE LINE MISSING THI
+            }
+        });
+
+        if(!vendorsRes.ok) {
+            // Agar Admin nahi hai ya Token expire ho gaya
+            if(vendorsRes.status === 401 || vendorsRes.status === 403) {
+                console.error("Auth Failed for Vendors");
+                allVendors = []; // Empty array taki crash na ho
+            } else {
+                throw new Error("Failed to fetch vendors");
+            }
+        } else {
             allVendors = await vendorsRes.json();
-            
-            renderPendingProducts(products.filter(p => p.status === 'Pending Review'));
-            renderLiveInventory(products.filter(p => p.status !== 'Pending Review'));
-        } catch(e) {
-            console.error('Error loading dashboard:', e);
-            showToast('Failed to load dashboard data', 'error');
         }
+        
+        renderPendingProducts(products.filter(p => p.status === 'Pending Review'));
+        renderLiveInventory(products.filter(p => p.status !== 'Pending Review'));
+
+    } catch(e) {
+        console.error('Error loading dashboard:', e);
+        showToast('Failed to load dashboard data', 'error');
     }
+}
 
     function renderPendingProducts(products) {
         const container = document.getElementById('pending-container');
@@ -908,74 +979,140 @@ function renderLiveInventory(products) {
     if(typeof lucide !== 'undefined') lucide.createIcons();
 }
     async function approveProduct(productId) {
-        if(!confirm('Approve this product?')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/products/${productId}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ status: 'Approved' })
-            });
-            
-            if(res.ok) {
-                showToast('Product approved successfully', 'success');
-                loadDashboardData();
-            } else {
-                showToast('Failed to approve product', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error approving product', 'error');
-        }
-    }
-
-  async function rejectOrder(orderId) {
-    if(!confirm('REJECT Order? Stock will be increased automatically.')) return;
+    if(!confirm('Approve this product?')) return;
     
     try {
-        const res = await fetch(`${API_URL}/orders/cancel`, { // Note: Calling cancel route but with 'Rejected' status
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                id: orderId,
-                status: 'Rejected' // Ye naya status server handle karega
-            })
+        const res = await fetch(`${API_URL}/products/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+            },
+            body: JSON.stringify({ status: 'Approved' })
         });
         
-        const data = await res.json();
-        
         if(res.ok) {
-            showToast('Order Rejected & Stock Restored', 'success');
-            loadDispatchManager(); // Refresh Table
+            showToast('Product approved successfully', 'success');
+            loadDashboardData(); // List Refresh
         } else {
-            showToast(data.error || 'Failed to reject', 'error');
+            const data = await res.json();
+            console.error("Server Error:", data);
+            showToast(data.message || 'Failed to approve product', 'error');
         }
     } catch(e) {
         console.error(e);
-        showToast('Server Error', 'error');
+        showToast('Server Connection Error', 'error');
     }
 }
 
-    async function deleteProduct(productId) {
-        if(!confirm('Delete this product permanently?')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/products/${productId}`, {
-                method: 'DELETE'
-            });
-            
-            if(res.ok) {
-                showToast('Product deleted', 'success');
-                loadDashboardData();
-            } else {
-                showToast('Failed to delete product', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error deleting product', 'error');
-        }
-    }
+// Ye function shayad missing tha, isse bhi add karein
+async function rejectProduct(productId) {
+    const reason = prompt("Enter rejection reason (Optional):");
+    if(reason === null) return; // Cancelled
 
+    try {
+        const res = await fetch(`${API_URL}/products/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+            },
+            body: JSON.stringify({ 
+                status: 'Rejected',
+                rejectionReason: reason 
+            })
+        });
+        
+        if(res.ok) {
+            showToast('Product Rejected', 'warning');
+            loadDashboardData(); // List Refresh
+        } else {
+            showToast('Failed to reject product', 'error');
+        }
+    } catch(e) {
+        console.error(e);
+        showToast('Server Connection Error', 'error');
+    }
+}
+// ==========================================
+// DRIVER AUTH (MANUAL LOGIN & REGISTER)
+// ==========================================
+
+// 1. Driver Register
+app.post('/api/driver/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const cleanEmail = email.toLowerCase().trim();
+
+        // Check if driver already exists
+        const exists = await DeliveryUser.findOne({ email: cleanEmail });
+        if (exists) return res.status(400).json({ message: "Driver email already exists" });
+
+        // Hash Password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create New Driver
+        const newDriver = new DeliveryUser({
+            name,
+            email: cleanEmail,
+            password: hashedPassword,
+            status: 'pending', // Admin verification ke liye pending
+            role: 'driver',
+            wallet: 0
+        });
+
+        await newDriver.save();
+        res.json({ ...newDriver.toObject(), token: generateToken(newDriver._id, 'driver') });
+
+    } catch (e) {
+        console.error("Driver Register Error:", e);
+        res.status(500).json({ message: "Server Error" });
+    }
+});
+
+// 2. Driver Login
+app.post('/api/driver/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const cleanEmail = email.toLowerCase().trim();
+
+        // Find Driver
+        const driver = await DeliveryUser.findOne({ email: cleanEmail });
+        if (!driver) return res.status(404).json({ message: "Driver not found" });
+
+        // Check Password (Bcrypt)
+        const isMatch = await bcrypt.compare(password, driver.password);
+        if (!isMatch) return res.status(400).json({ message: "Invalid Password" });
+
+        // Success
+        const driverObj = driver.toObject();
+        delete driverObj.password; // Security: Password remove karein response se
+        
+        res.json({ ...driverObj, token: generateToken(driver._id, 'driver') });
+
+    } catch (e) {
+        console.error("Driver Login Error:", e);
+        res.status(500).json({ message: "Server Error" });
+    }
+});
+async function deleteProduct(productId) {
+    if(!confirm('Delete this product permanently?')) return;
+    
+    try {
+        const res = await fetch(`${API_URL}/products/${productId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
+        });
+        
+        if(res.ok) {
+            showToast('Product deleted', 'success');
+            loadDashboardData();
+        } else {
+            showToast('Failed to delete product', 'error');
+        }
+    } catch(e) { console.error(e); }
+}
     function viewProduct(productId) {
         const product = allProducts.find(p => p._id === productId || p.id == productId);
         if(!product) return alert('Product not found');
@@ -1058,16 +1195,17 @@ function renderLiveInventory(products) {
 
     // --- VENDORS MANAGEMENT ---
     async function loadVendors() {
-        try {
-            const res = await fetch(`${API_URL}/vendors`);
-            allVendors = await res.json();
-            renderVendors(allVendors);
-        } catch(e) {
-            console.error('Error loading vendors:', e);
-            showToast('Failed to load vendors', 'error');
-        }
+    try {
+        const res = await fetch(`${API_URL}/vendors`, {
+            headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
+        });
+        allVendors = await res.json();
+        renderVendors(allVendors);
+    } catch(e) {
+        console.error('Error loading vendors:', e);
+        showToast('Failed to load vendors', 'error');
     }
-
+}
     function renderVendors(vendors) {
         const tbody = document.getElementById('vendor-list-body');
         
@@ -1348,63 +1486,54 @@ async function resetPassword() {
     }
 }
 
-
-    async function deleteVendor(vendorId) {
-        if(!confirm('Delete this vendor? This action cannot be undone.')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/vendors/${vendorId}`, {
-                method: 'DELETE'
-            });
-            
-            if(res.ok) {
-                showToast('Vendor deleted', 'success');
-                loadVendors();
-            } else {
-                showToast('Failed to delete vendor', 'error');
+async function deleteVendor(vendorId) {
+    // 1. Confirmation Popup
+    if(!confirm('Delete this vendor? This action cannot be undone.')) return;
+    
+    try {
+        // 2. Send DELETE Request with TOKEN
+        const res = await fetch(`${API_URL}/vendors/${vendorId}`, {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}` // <--- Token यहाँ Add किया है
             }
-        } catch(e) {
-            console.error(e);
-            showToast('Error deleting vendor', 'error');
+        });
+        
+        if(res.ok) {
+            showToast('Vendor deleted', 'success');
+            loadVendors(); // List refresh करें
+        } else {
+            const data = await res.json();
+            showToast(data.message || 'Failed to delete vendor', 'error');
         }
+    } catch(e) {
+        console.error(e);
+        showToast('Server connection error', 'error');
     }
+}
 
     // --- JOB APPLICATIONS (DEBUGGED VERSION) ---
-    async function loadJobApplications() {
-        try {
-            console.log("🔄 Fetching Job Applications...");
-            
-            // 1. Fetch Users
-            const res = await fetch(`${API_URL}/users`);
-            const drivers = await res.json();
-            
-            console.log("📦 Raw Data from Server:", drivers); // Console Check Karein
+   async function loadJobApplications() {
+    try {
+        // /api/users route ab ADMIN ONLY hai, token chahiye
+        const res = await fetch(`${API_URL}/users`, {
+            headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
+        });
+        const drivers = await res.json();
+        allDrivers = drivers;
+        
+        const pendingApps = drivers.filter(d => (d.status || "").toLowerCase().trim() === 'pending');
+        renderDeliveryApplications(pendingApps);
+        
+        const historyApps = drivers.filter(d => (d.status || "").toLowerCase().trim() !== 'pending');
+        renderAppHistory(historyApps);
 
-            allDrivers = drivers;
-            
-            // 2. Robust Filtering (Case Insensitive)
-            const pendingApps = drivers.filter(d => {
-                const status = (d.status || "").toLowerCase().trim();
-                return status === 'pending';
-            });
-
-            console.log(`✅ Found ${pendingApps.length} Pending Applications`);
-
-            renderDeliveryApplications(pendingApps);
-            
-            // 3. History Filtering (Not Pending)
-            const historyApps = drivers.filter(d => {
-                const status = (d.status || "").toLowerCase().trim();
-                return status !== 'pending';
-            });
-            
-            renderAppHistory(historyApps);
-
-        } catch(e) {
-            console.error('❌ Error loading applications:', e);
-            showToast('Failed to load applications', 'error');
-        }
+    } catch(e) {
+        console.error('Error loading applications:', e);
+        showToast('Failed to load applications', 'error');
     }
+}
     function renderDeliveryApplications(applications) {
         const container = document.getElementById('delivery-apps-container');
         
@@ -1520,14 +1649,16 @@ async function resetPassword() {
             `;
         }).join('');
     }
-
-    async function approveDriver(email) {
+async function approveDriver(email) {
         if(!confirm('Approve this driver?')) return;
         
         try {
             const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                },
                 body: JSON.stringify({ status: 'active' })
             });
             
@@ -1535,11 +1666,12 @@ async function resetPassword() {
                 showToast('Driver approved', 'success');
                 loadJobApplications();
             } else {
-                showToast('Failed to approve driver', 'error');
+                const data = await res.json();
+                showToast(data.message || 'Failed to approve driver', 'error');
             }
         } catch(e) {
             console.error(e);
-            showToast('Error approving driver', 'error');
+            showToast('Server Connection Error', 'error');
         }
     }
 
@@ -1549,7 +1681,10 @@ async function resetPassword() {
         try {
             const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                },
                 body: JSON.stringify({ status: 'rejected' })
             });
             
@@ -1561,7 +1696,7 @@ async function resetPassword() {
             }
         } catch(e) {
             console.error(e);
-            showToast('Error rejecting application', 'error');
+            showToast('Server Connection Error', 'error');
         }
     }
 
@@ -1571,7 +1706,10 @@ async function resetPassword() {
         try {
             const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                },
                 body: JSON.stringify({ status: 'blocked' })
             });
             
@@ -1583,41 +1721,11 @@ async function resetPassword() {
             }
         } catch(e) {
             console.error(e);
-            showToast('Error blocking driver', 'error');
+            showToast('Server Connection Error', 'error');
         }
     }
 
-    async function deleteDriver(email) {
-        if(!confirm('Delete this driver permanently?')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
-                method: 'DELETE'
-            });
-            
-            if(res.ok) {
-                showToast('Driver deleted', 'success');
-                loadJobApplications();
-            } else {
-                showToast('Failed to delete driver', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error deleting driver', 'error');
-        }
-    }
-
-    function editApplication(email) {
-        const driver = allDrivers.find(d => d.email === email);
-        if(!driver) return;
-        
-        document.getElementById('edit-app-modal').classList.remove('hidden');
-        document.getElementById('edit-app-orig-email').value = email;
-        document.getElementById('edit-app-name').value = driver.name || '';
-        document.getElementById('edit-app-phone').value = driver.phone || driver.mobile || '';
-        document.getElementById('edit-app-vehicle').value = driver.vehicleNo || '';
-    }
-
+    // Edit Application Save Function Fix
     async function saveEditedApp() {
         const origEmail = document.getElementById('edit-app-orig-email').value;
         const updates = {
@@ -1630,7 +1738,10 @@ async function resetPassword() {
         try {
             const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(origEmail)}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added here too
+                },
                 body: JSON.stringify(updates)
             });
             
@@ -1646,30 +1757,33 @@ async function resetPassword() {
             showToast('Error updating application', 'error');
         }
     }
-
-    // --- REPLACE THIS FUNCTION IN webadmin.html ---
+   // REPLACE THIS FUNCTION IN webadmin.html
 
 async function loadActiveFleet() {
     try {
-        // Show loading state or toast if needed
-        // showToast('Refreshing Fleet Data...', 'info');
-
-        // 1. Fetch Users (Drivers) AND Orders simultaneously
+        // 1. Fetch Users (SECURE - Needs Token) & Orders (Public)
         const [usersRes, ordersRes] = await Promise.all([
-            fetch(`${API_URL}/users`),
-            fetch(`${API_URL}/orders`)
+            fetch(`${API_URL}/users`, {
+                method: 'GET',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+                }
+            }),
+            fetch(`${API_URL}/orders`) // Orders route public hai server.js mein
         ]);
 
+        if(!usersRes.ok) throw new Error("Failed to fetch drivers (Auth Error)");
+        
         const drivers = await usersRes.json();
         const orders = await ordersRes.json();
 
         // 2. Update Global Variables
-        allOrders = orders; // Important: Update global orders list
+        allOrders = orders;
         
         // 3. Filter Active Drivers
         const activeDrivers = drivers.filter(d => d.status === 'active');
         
-        // 4. Render
         renderActiveFleet(activeDrivers);
         
     } catch(e) {
@@ -1967,201 +2081,170 @@ async function viewDriverHistory(email) {
 // ==========================================
 
 // 1. Global Variables
-let historyOrdersCache = []; 
+
 let currentHistoryTab = 'delivery';
 
-// 2. Main Function - Opens Modal
+var historyOrdersCache = []; 
+
 async function viewDriverHistory(email) {
     try {
-        // A. Fetch Data
-        const ordersRes = await fetch(`${API_URL}/orders`);
-        const orders = await ordersRes.json();
+        console.log("Opening History for:", email);
+
+        if (!email) {
+            alert("Error: Invalid Driver Email");
+            return;
+        }
+
+        // 1. Data Loading (Safe Check)
+        // Pehle check karein ki global variable 'allOrders' hai ya nahi
+        let orders = (typeof allOrders !== 'undefined') ? allOrders : [];
         
-        // B. Filter for Specific Driver
+        // Agar data khali hai, to server se fetch karein
+        if (!orders || orders.length === 0) {
+            try {
+                const res = await fetch(`${API_URL}/orders`);
+                if(!res.ok) throw new Error("API Error");
+                orders = await res.json();
+                // Global variable update karein
+                if(typeof allOrders !== 'undefined') allOrders = orders;
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                alert("Failed to load data. Please refresh the page.");
+                return;
+            }
+        }
+        
+        // 2. Filter Logic (String conversion ke saath taaki crash na ho)
+        const targetEmail = String(email).toLowerCase().trim();
+        
         historyOrdersCache = orders.filter(o => 
-            o.assignedTo && o.assignedTo.toLowerCase().trim() === email.toLowerCase().trim()
+            o.assignedTo && String(o.assignedTo).toLowerCase().trim() === targetEmail
         );
 
-        // C. CALCULATE GRAND TOTALS (Pura Hissab)
-        // Chahe order delivery tab me ho ya return me, total yahan calculate hoga
-        let totalVerifiedAmount = 0;
-        let totalPendingAmount = 0;
+        console.log(`Found ${historyOrdersCache.length} orders`);
+
+        // 3. Calculate Totals (Hissab)
+        let totalVerified = 0;
+        let totalPending = 0;
 
         historyOrdersCache.forEach(o => {
-            // 1. Delivery Ka Hissab
-            if (o.isDeliveryVerified) {
-                totalVerifiedAmount += 20;
-            } else if (o.status === 'Delivered') {
-                totalPendingAmount += 20;
-            }
+            // Delivery Pay
+            if (o.isDeliveryVerified) totalVerified += 20;
+            else if (o.status === 'Delivered') totalPending += 20;
 
-            // 2. Return Ka Hissab
-            if (o.isReturnVerified) {
-                totalVerifiedAmount += 20;
-            } else if (o.status === 'Returned' || o.status === 'Return Completed') {
-                // Agar return complete hai par paisa verify nahi hua
-                if (!o.isReturnVerified) totalPendingAmount += 20;
+            // Return Pay
+            if (o.isReturnVerified) totalVerified += 20;
+            else if (['Returned', 'Return Completed'].includes(o.status) && !o.isReturnVerified) {
+                totalPending += 20;
             }
         });
 
-        // D. Setup UI Containers
+        // 4. Update UI Elements
+        // Check karein ki element page par hai ya nahi
+        const elEarned = document.getElementById('hist-total-earned');
+        const elPending = document.getElementById('hist-total-pending');
+        
+        if(elEarned) elEarned.innerText = `₹${totalVerified}`;
+        if(elPending) elPending.innerText = `₹${totalPending}`;
+        
+        // 5. Initialize UI (Tabs & Header)
         const modal = document.getElementById('driver-history-modal');
         const container = modal.querySelector('.bg-white'); 
         
-        // E. Inject Summary & Tabs (If not exists)
+        // Header UI inject karein agar nahi hai
         if (!document.getElementById('history-ui-container')) {
             const header = container.querySelector('.flex.justify-between');
-            
-            const uiHTML = `
-                <div id="history-ui-container" class="mb-4">
-                    <div class="mx-6 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-2 gap-4 text-center">
-                        <div>
-                            <p class="text-[10px] text-green-600 font-bold uppercase">Total Earned (Paid)</p>
-                            <p class="text-2xl font-black text-green-700" id="hist-total-earned">₹0</p>
+            if(header) {
+                const uiHTML = `
+                    <div id="history-ui-container" class="mb-4">
+                        <div class="mx-6 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <p class="text-[10px] text-green-600 font-bold uppercase">Total Earned</p>
+                                <p class="text-2xl font-black text-green-700" id="hist-total-earned">₹${totalVerified}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-orange-600 font-bold uppercase">Pending</p>
+                                <p class="text-2xl font-black text-orange-700" id="hist-total-pending">₹${totalPending}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-orange-600 font-bold uppercase">Pending Verification</p>
-                            <p class="text-2xl font-black text-orange-700" id="hist-total-pending">₹0</p>
+                        <div class="flex border-b border-gray-200 px-6">
+                            <button onclick="renderHistoryTable('delivery')" id="tab-hist-del" class="flex-1 py-3 text-sm font-bold border-b-2 border-black text-black">Delivery</button>
+                            <button onclick="renderHistoryTable('return')" id="tab-hist-ret" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400">Returns</button>
                         </div>
-                    </div>
-
-                    <div class="flex border-b border-gray-200 px-6">
-                        <button onclick="renderHistoryTable('delivery')" id="tab-hist-del" class="flex-1 py-3 text-sm font-bold border-b-2 border-black text-black transition-colors">
-                            Delivery Records
-                        </button>
-                        <button onclick="renderHistoryTable('return')" id="tab-hist-ret" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-black transition-colors">
-                            Return Records
-                        </button>
-                    </div>
-                </div>
-            `;
-            header.insertAdjacentHTML('afterend', uiHTML);
+                    </div>`;
+                header.insertAdjacentHTML('afterend', uiHTML);
+            }
         }
-
-        // F. Update Values & Show
-        document.getElementById('hist-total-earned').innerText = `₹${totalVerifiedAmount}`;
-        document.getElementById('hist-total-pending').innerText = `₹${totalPendingAmount}`;
         
         renderHistoryTable('delivery');
         modal.classList.remove('hidden');
 
     } catch(e) {
-        console.error(e);
-        showToast('Failed to load history', 'error');
+        console.error("ViewHistory Critical Error:", e);
+        // Error ko toast/alert mein dikhayein
+        if(typeof showToast === 'function') showToast("System Error: " + e.message, 'error');
+        else alert("System Error: " + e.message);
     }
 }
 
-// 3. Render Table Logic (The Fix is Here)
+// Helper Function: Render Table
 function renderHistoryTable(type) {
-    currentHistoryTab = type;
-    const tbody = document.getElementById('driver-history-body');
-    
-    // A. Tab Styling
-    const tabDel = document.getElementById('tab-hist-del');
-    const tabRet = document.getElementById('tab-hist-ret');
-    
-    if (tabDel && tabRet) {
+    try {
+        const tbody = document.getElementById('driver-history-body');
+        const tabDel = document.getElementById('tab-hist-del');
+        const tabRet = document.getElementById('tab-hist-ret');
+        
+        if(!tbody) return;
+
+        // Update Tabs Style
+        if (tabDel && tabRet) {
+            if (type === 'delivery') {
+                tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black";
+                tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400";
+            } else {
+                tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400";
+                tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black";
+            }
+        }
+
+        // Filter Data
+        let filtered = [];
         if (type === 'delivery') {
-            tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black transition-colors";
-            tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-black transition-colors";
+            filtered = historyOrdersCache.filter(o => o.isDeliveryVerified === true || o.status === 'Delivered');
         } else {
-            tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-black transition-colors";
-            tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black transition-colors";
-        }
-    }
-
-    // B. FILTER LOGIC (FIXED)
-    let filteredOrders = [];
-
-    if (type === 'delivery') {
-        // DELIVERY TAB RULE:
-        // 1. Agar Delivery Verify ho chuki hai (isDeliveryVerified == true), toh dikhao (Chahe abhi status 'Returned' ho)
-        // 2. YA fir status 'Delivered' ho (Pending payment)
-        filteredOrders = historyOrdersCache.filter(o => 
-            o.isDeliveryVerified === true || o.status === 'Delivered'
-        );
-    } else {
-        // RETURN TAB RULE:
-        // 1. Agar Return Verify ho chuka hai (isReturnVerified == true)
-        // 2. YA fir status me 'Return' ya 'Pickup' shamil hai
-        filteredOrders = historyOrdersCache.filter(o => 
-            o.isReturnVerified === true || 
-            (o.status && (o.status.includes('Return') || o.status.includes('Pickup')))
-        );
-    }
-
-    // C. Render Rows
-    if (filteredOrders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No records found in ${type}.</td></tr>`;
-        return;
-    }
-
-    // Sort: Latest first
-    filteredOrders.sort((a, b) => (b._id || b.id).localeCompare(a._id || a.id));
-
-    tbody.innerHTML = filteredOrders.map(order => {
-        
-        // 1. Determine Payment Status & Badge for THIS TAB
-        let isPaid = false;
-        let statusText = order.status; // Default
-        
-        if (type === 'delivery') {
-            isPaid = order.isDeliveryVerified;
-            // Agar order Returned hai par hum Delivery Tab me hai, to status "Delivered" dikhao taki confusion na ho
-            if(isPaid) statusText = "Delivery Completed";
-            else if(order.status === 'Delivered') statusText = "Delivered (Pending)";
-        } else {
-            isPaid = order.isReturnVerified;
-            if(isPaid) statusText = "Return Completed";
+            filtered = historyOrdersCache.filter(o => o.isReturnVerified === true || (o.status && o.status.includes('Return')));
         }
 
-        // 2. Badge UI
-        let payBadge = '';
-        if (isPaid) {
-            payBadge = `<span class="flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full w-fit border border-green-200"><i data-lucide="check-circle" class="w-3 h-3"></i> Verified (₹20)</span>`;
-        } else {
-            payBadge = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full w-fit border border-orange-200">Pending</span>`;
+        // Empty State
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No records found.</td></tr>`;
+            return;
         }
 
-        // 3. Status Badge Color
-        let statusColor = 'bg-gray-100 text-gray-600';
-        if(statusText.includes('Completed') || statusText.includes('Delivered')) statusColor = 'bg-green-100 text-green-800';
-        
-        return `
-            <tr class="hover:bg-gray-50 border-b border-gray-100 transition">
-                <td class="p-4 align-top w-28">
-                    <p class="font-mono font-bold text-xs text-gray-900">#${order.id || String(order._id).substr(-6)}</p>
-                    <p class="text-[10px] text-gray-500 font-medium mt-1">${order.date || 'No Date'}</p>
-                    <div class="mt-2">${payBadge}</div>
-                </td>
+        // Sort (Safe string compare)
+        filtered.sort((a, b) => {
+            const idA = String(a._id || a.id || '');
+            const idB = String(b._id || b.id || '');
+            return idB.localeCompare(idA);
+        });
 
-                <td class="p-4 align-top max-w-[200px]">
-                    <p class="font-bold text-sm text-gray-900">${order.customerName || 'Guest'}</p>
-                    <p class="text-xs text-blue-600 font-bold flex items-center gap-1 mt-0.5">
-                        <i data-lucide="phone" class="w-3 h-3"></i> ${order.phone || 'N/A'}
-                    </p>
-                    <div class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 leading-relaxed line-clamp-2">
-                        ${order.address || 'No Address'}
-                    </div>
-                </td>
+        // Render Rows
+        tbody.innerHTML = filtered.map(order => {
+            const isPaid = (type === 'delivery' ? order.isDeliveryVerified : order.isReturnVerified);
+            const badge = isPaid 
+                ? `<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">Verified</span>`
+                : `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">Pending</span>`;
 
-                <td class="p-4 align-top">
-                    <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide ${statusColor}">
-                        ${statusText}
-                    </span>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase mt-2">Item:</p>
-                    <p class="text-xs text-gray-700 font-medium truncate w-32">${order.product || (order.items && order.items[0]?.name) || 'Item'}</p>
-                </td>
-
-                <td class="p-4 align-top text-right">
-                    <p class="font-black text-sm text-gray-900">₹20.00</p>
-                    <p class="text-[10px] text-gray-400 font-medium">${type === 'delivery' ? 'Delivery Fee' : 'Return Fee'}</p>
-                </td>
-            </tr>
-        `;
-    }).join('');
-
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+            return `
+                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="p-4"><p class="font-mono text-xs font-bold">#${order.id || String(order._id).substr(-6)}</p><p class="text-[10px] text-gray-400">${order.date || ''}</p></td>
+                    <td class="p-4"><p class="font-bold text-sm">${order.customerName || 'Unknown'}</p><p class="text-xs text-gray-500">${order.address || ''}</p></td>
+                    <td class="p-4">${badge}<p class="text-[10px] mt-1">${order.status}</p></td>
+                    <td class="p-4 text-right"><span class="font-bold text-sm ${isPaid ? 'text-green-600' : 'text-gray-400'}">₹20</span></td>
+                </tr>
+            `;
+        }).join('');
+    } catch(e) { console.error("Table Render Error:", e); }
 }
     // --- DISPATCH MANAGER ---
     async function loadDispatchManager() {
@@ -2339,38 +2422,41 @@ else if ((order.status === 'Delivered' || order.status === 'Return Completed')) 
         }
     }
 async function verifyAndPay(orderId) {
-        if(!confirm("Verify this delivery and credit ₹20 to the driver's wallet?")) return;
+    if(!confirm("Verify this delivery and credit ₹20 to the driver's wallet?")) return;
 
+    try {
+        const res = await fetch(`${API_URL}/admin/verify-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // ✅ FIX: Token Add kiya (Zaroori hai)
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify({ orderId: orderId })
+        });
+
+        // Response Handling
+        const textResponse = await res.text();
+        let data;
         try {
-            const res = await fetch(`${API_URL}/admin/verify-payment`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ orderId: orderId })
-            });
-
-            // पहले टेक्स्ट के रूप में रिस्पॉन्स लें (ताकि HTML एरर को पकड़ सकें)
-            const textResponse = await res.text();
-            
-            let data;
-            try {
-                data = JSON.parse(textResponse); // अब JSON पार्स करें
-            } catch(e) {
-                console.error("Server Sent Non-JSON:", textResponse);
-                showToast(`❌ Server Error: ${res.status} ${res.statusText}`, "error");
-                return;
-            }
-
-            if(res.ok) {
-                showToast("✅ Payment Successful! Driver Wallet Updated.", "success");
-                loadDispatchManager(); // टेबल रिफ्रेश करें
-            } else {
-                showToast("❌ Error: " + (data.message || "Unknown Error"), "error");
-            }
+            data = JSON.parse(textResponse);
         } catch(e) {
-            console.error("Network Error:", e);
-            showToast("Server Connection Error. Is Server Running?", "error");
+            console.error("Server Sent Non-JSON:", textResponse);
+            showToast(`❌ Server Error: ${res.status} ${res.statusText}`, "error");
+            return;
         }
+
+        if(res.ok) {
+            showToast("✅ Payment Successful! Driver Wallet Updated.", "success");
+            loadDispatchManager(); // Table refresh
+        } else {
+            showToast("❌ Error: " + (data.message || "Unknown Error"), "error");
+        }
+    } catch(e) {
+        console.error("Network Error:", e);
+        showToast("Server Connection Error. Is Server Running?", "error");
     }
+}
     async function viewOrderBill(orderId) {
         try {
             const res = await fetch(`${API_URL}/orders/${orderId}`);
@@ -2464,44 +2550,56 @@ async function verifyAndPay(orderId) {
         if(!order) return;
         
         try {
-            const driversRes = await fetch(`${API_URL}/users`);
+            // ✅ FIX: Added Authorization Header with Token
+            const driversRes = await fetch(`${API_URL}/users`, {
+                method: 'GET',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}` 
+                }
+            });
+
+            if (!driversRes.ok) throw new Error("Unauthorized: Failed to fetch drivers");
+
             const drivers = await driversRes.json();
             const activeDrivers = drivers.filter(d => d.status === 'active');
             
             document.getElementById('modal-order-id').innerText = `#${order.id || order._id?.substr(-6)}`;
             
             const driversList = document.getElementById('modal-drivers-list');
-            driversList.innerHTML = activeDrivers.map(driver => `
-                <div class="bg-gray-50 p-3 rounded-lg hover:bg-gray-100 cursor-pointer border border-gray-200"
-                     onclick="selectDriverForAssignment('${driver.email}', '${orderId}')">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-sm">${driver.name}</p>
-                            <p class="text-xs text-gray-500">${driver.vehicle || 'Bike'} • ${driver.city || 'Unknown'}</p>
+            
+            if(activeDrivers.length === 0) {
+                driversList.innerHTML = `<p class="text-center text-gray-500 py-4 text-xs">No active drivers found.</p>`;
+            } else {
+                driversList.innerHTML = activeDrivers.map(driver => `
+                    <div class="bg-gray-50 p-3 rounded-lg hover:bg-gray-100 cursor-pointer border border-gray-200"
+                         onclick="selectDriverForAssignment('${driver.email}', '${orderId}')">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-sm">${driver.name}</p>
+                                <p class="text-xs text-gray-500">${driver.vehicle || 'Bike'} • ${driver.city || 'Unknown'}</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
                         </div>
-                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
             
             document.getElementById('assign-modal').classList.remove('hidden');
-            lucide.createIcons();
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+            
         } catch(e) {
             console.error(e);
-            showToast('Failed to load drivers', 'error');
+            showToast('Failed to load drivers: ' + e.message, 'error');
         }
     }
-
    async function selectDriverForAssignment(driverEmail, orderId) {
     if(!confirm(`Assign order to ${driverEmail}?`)) return;
     
     const cleanEmail = driverEmail.toLowerCase().trim();
-    
-    // Find the order to check if it's a Return
     const order = allOrders.find(o => o._id === orderId || o.id == orderId);
     
-    // Determine Status: If currently 'Return Approved', set to 'Return Assigned'
-    // Otherwise set to 'Assigned' (Normal Delivery)
+    // Status Logic
     let newStatus = 'Assigned';
     if(order.status === 'Return Approved' || order.status.includes('Return')) {
         newStatus = 'Return Assigned';
@@ -2510,7 +2608,11 @@ async function verifyAndPay(orderId) {
     try {
         const res = await fetch(`${API_URL}/orders/${orderId}`, {
             method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                // ✅ FIX: Added Token here as well
+                'Authorization': `Bearer ${currentUser.token}`
+            },
             body: JSON.stringify({ 
                 assignedTo: cleanEmail, 
                 status: newStatus 
@@ -2518,14 +2620,16 @@ async function verifyAndPay(orderId) {
         });
         
         if(res.ok) {
-            alert("Driver Assigned Successfully!");
+            showToast("Driver Assigned Successfully!", "success");
             document.getElementById('assign-modal').classList.add('hidden');
             loadDispatchManager(); 
         } else {
-            alert("Failed to assign");
+            const err = await res.json();
+            showToast("Failed to assign: " + (err.message || "Unknown error"), "error");
         }
     } catch(e) {
         console.error(e);
+        showToast("Server Connection Error", "error");
     }
 }
     function reassignOrder(orderId) {
@@ -2560,16 +2664,25 @@ async function verifyAndPay(orderId) {
 
     // --- RETURNS MANAGEMENT ---
     async function loadReturns() {
-        try {
-            const res = await fetch(`${API_URL}/returns`);
-            allReturnRequests = await res.json();
-            renderReturnsTable(allReturnRequests);
-        } catch(e) {
-            console.error('Error loading returns:', e);
-            showToast('Failed to load returns', 'error');
-        }
-    }
+    try {
+        // Returns Route is Secured in server.js, so Token is required
+        const res = await fetch(`${API_URL}/returns`, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+            }
+        });
 
+        if(!res.ok) throw new Error("Failed to fetch returns (Auth Error)");
+
+        allReturnRequests = await res.json();
+        renderReturnsTable(allReturnRequests);
+    } catch(e) {
+        console.error('Error loading returns:', e);
+        showToast('Failed to load returns', 'error');
+    }
+}
     function renderReturnsTable(returns) {
         const tbody = document.getElementById('returns-table-body');
         
@@ -2629,9 +2742,6 @@ async function verifyAndPay(orderId) {
         
         lucide.createIcons();
     }
-
-    // --- REPLACE THIS FUNCTION IN webadmin.html ---
-
 async function updateReturnStatus(orderId, status) {
     if(!confirm(`${status} this return request?`)) return;
     
@@ -2642,7 +2752,11 @@ async function updateReturnStatus(orderId, status) {
         // 1. Update the Return Request Entry (Admin Panel View)
         const returnRes = await fetch(`${API_URL}/returns/${encodeURIComponent(orderId)}`, {
             method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                // ✅ FIX: Token Added Here
+                'Authorization': `Bearer ${currentUser.token}` 
+            },
             body: JSON.stringify({ status })
         });
         
@@ -2651,13 +2765,15 @@ async function updateReturnStatus(orderId, status) {
         }
 
         // 2. Update the Actual Order Status (For Driver/Dispatch View)
-        // If Approved -> 'Return Approved' (Ready for driver assignment)
-        // If Rejected -> 'Return Rejected' (Process ends)
         const newOrderStatus = status === 'Approved' ? 'Return Approved' : 'Return Rejected';
 
         const orderRes = await fetch(`${API_URL}/update-order-status`, { 
             method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                // ✅ FIX: Token Added Here Too
+                'Authorization': `Bearer ${currentUser.token}`
+            },
             body: JSON.stringify({ 
                 id: orderId, 
                 status: newOrderStatus

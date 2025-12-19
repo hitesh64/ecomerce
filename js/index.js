@@ -1,6 +1,7 @@
-// index.js - Cleaned & Optimized
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : '/api';
 
-const API_URL = 'https://ecomerce-mocha-one.vercel.app/api';
 
 // --- 1. GLOBAL STATE ---
 let products = [];
@@ -2101,18 +2102,16 @@ function decodeJwtResponse(token) {
 }
 
 async function handleGoogleLogin(response) {
-    const responsePayload = decodeJwtResponse(response.credential);
     try {
+        const token = response.credential;
         const res = await fetch(`${API_URL}/auth/google`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: responsePayload.name,
-                email: responsePayload.email,
-                picture: responsePayload.picture
-            })
+            body: JSON.stringify({ token })
         });
         const user = await res.json();
+        
+        if(user.error) { showToast(user.error); return; }
         
         state.user = user;
         state.cart = user.cart || [];
@@ -2122,7 +2121,7 @@ async function handleGoogleLogin(response) {
         updateAllUI();
         showToast("Signed in as " + user.name);
         fetchUserOrders();
-    } catch(e) { showToast("Google Login Failed"); }
+    } catch(e) { console.error(e); showToast("Google Login Failed"); }
 }
 
 // --- 19. SUNDAY SPECIAL LOGIC ---
@@ -2416,7 +2415,21 @@ function renderRecentSection() {
     const container = document.getElementById('recent-items-container');
     const nameDisplay = document.getElementById('recent-user-name');
     
-    const recent = JSON.parse(localStorage.getItem('kicks_recent')) || [];
+    // 1. Get History from LocalStorage
+    let recent = JSON.parse(localStorage.getItem('kicks_recent')) || [];
+
+    // --- FIX START: Filter out deleted products ---
+    // Check karo ki recent item abhi bhi hamare active 'products' list mein hai ya nahi
+    if (products.length > 0) {
+        const validRecent = recent.filter(r => products.some(p => p.id === r.id));
+        
+        // Agar kuch items delete ho gaye hain, to LocalStorage update kar do
+        if (validRecent.length !== recent.length) {
+            recent = validRecent;
+            localStorage.setItem('kicks_recent', JSON.stringify(recent));
+        }
+    }
+    // --- FIX END ---
 
     // Personalize Name
     if(state.user && state.user.name) {
@@ -2441,7 +2454,6 @@ function renderRecentSection() {
         </div>
     `).join('');
 }
-
 // --- D. AUTO RUN ON LOAD ---
 document.addEventListener('DOMContentLoaded', () => {
     getUserLocation(); // Try getting location immediately
