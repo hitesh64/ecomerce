@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KICKS INDIA | The Violet Store</title>
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80" fetchpriority="high">
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80"
+        fetchpriority="high">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preload" as="image" href="sources/sunday.jpg" fetchpriority="high">
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,400,600,700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap"
+        rel="stylesheet">
 
     <style>
         /* --- 1. CORE THEME (WHITE & PURPLE) --- */
         :root {
             --bg-main: #ffffff;
-            --bg-soft: #f5f3ff; /* Light Violet Tint */
-            --text-main: #1e1b4b; /* Deep Indigo */
-            --accent: #7c3aed; /* Violet 600 */
+            --bg-soft: #f5f3ff;
+            /* Light Violet Tint */
+            --text-main: #1e1b4b;
+            /* Deep Indigo */
+            --accent: #7c3aed;
+            /* Violet 600 */
             --accent-hover: #6d28d9;
             --accent-light: #ddd6fe;
             --glass: rgba(255, 255, 255, 0.7);
@@ -32,12 +38,16 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             overflow-x: hidden;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 10%, rgba(124, 58, 237, 0.03) 0%, transparent 40%),
                 radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.03) 0%, transparent 40%);
         }
 
-        h1, h2, h3, h4, .brand-font {
+        h1,
+        h2,
+        h3,
+        h4,
+        .brand-font {
             font-family: 'Clash Display', sans-serif;
             letter-spacing: 0.01em;
         }
@@ -49,19 +59,36 @@
             transform-style: preserve-3d;
             perspective: 1000px;
         }
+
         .tilt-card:hover {
             transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
             box-shadow: var(--shadow-hover);
         }
-        
-        .hero-float { animation: float 6s ease-in-out infinite; }
-        .hero-float-delay-1 { animation-delay: 1s; }
-        .hero-float-delay-2 { animation-delay: 2s; }
+
+        .hero-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-float-delay-1 {
+            animation-delay: 1s;
+        }
+
+        .hero-float-delay-2 {
+            animation-delay: 2s;
+        }
 
         @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(2deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(2deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
         }
 
         .glass-panel {
@@ -78,19 +105,24 @@
             opacity: 0;
             visibility: hidden;
         }
+
         .group:hover .dropdown-menu {
             transform: scale(1);
             opacity: 1;
             visibility: visible;
         }
 
-        input, textarea, select {
+        input,
+        textarea,
+        select {
             background-color: #f8fafc !important;
             border: 1px solid #e2e8f0 !important;
             color: #1e1b4b !important;
             transition: all 0.3s;
         }
-        input:focus, textarea:focus {
+
+        input:focus,
+        textarea:focus {
             border-color: var(--accent) !important;
             background-color: white !important;
             outline: none;
@@ -98,11 +130,12 @@
         }
 
         /* --- VIEW MANAGEMENT SYSTEM --- */
-        .section-view { 
-            display: none !important; 
-            opacity: 0; 
+        .section-view {
+            display: none !important;
+            opacity: 0;
             visibility: hidden;
-            position: absolute; /* Prevents taking up space */
+            position: absolute;
+            /* Prevents taking up space */
             top: 0;
             left: 0;
             width: 100%;
@@ -110,43 +143,86 @@
         }
 
         /* Active state: Visible and on top */
-        .section-view.active { 
-            display: block !important; 
-            opacity: 1; 
+        .section-view.active {
+            display: block !important;
+            opacity: 1;
             visibility: visible;
-            position: relative; /* Restores normal flow */
+            position: relative;
+            /* Restores normal flow */
             z-index: 10;
-            animation: fadeUp 0.4s ease-out forwards; 
+            animation: fadeUp 0.4s ease-out forwards;
         }
 
-        @keyframes fadeUp { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: #ef4444 !important; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+            border-color: #ef4444 !important;
+        }
 
-        details summary::-webkit-details-marker { display:none; }
-        details > summary { list-style: none; }
-        
-        .banner-slide { transition: opacity 1.5s ease-in-out; }
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details>summary {
+            list-style: none;
+        }
+
+        .banner-slide {
+            transition: opacity 1.5s ease-in-out;
+        }
 
         /* --- TRENDING SECTION STYLES --- */
         .trending-bg-mesh {
             background-color: #0f0a1e;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
             position: relative;
         }
-        
+
         /* Product Cards */
         .enhanced-product-card {
             background: rgba(255, 255, 255, 0.95);
@@ -157,17 +233,21 @@
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+
         .enhanced-product-card:hover {
             transform: translateY(-10px) scale(1.02);
             box-shadow: 0 20px 40px -5px rgba(124, 58, 237, 0.3);
             z-index: 10;
         }
+
         .enhanced-product-card img {
             transition: transform 0.6s ease;
         }
+
         .enhanced-product-card:hover img {
             transform: scale(1.1);
         }
+
         .fire-badge {
             background: linear-gradient(135deg, #ff4d4d 0%, #f9cb28 100%);
             color: white;
@@ -185,109 +265,145 @@
 
         /* Ticker Animation */
         @keyframes scrollLeft {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); } 
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
         }
-        
+
         #sunday-track {
-            animation: scrollLeft 30s linear infinite; 
+            animation: scrollLeft 30s linear infinite;
         }
-        
+
         .hover\:pause-scroll:hover {
             animation-play-state: paused;
         }
+
         :root {
-        --brand-pink: #c20069; /* The color from your screenshot */
-        --brand-dark: #860049;
-    }
-    .bg-brand { background-color: var(--brand-pink); }
-    .bg-brand-dark { background-color: var(--brand-dark); }
-    
-    /* Hide scrollbar for category row */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            --brand-pink: #c20069;
+            /* The color from your screenshot */
+            --brand-dark: #860049;
+        }
+
+        .bg-brand {
+            background-color: var(--brand-pink);
+        }
+
+        .bg-brand-dark {
+            background-color: var(--brand-dark);
+        }
+
+        /* Hide scrollbar for category row */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
 
-    /* Hover Effects for Icons */
-    .group-icon:hover .text-\\[9px\\] {
-        color: var(--brand-pink);
-        font-weight: 900;
-    }
+        /* Hover Effects for Icons */
+        .group-icon:hover .text-\\[9px\\] {
+            color: var(--brand-pink);
+            font-weight: 900;
+        }
 
-    /* Scrollbar for Vertical Sidebar */
-    .fixed.left-0::-webkit-scrollbar {
-        width: 3px;
-    }
+        /* Scrollbar for Vertical Sidebar */
+        .fixed.left-0::-webkit-scrollbar {
+            width: 3px;
+        }
 
-    .fixed.left-0::-webkit-scrollbar-thumb {
-        background: var(--brand-pink);
-        border-radius: 10px;
-    }
+        .fixed.left-0::-webkit-scrollbar-thumb {
+            background: var(--brand-pink);
+            border-radius: 10px;
+        }
 
-    /* Smooth View Transitions */
-    .section-view {
-        transition: opacity 0.4s ease, transform 0.4s ease;
-        opacity: 0;
-        transform: translateY(10px);
-    }
+        /* Smooth View Transitions */
+        .section-view {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
 
-    .section-view.active {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    /* --- MOBILE BOTTOM NAV FIX --- */
-body {
-    padding-bottom: 80px; /* Space for bottom nav */
-}
+        .section-view.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-@media (min-width: 768px) {
-    body { padding-bottom: 0; }
-}
+        /* --- MOBILE BOTTOM NAV FIX --- */
+        body {
+            padding-bottom: 80px;
+            /* Space for bottom nav */
+        }
 
-/* Nav Button Active State */
-.nav-btn.active {
-    color: var(--brand-pink);
-}
-.nav-btn.active i {
-    fill: rgba(194, 0, 105, 0.1);
-}
-/* --- SIZE SELECTOR FIX FOR MOBILE --- */
-#pdp-sizes {
-    display: flex;
-    flex-wrap: wrap;  /* This makes buttons go to next line if space is less */
-    gap: 10px;        /* Space between buttons */
-}
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 0;
+            }
+        }
 
-.size-btn {
-    flex: 1 1 auto;   /* Allows buttons to grow and fill space */
-    min-width: 50px;  /* Ensures buttons don't get too small */
-    text-align: center;
-    padding: 12px 0;
-    font-size: 14px;
-}
+        /* Nav Button Active State */
+        .nav-btn.active {
+            color: var(--brand-pink);
+        }
 
-/* Stronger style for active state to override defaults */
-.size-btn.active-size {
-    background-color: #9333ea !important; /* Purple-600 */
-    color: white !important;
-    border-color: #9333ea !important;
-}
+        .nav-btn.active i {
+            fill: rgba(194, 0, 105, 0.1);
+        }
+
+        /* --- SIZE SELECTOR FIX FOR MOBILE --- */
+        #pdp-sizes {
+            display: flex;
+            flex-wrap: wrap;
+            /* This makes buttons go to next line if space is less */
+            gap: 10px;
+            /* Space between buttons */
+        }
+
+        .size-btn {
+            flex: 1 1 auto;
+            /* Allows buttons to grow and fill space */
+            min-width: 50px;
+            /* Ensures buttons don't get too small */
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+        }
+
+        /* Stronger style for active state to override defaults */
+        .size-btn.active-size {
+            background-color: #9333ea !important;
+            /* Purple-600 */
+            color: white !important;
+            border-color: #9333ea !important;
+        }
     </style>
 </head>
+
 <body class="flex flex-col min-h-screen selection:bg-purple-200 selection:text-purple-900">
 
     <!-- OVERLAYS -->
-   <div id="overlay-backdrop" onclick="closeAllOverlays()" class="fixed inset-0 bg-purple-900/20 backdrop-blur-sm z-[85] hidden transition-opacity"></div>
+    <div id="overlay-backdrop" onclick="closeAllOverlays()"
+        class="fixed inset-0 bg-purple-900/20 backdrop-blur-sm z-[85] hidden transition-opacity"></div>
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-white border-r border-purple-50 z-[90] transform -translate-x-full flex flex-col transition-transform duration-300 shadow-2xl">
-            <div class="font-bold text-2xl tracking-tighter brand-font text-purple-900">MENU<span class="text-purple-500">.</span></div>
-            <button type="button" onclick="toggleSidebar()" class="text-gray-400 hover:text-purple-600 transition"><i data-lucide="x"></i></button>
+    <aside id="sidebar"
+        class="fixed top-0 left-0 h-full w-80 bg-white border-r border-purple-50 z-[90] transform -translate-x-full flex flex-col transition-transform duration-300 shadow-2xl">
+        <div class="font-bold text-2xl tracking-tighter brand-font text-purple-900">MENU<span
+                class="text-purple-500">.</span></div>
+        <button type="button" onclick="toggleSidebar()" class="text-gray-400 hover:text-purple-600 transition"><i
+                data-lucide="x"></i></button>
         </div>
-        
+
         <div class="p-6 border-b border-purple-50">
             <div id="sidebar-user-info" class="hidden">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full border-2 border-purple-200 flex items-center justify-center text-purple-600 font-bold text-xl overflow-hidden bg-purple-50" id="sidebar-avatar"></div>
+                    <div class="w-12 h-12 rounded-full border-2 border-purple-200 flex items-center justify-center text-purple-600 font-bold text-xl overflow-hidden bg-purple-50"
+                        id="sidebar-avatar"></div>
                     <div>
                         <p class="font-bold text-lg text-purple-900 brand-font" id="sidebar-name">User</p>
                         <p class="text-xs text-gray-500" id="sidebar-email">user@email.com</p>
@@ -296,224 +412,269 @@ body {
             </div>
             <div id="sidebar-guest-info">
                 <p class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-widest">Welcome Guest</p>
-                <button onclick="closeAllOverlays(); openAuth('login')" class="w-full py-3 bg-purple-600 text-white font-bold text-sm uppercase tracking-wide hover:bg-purple-700 transition-colors rounded-lg shadow-lg shadow-purple-200">Login / Join</button>
+                <button onclick="closeAllOverlays(); openAuth('login')"
+                    class="w-full py-3 bg-purple-600 text-white font-bold text-sm uppercase tracking-wide hover:bg-purple-700 transition-colors rounded-lg shadow-lg shadow-purple-200">Login
+                    / Join</button>
             </div>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
-            <button onclick="navigate('home')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+            <button onclick="navigate('home')"
+                class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                 <i data-lucide="home" class="mr-4 w-5 h-5 text-purple-500"></i> Home
             </button>
-            
-            <button onclick="navigate('profile')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+
+            <button onclick="navigate('profile')"
+                class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                 <i data-lucide="user" class="mr-4 w-5 h-5 text-purple-500"></i> My Profile
             </button>
 
             <div class="border-t border-purple-50 my-2 pt-2"></div>
 
-            <button onclick="navigate('wishlist')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+            <button onclick="navigate('wishlist')"
+                class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                 <i data-lucide="heart" class="mr-4 w-5 h-5 text-purple-500"></i> Wishlist
-                <span id="sidebar-wishlist-count" class="ml-auto bg-purple-100 text-purple-700 text-xs px-2.5 py-1 rounded-full font-bold hidden">0</span>
+                <span id="sidebar-wishlist-count"
+                    class="ml-auto bg-purple-100 text-purple-700 text-xs px-2.5 py-1 rounded-full font-bold hidden">0</span>
             </button>
-            <button onclick="navigate('cart')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+            <button onclick="navigate('cart')"
+                class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                 <i data-lucide="shopping-bag" class="mr-4 w-5 h-5 text-purple-500"></i> Cart
-                <span id="sidebar-cart-count" class="ml-auto bg-purple-600 text-white text-xs px-2.5 py-1 rounded-full font-bold hidden">0</span>
+                <span id="sidebar-cart-count"
+                    class="ml-auto bg-purple-600 text-white text-xs px-2.5 py-1 rounded-full font-bold hidden">0</span>
             </button>
-            <button onclick="navigate('orders')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i data-lucide="package" class="mr-4 w-5 h-5 text-purple-500"></i> Orders</button>
-          
+            <button onclick="navigate('orders')"
+                class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i
+                    data-lucide="package" class="mr-4 w-5 h-5 text-purple-500"></i> Orders</button>
 
-    <button onclick="navigate('categories')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
-        <i data-lucide="layout-grid" class="mr-4 w-5 h-5 text-purple-500"></i> All Categories
-    </button>
+
+            <button onclick="navigate('categories')"
+                class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+                <i data-lucide="layout-grid" class="mr-4 w-5 h-5 text-purple-500"></i> All Categories
+            </button>
             <div class="pt-4 mt-4 border-t border-purple-50">
                 <p class="px-3 text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">Management</p>
-                <a href="shopdashboard.html" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+                <a href="shopdashboard.html"
+                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                     <i data-lucide="layout-dashboard" class="mr-4 w-5 h-5 text-purple-500"></i> Dashboard
                 </a>
-                <a href="webadmin.html" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+                <a href="webadmin.html"
+                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                     <i data-lucide="shield-check" class="mr-4 w-5 h-5 text-purple-500"></i> Admin Panel
                 </a>
-                <a href="deldashboard.html" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
+                <a href="deldashboard.html"
+                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium">
                     <i data-lucide="truck" class="mr-4 w-5 h-5 text-purple-500"></i> Delivery
                 </a>
             </div>
         </nav>
 
         <div class="p-6 border-t border-purple-50" id="sidebar-logout-btn" style="display:none;">
-            <button onclick="logout()" class="flex items-center w-full text-red-500 hover:bg-red-50 p-3 rounded-xl font-bold transition"><i data-lucide="log-out" class="mr-3 w-5 h-5"></i> Log Out</button>
+            <button onclick="logout()"
+                class="flex items-center w-full text-red-500 hover:bg-red-50 p-3 rounded-xl font-bold transition"><i
+                    data-lucide="log-out" class="mr-3 w-5 h-5"></i> Log Out</button>
         </div>
     </aside>
 
-   
+
 
     <!-- HEADER -->
     <header class="sticky top-0 z-[50] bg-brand text-white shadow-lg transition-all duration-300">
-    
-    <div class="px-4 py-2 bg-brand-dark flex items-center justify-between text-xs font-medium cursor-pointer" onclick="getUserLocation()">
-        <div class="flex items-center gap-2 truncate max-w-[80%]">
-            <i data-lucide="map-pin" class="w-3 h-3 text-yellow-300 fill-yellow-300"></i>
-            <span id="user-location-text">Enable Location...</span>
-        </div>
-        <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
-    </div>
 
-    <div class="container mx-auto px-3 py-3 flex items-center gap-3">
-        <button onclick="toggleSidebar()" class="p-1 rounded-lg hover:bg-white/10 transition flex-shrink-0">
-            <i data-lucide="menu" class="w-6 h-6 text-white"></i>
-        </button>
-
-        <div class="flex-1 relative group">
-            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <i data-lucide="search" class="w-4 h-4"></i>
+        <div class="px-4 py-2 bg-brand-dark flex items-center justify-between text-xs font-medium cursor-pointer"
+            onclick="getUserLocation()">
+            <div class="flex items-center gap-2 truncate max-w-[80%]">
+                <i data-lucide="map-pin" class="w-3 h-3 text-yellow-300 fill-yellow-300"></i>
+                <span id="user-location-text">Enable Location...</span>
             </div>
-            <input type="text" id="search-input" autocomplete="off" 
-                placeholder="Search for products..." 
-                class="w-full h-10 bg-white text-gray-800 rounded-lg pl-10 pr-10 text-sm outline-none shadow-inner" 
-                oninput="handleSearch(this.value)" 
-                onfocus="handleSearch(this.value)">
-            
-            <button onclick="startVoiceSearch()" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-gray-50 text-brand-pink hover:bg-gray-100 transition">
-                <i data-lucide="mic" class="w-4 h-4 text-[#c20069]"></i>
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
+        </div>
+
+        <div class="container mx-auto px-3 py-3 flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="p-1 rounded-lg hover:bg-white/10 transition flex-shrink-0">
+                <i data-lucide="menu" class="w-6 h-6 text-white"></i>
             </button>
-            
-            <div id="search-suggestions" class="absolute top-full left-0 w-full bg-white rounded-b-xl shadow-xl border-t border-gray-100 z-[100] hidden overflow-hidden text-black"></div>
-        </div>
 
-        <button onclick="navigate('cart')" class="relative p-1">
-            <i data-lucide="shopping-cart" class="w-6 h-6 text-white"></i>
-            <span id="header-cart-count" class="absolute -top-1 -right-1 bg-yellow-400 text-brand-pink text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white hidden">0</span>
-        </button>
-    </div>
+            <div class="flex-1 relative group">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </div>
+                <input type="text" id="search-input" autocomplete="off" placeholder="Search for products..."
+                    class="w-full h-10 bg-white text-gray-800 rounded-lg pl-10 pr-10 text-sm outline-none shadow-inner"
+                    oninput="handleSearch(this.value)" onfocus="handleSearch(this.value)">
 
-  <div id="category-header" class="px-2 pb-2 overflow-x-auto no-scrollbar flex gap-4 text-center text-white">
-    
-    <div onclick="switchView('home')" class="min-w-[70px] flex flex-col items-center gap-1 p-2 rounded-lg bg-white/10 border border-white/20">
-        <img src="https://cdn-icons-png.flaticon.com/512/3225/3225194.png" class="w-6 h-6 invert brightness-0">
-        <span class="text-[10px] font-bold">For You</span>
-    </div>
+                <button onclick="startVoiceSearch()"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-gray-50 text-brand-pink hover:bg-gray-100 transition">
+                    <i data-lucide="mic" class="w-4 h-4 text-[#c20069]"></i>
+                </button>
 
-    <div onclick="openListing('category','Electronics')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="cpu" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Electronics</span>
-    </div>
-
-    <div onclick="openListing('category','Fashion')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="shirt" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Fashion</span>
-    </div>
-
-    <div onclick="openListing('category','Beauty')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="sparkles" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Beauty</span>
-    </div>
-
-    <div onclick="openListing('category','Appliances')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="microwave" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Appliances</span>
-    </div>
-
-    <div onclick="openListing('category','Toys')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="gamepad-2" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Toys</span>
-    </div>
-
-    <div onclick="openListing('category','Grocery')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="shopping-basket" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Grocery</span>
-    </div>
-
-    <div onclick="openListing('category','Mobiles')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="smartphone" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Mobiles</span>
-    </div>
-
-    <div onclick="openListing('category','Laptops')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="laptop" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Laptops</span>
-    </div>
-
-    <div onclick="openListing('category','Furniture')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="sofa" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Furniture</span>
-    </div>
-
-    <div onclick="openListing('category','Sports')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="dumbbell" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Sports</span>
-    </div>
-
-    <div onclick="openListing('category','Footwear')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="footprints" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Footwear</span>
-    </div>
-
-    <div onclick="openListing('category','Watches')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="watch" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Watches</span>
-    </div>
-
-    <div onclick="openListing('category','Jewellery')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="gem" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Jewellery</span>
-    </div>
-
-    <div onclick="openListing('category','Bags')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="briefcase" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Bags</span>
-    </div>
-
-    <div onclick="openListing('category','Kitchen')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="utensils" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Kitchen</span>
-    </div>
-
-    <div onclick="openListing('category','Baby Care')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="baby" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Baby Care</span>
-    </div>
-
-    <div onclick="openListing('category','Automotive')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="car" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Automotive</span>
-    </div>
-
-    <div onclick="openListing('category','Books')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="book-open" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Books</span>
-    </div>
-
-    <div onclick="openListing('category','Stationery')" class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
-        <i data-lucide="pen-tool" class="w-6 h-6"></i>
-        <span class="text-[10px] font-medium">Stationery</span>
-    </div>
-</div>
-</header>
-<div id="recent-view-section" class="hidden container mx-auto px-4 mt-6 mb-8">
-    <div class="bg-gradient-to-r from-[#c20069] to-[#860049] ...">
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-        
-        <div class="relative z-10 mb-4">
-            <h3 class="text-white text-lg font-bold flex items-center gap-2">
-                <span id="recent-user-name">User</span>, still looking for these?
-            </h3>
-            <p class="text-pink-200 text-xs">Pick up where you left off</p>
-        </div>
-
-        <div id="recent-items-container" class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                <div id="search-suggestions"
+                    class="absolute top-full left-0 w-full bg-white rounded-b-xl shadow-xl border-t border-gray-100 z-[100] hidden overflow-hidden text-black">
+                </div>
             </div>
+
+            <button onclick="navigate('cart')" class="relative p-1">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-white"></i>
+                <span id="header-cart-count"
+                    class="absolute -top-1 -right-1 bg-yellow-400 text-brand-pink text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white hidden">0</span>
+            </button>
+        </div>
+
+        <div id="category-header" class="px-2 pb-2 overflow-x-auto no-scrollbar flex gap-4 text-center text-white">
+
+            <div onclick="switchView('home')"
+                class="min-w-[70px] flex flex-col items-center gap-1 p-2 rounded-lg bg-white/10 border border-white/20">
+                <img src="https://cdn-icons-png.flaticon.com/512/3225/3225194.png" class="w-6 h-6 invert brightness-0">
+                <span class="text-[10px] font-bold">For You</span>
+            </div>
+
+            <div onclick="openListing('category','Electronics')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="cpu" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Electronics</span>
+            </div>
+
+            <div onclick="openListing('category','Fashion')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="shirt" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Fashion</span>
+            </div>
+
+            <div onclick="openListing('category','Beauty')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Beauty</span>
+            </div>
+
+            <div onclick="openListing('category','Appliances')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="microwave" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Appliances</span>
+            </div>
+
+            <div onclick="openListing('category','Toys')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Toys</span>
+            </div>
+
+            <div onclick="openListing('category','Grocery')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="shopping-basket" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Grocery</span>
+            </div>
+
+            <div onclick="openListing('category','Mobiles')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="smartphone" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Mobiles</span>
+            </div>
+
+            <div onclick="openListing('category','Laptops')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="laptop" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Laptops</span>
+            </div>
+
+            <div onclick="openListing('category','Furniture')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="sofa" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Furniture</span>
+            </div>
+
+            <div onclick="openListing('category','Sports')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="dumbbell" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Sports</span>
+            </div>
+
+            <div onclick="openListing('category','Footwear')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="footprints" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Footwear</span>
+            </div>
+
+            <div onclick="openListing('category','Watches')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="watch" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Watches</span>
+            </div>
+
+            <div onclick="openListing('category','Jewellery')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="gem" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Jewellery</span>
+            </div>
+
+            <div onclick="openListing('category','Bags')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="briefcase" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Bags</span>
+            </div>
+
+            <div onclick="openListing('category','Kitchen')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="utensils" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Kitchen</span>
+            </div>
+
+            <div onclick="openListing('category','Baby Care')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="baby" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Baby Care</span>
+            </div>
+
+            <div onclick="openListing('category','Automotive')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="car" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Automotive</span>
+            </div>
+
+            <div onclick="openListing('category','Books')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="book-open" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Books</span>
+            </div>
+
+            <div onclick="openListing('category','Stationery')"
+                class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+                <i data-lucide="pen-tool" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Stationery</span>
+            </div>
+        </div>
+    </header>
+    <div id="recent-view-section" class="hidden container mx-auto px-4 mt-6 mb-8">
+        <div class="bg-gradient-to-r from-[#c20069] to-[#860049] ...">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+            <div class="relative z-10 mb-4">
+                <h3 class="text-white text-lg font-bold flex items-center gap-2">
+                    <span id="recent-user-name">User</span>, still looking for these?
+                </h3>
+                <p class="text-pink-200 text-xs">Pick up where you left off</p>
+            </div>
+
+            <div id="recent-items-container" class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            </div>
+        </div>
     </div>
-</div>
 
     <!-- AUTH MODALS -->
-   <div id="auth-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center pointer-events-none">
-        <div id="login-box" class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 pointer-events-auto hidden transform transition-all scale-95 opacity-0 border border-purple-100">
+    <div id="auth-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center pointer-events-none">
+        <div id="login-box"
+            class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 pointer-events-auto hidden transform transition-all scale-95 opacity-0 border border-purple-100">
             <div class="flex justify-between mb-8">
                 <h2 class="text-3xl font-bold brand-font text-purple-900">Sign In</h2>
-                <button onclick="closeAllOverlays()" class="text-gray-400 hover:text-purple-600"><i data-lucide="x"></i></button>
+                <button onclick="closeAllOverlays()" class="text-gray-400 hover:text-purple-600"><i
+                        data-lucide="x"></i></button>
             </div>
-            
-            <div id="g_id_onload" data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
-            <div class="g_id_signin mb-6" data-type="standard" data-theme="outline" data-size="large" data-width="320"></div>
+
+            <div id="g_id_onload"
+                data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
+                data-context="signin" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin mb-6" data-type="standard" data-theme="outline" data-size="large" data-width="320">
+            </div>
 
             <div class="relative flex py-2 items-center mb-6">
                 <div class="flex-grow border-t border-gray-100"></div>
@@ -524,69 +685,82 @@ body {
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <input type="email" id="login-email" placeholder="Email Address" required class="rounded-xl">
                 <input type="password" id="login-pass" placeholder="Password" required class="rounded-xl">
-                <button type="submit" class="w-full py-4 bg-purple-900 text-white font-bold rounded-xl hover:bg-purple-800 transition-colors shadow-lg shadow-purple-200">Continue</button>
+                <button type="submit"
+                    class="w-full py-4 bg-purple-900 text-white font-bold rounded-xl hover:bg-purple-800 transition-colors shadow-lg shadow-purple-200">Continue</button>
             </form>
-            <p class="mt-6 text-center text-sm text-gray-500">New here? <button onclick="switchAuth('register')" class="text-purple-600 font-bold hover:underline">Create Account</button></p>
+            <p class="mt-6 text-center text-sm text-gray-500">New here? <button onclick="switchAuth('register')"
+                    class="text-purple-600 font-bold hover:underline">Create Account</button></p>
         </div>
 
-        <div id="register-box" class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 pointer-events-auto hidden transform transition-all scale-95 opacity-0 border border-purple-100">
+        <div id="register-box"
+            class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 pointer-events-auto hidden transform transition-all scale-95 opacity-0 border border-purple-100">
             <div class="flex justify-between mb-8">
                 <h2 class="text-3xl font-bold brand-font text-purple-900">Join Us</h2>
-                <button onclick="closeAllOverlays()" class="text-gray-400 hover:text-purple-600"><i data-lucide="x"></i></button>
+                <button onclick="closeAllOverlays()" class="text-gray-400 hover:text-purple-600"><i
+                        data-lucide="x"></i></button>
             </div>
             <form onsubmit="handleRegister(event)" class="space-y-4">
                 <input type="text" id="reg-name" placeholder="Full Name" required class="rounded-xl">
                 <input type="email" id="reg-email" placeholder="Email Address" required class="rounded-xl">
                 <input type="password" id="reg-pass" placeholder="Password (Min 6 chars)" required class="rounded-xl">
-                <button type="submit" class="w-full py-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-500 transition-colors shadow-lg shadow-purple-200">Create Account</button>
+                <button type="submit"
+                    class="w-full py-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-500 transition-colors shadow-lg shadow-purple-200">Create
+                    Account</button>
             </form>
-            <p class="mt-6 text-center text-sm text-gray-500">Member? <button onclick="switchAuth('login')" class="text-purple-600 font-bold hover:underline">Sign In</button></p>
+            <p class="mt-6 text-center text-sm text-gray-500">Member? <button onclick="switchAuth('login')"
+                    class="text-purple-600 font-bold hover:underline">Sign In</button></p>
         </div>
     </div>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="flex-grow relative z-10"> 
-        
+    <main class="flex-grow relative z-10">
+
         <!-- --- HOME VIEW --- -->
-      <div id="view-home" class="section-view active pt-6"> <div class="mb-8 container mx-auto px-4">
-       <div id="home-slides-container" class="relative w-full aspect-[21/9] md:h-[400px] rounded-xl overflow-hidden shadow-md group border border-gray-100 bg-gray-50">
-    <div class="absolute inset-0 w-full h-full z-10" id="home-slide-0">
-        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80" 
-             class="w-full h-full object-cover" 
-             alt="Fashion Collection"
-             fetchpriority="high"
-             loading="eager">
-    </div>
+        <div id="view-home" class="section-view active pt-6">
+            <div class="mb-8 container mx-auto px-4">
+                <div id="home-slides-container"
+                    class="relative w-full aspect-[21/9] md:h-[400px] rounded-xl overflow-hidden shadow-md group border border-gray-100 bg-gray-50">
+                    <div class="absolute inset-0 w-full h-full z-10" id="home-slide-0">
+                        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80"
+                            class="w-full h-full object-cover" alt="Fashion Collection" fetchpriority="high"
+                            loading="eager">
+                    </div>
 
-    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-20 pointer-events-none"></div>
-</div>
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-20 pointer-events-none">
+                    </div>
+                </div>
 
-        <div id="home-slides-indicators" class="flex justify-center items-center gap-1 mt-3">
+                <div id="home-slides-indicators" class="flex justify-center items-center gap-1 mt-3">
+                </div>
             </div>
-    </div>
             <!-- SUNDAY SECTION (FIXED & NESTED CORRECTLY) -->
             <div class="container mx-auto px-6 py-8 flex justify-center">
-               <button id="sunday-trigger-btn" onclick="handleSundayClick()" 
-    class="w-full md:w-auto min-w-[300px] px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all transform hover:scale-105 shadow-2xl border-2">
+                <button id="sunday-trigger-btn" onclick="handleSundayClick()"
+                    class="w-full md:w-auto min-w-[300px] px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all transform hover:scale-105 shadow-2xl border-2">
                     Loading Status...
                 </button>
             </div>
 
-            <div id="sunday-section" class="w-full bg-black text-white overflow-hidden mb-8 border-y border-purple-900 shadow-2xl relative group">
-                <div id="sunday-locked" class="container mx-auto py-6 px-4 flex flex-col md:flex-row items-center justify-center gap-8 text-center">
+            <div id="sunday-section"
+                class="w-full bg-black text-white overflow-hidden mb-8 border-y border-purple-900 shadow-2xl relative group">
+                <div id="sunday-locked"
+                    class="container mx-auto py-6 px-4 flex flex-col md:flex-row items-center justify-center gap-8 text-center">
                     <div class="flex items-center gap-3 text-red-500 animate-pulse">
                         <i data-lucide="lock" class="w-6 h-6"></i>
                         <span class="font-bold tracking-widest uppercase text-sm">Sunday Sale Closed</span>
                     </div>
-                    
+
                     <div class="flex flex-col items-center">
-                        <h3 class="text-3xl md:text-5xl font-black brand-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                        <h3
+                            class="text-3xl md:text-5xl font-black brand-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
                             SUNDAY DROPS
                         </h3>
-                        <p class="text-gray-400 text-xs uppercase tracking-[0.3em] mt-2">Exclusive Products Coming In</p>
+                        <p class="text-gray-400 text-xs uppercase tracking-[0.3em] mt-2">Exclusive Products Coming In
+                        </p>
                     </div>
 
-                    <button onclick="handleSundayClick()" 
+                    <button onclick="handleSundayClick()"
                         class="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-sm rounded-full hover:bg-purple-500 hover:text-white transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105">
                         Check Status
                     </button>
@@ -595,7 +769,9 @@ body {
                 <div id="sunday-live" class="hidden py-6">
                     <div class="container mx-auto px-4 mb-4 flex justify-between items-end">
                         <div>
-                            <span class="bg-green-500 text-black text-[10px] font-bold px-2 py-1 rounded uppercase animate-pulse">● Live Now</span>
+                            <span
+                                class="bg-green-500 text-black text-[10px] font-bold px-2 py-1 rounded uppercase animate-pulse">●
+                                Live Now</span>
                             <h3 class="text-2xl font-black text-white italic mt-1">SUNDAY FLASH SALE</h3>
                         </div>
                         <p class="text-xs text-gray-400">Grab before they're gone!</p>
@@ -611,319 +787,444 @@ body {
 
             <!-- 3D TILT PROMO -->
             <div class="relative w-full py-10 container mx-auto px-6">
-                <div class="relative bg-[#0f0a1e] rounded-[3rem] p-8 md:p-12 overflow-hidden shadow-2xl tilt-card group border border-purple-500/30">
-                    
-                    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600 rounded-full blur-[120px] opacity-40 animate-pulse"></div>
-                    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600 rounded-full blur-[120px] opacity-30"></div>
-                    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
-                    
+                <div
+                    class="relative bg-[#0f0a1e] rounded-[3rem] p-8 md:p-12 overflow-hidden shadow-2xl tilt-card group border border-purple-500/30">
+
+                    <div
+                        class="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600 rounded-full blur-[120px] opacity-40 animate-pulse">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600 rounded-full blur-[120px] opacity-30">
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150">
+                    </div>
+
                     <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-                        
+
                         <div class="md:w-1/2 text-center md:text-left z-20 pl-4">
-                             <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-full mb-6 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                            <div
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-full mb-6 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
                                 <span class="w-2 h-2 bg-green-400 rounded-full animate-ping"></span> Live Now
-                             </div>
-                             <h1 class="text-5xl md:text-7xl font-black text-white leading-[0.9] mb-6 brand-font italic drop-shadow-lg">
-                                 GRAND <br> 
-                                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">OPENING</span>
-                             </h1>
-                             <p class="text-purple-200 text-lg mb-8 max-w-md mx-auto md:mx-0 font-medium leading-relaxed">
+                            </div>
+                            <h1
+                                class="text-5xl md:text-7xl font-black text-white leading-[0.9] mb-6 brand-font italic drop-shadow-lg">
+                                GRAND <br>
+                                <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">OPENING</span>
+                            </h1>
+                            <p
+                                class="text-purple-200 text-lg mb-8 max-w-md mx-auto md:mx-0 font-medium leading-relaxed">
                                 Step into the future of shopping. Electronics, Fashion, and more—curated for the elite.
-                             </p>
-                             <button onclick="navigate('listing')" class="px-10 py-4 bg-white text-black font-black rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:scale-110 transition duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.6)] uppercase tracking-wider flex items-center gap-3 mx-auto md:mx-0">
+                            </p>
+                            <button onclick="navigate('listing')"
+                                class="px-10 py-4 bg-white text-black font-black rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:scale-110 transition duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.6)] uppercase tracking-wider flex items-center gap-3 mx-auto md:mx-0">
                                 Shop The Universe <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                             </button>
+                            </button>
                         </div>
-                        
+
                         <div class="md:w-1/2 relative h-[350px] md:h-[450px] w-full perspective-container mt-8 md:mt-0">
-                             <div class="absolute inset-0 z-20 border-[6px] border-white/10 rounded-[2.5rem] pointer-events-none shadow-2xl"></div>
-                             
-                             <div class="w-full h-full rounded-[2.5rem] overflow-hidden relative bg-black/50 shadow-2xl ring-1 ring-white/20 transform rotate-2 hover:rotate-0 transition duration-700">
-                                 
-                                 <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=800&q=80" 
-                                      class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-100 scale-100" 
-                                      alt="Electronics">
+                            <div
+                                class="absolute inset-0 z-20 border-[6px] border-white/10 rounded-[2.5rem] pointer-events-none shadow-2xl">
+                            </div>
 
-                                 <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80" 
-                                      class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-0 scale-110" 
-                                      alt="Fashion">
+                            <div
+                                class="w-full h-full rounded-[2.5rem] overflow-hidden relative bg-black/50 shadow-2xl ring-1 ring-white/20 transform rotate-2 hover:rotate-0 transition duration-700">
 
-                                 <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80" 
-                                      class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-0 scale-110" 
-                                      alt="Gadgets">
-                                 
-                                 <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80" 
-                                      class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-0 scale-110" 
-                                      alt="Watches">
+                                <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=800&q=80"
+                                    class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-100 scale-100"
+                                    alt="Electronics">
 
-                                 <div class="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent z-10 mix-blend-overlay"></div>
-                             </div>
+                                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80"
+                                    class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-0 scale-110"
+                                    alt="Fashion">
 
-                             <div class="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl z-30 shadow-xl animate-bounce" style="animation-duration: 3s;">
-                                 <div class="flex items-center gap-3">
-                                     <div class="w-10 h-10 bg-green-400 rounded-full flex items-center justify-center text-black font-bold text-xs">50%</div>
-                                     <div class="text-white text-xs font-bold leading-tight">FLAT OFF<br><span class="opacity-70">On First Order</span></div>
-                                 </div>
-                             </div>
+                                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80"
+                                    class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-0 scale-110"
+                                    alt="Gadgets">
+
+                                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80"
+                                    class="grand-opener-slide absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms] ease-in-out opacity-0 scale-110"
+                                    alt="Watches">
+
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent z-10 mix-blend-overlay">
+                                </div>
+                            </div>
+
+                            <div class="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl z-30 shadow-xl animate-bounce"
+                                style="animation-duration: 3s;">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 bg-green-400 rounded-full flex items-center justify-center text-black font-bold text-xs">
+                                        50%</div>
+                                    <div class="text-white text-xs font-bold leading-tight">FLAT OFF<br><span
+                                            class="opacity-70">On First Order</span></div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
                 </div>
             </div>
-      
+
             <!-- TRENDING PRODUCTS (MESH BG) -->
             <div class="trending-bg-mesh py-20 mb-10 w-full">
                 <div class="container mx-auto px-6 relative z-10">
                     <div class="flex flex-col items-center mb-16 text-center">
-                        <span class="text-purple-400 font-bold tracking-[0.2em] text-xs uppercase mb-3 animate-pulse">Hot Picks</span>
-                        <h2 class="text-4xl md:text-6xl font-black text-white brand-font uppercase tracking-tight drop-shadow-xl">
-                            Trending <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Now</span>
+                        <span
+                            class="text-purple-400 font-bold tracking-[0.2em] text-xs uppercase mb-3 animate-pulse">Hot
+                            Picks</span>
+                        <h2
+                            class="text-4xl md:text-6xl font-black text-white brand-font uppercase tracking-tight drop-shadow-xl">
+                            Trending <span
+                                class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Now</span>
                         </h2>
                         <div class="h-1 w-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mt-6"></div>
                     </div>
-                    
-                  <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[400px]">
-    <div class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse">
-        <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
-        <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-        <div class="h-4 bg-white/10 rounded w-1/4"></div>
-    </div>
-    <div class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse hidden sm:block">
-        <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
-        <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-        <div class="h-4 bg-white/10 rounded w-1/4"></div>
-    </div>
-    <div class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse hidden lg:block">
-         <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
-         <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-    </div>
-    <div class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse hidden lg:block">
-         <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
-         <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-    </div>
-</div>
+
+                    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[400px]">
+                        <div class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse">
+                            <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
+                            <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+                            <div class="h-4 bg-white/10 rounded w-1/4"></div>
+                        </div>
+                        <div
+                            class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse hidden sm:block">
+                            <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
+                            <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+                            <div class="h-4 bg-white/10 rounded w-1/4"></div>
+                        </div>
+                        <div
+                            class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse hidden lg:block">
+                            <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
+                            <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+                        </div>
+                        <div
+                            class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse hidden lg:block">
+                            <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
+                            <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+                        </div>
+                    </div>
                     <div class="text-center mt-12">
-                        <button onclick="navigate('listing')" class="px-10 py-4 border border-white/20 hover:bg-white hover:text-black text-white rounded-full font-bold uppercase tracking-widest transition duration-300">View All Collections</button>
+                        <button onclick="navigate('listing')"
+                            class="px-10 py-4 border border-white/20 hover:bg-white hover:text-black text-white rounded-full font-bold uppercase tracking-widest transition duration-300">View
+                            All Collections</button>
                     </div>
                 </div>
             </div>
 
         </div> <!-- IMPORTANT: Closing view-home HERE -->
-        
-     </div>
- <div id="view-categories" class="section-view w-full h-[calc(100vh-80px)] bg-white relative z-10">
-    <div class="h-14 border-b border-gray-100 flex items-center px-4 bg-white sticky top-0 z-20 shadow-sm">
-        <h2 class="text-lg font-black brand-font text-gray-900">All Categories</h2>
-        <div class="ml-auto flex gap-4">
-            
-            <div onclick="switchView('home'); setTimeout(() => document.getElementById('search-input').focus(), 300)" class="cursor-pointer p-1 hover:bg-gray-50 rounded-full transition">
-                <i data-lucide="search" class="w-5 h-5 text-gray-600 hover:text-purple-600"></i>
-            </div>
-
-            <div onclick="navigate('cart')" class="cursor-pointer p-1 hover:bg-gray-50 rounded-full transition">
-                <i data-lucide="shopping-cart" class="w-5 h-5 text-gray-600 hover:text-purple-600"></i>
-            </div>
 
         </div>
-    </div>
+        <div id="view-categories" class="section-view w-full h-[calc(100vh-80px)] bg-white relative z-10">
+            <div class="h-14 border-b border-gray-100 flex items-center px-4 bg-white sticky top-0 z-20 shadow-sm">
+                <h2 class="text-lg font-black brand-font text-gray-900">All Categories</h2>
+                <div class="ml-auto flex gap-4">
 
-    <div class="flex h-full">
-        
-        <div class="w-[100px] md:w-[120px] bg-[#f0f5ff] h-full overflow-y-auto no-scrollbar pb-32 border-r border-gray-100 flex-shrink-0">
-            
-            <div onclick="loadCategoryInView('Electronics')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
+                    <div onclick="switchView('home'); setTimeout(() => document.getElementById('search-input').focus(), 300)"
+                        class="cursor-pointer p-1 hover:bg-gray-50 rounded-full transition">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-600 hover:text-purple-600"></i>
+                    </div>
+
+                    <div onclick="navigate('cart')" class="cursor-pointer p-1 hover:bg-gray-50 rounded-full transition">
+                        <i data-lucide="shopping-cart" class="w-5 h-5 text-gray-600 hover:text-purple-600"></i>
+                    </div>
+
                 </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Electronics</span>
             </div>
 
-            <div onclick="loadCategoryInView('Fashion')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
+            <div class="flex h-full">
+
+                <div
+                    class="w-[100px] md:w-[120px] bg-[#f0f5ff] h-full overflow-y-auto no-scrollbar pb-32 border-r border-gray-100 flex-shrink-0">
+
+                    <div onclick="loadCategoryInView('Electronics')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Electronics</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Fashion')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Fashion</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Mobiles')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Mobiles</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Beauty')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Beauty</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Appliances')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Appliances</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Toys')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Toys</span>
+                    </div>
+                    <div onclick="loadCategoryInView('Grocery')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Grocery</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Laptops')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Laptops</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Furniture')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Furniture</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Sports')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Sports</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Footwear')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Footwear</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Watches')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Watches</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Jewellery')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Jewellery</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Bags')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Bags</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Kitchen')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=150&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Kitchen</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Baby Care')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Baby
+                            Care</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Automotive')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Automotive</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Books')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=100&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Books</span>
+                    </div>
+
+                    <div onclick="loadCategoryInView('Stationery')"
+                        class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1587614382346-4ec70e388b28?auto=format&fit=crop&w=150&q=80"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <span
+                            class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Stationery</span>
+                    </div>
+
                 </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Fashion</span>
-            </div>
 
-            <div onclick="loadCategoryInView('Mobiles')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
+                <div id="category-right-content"
+                    class="flex-1 h-full overflow-y-auto bg-white p-4 pb-32 transition-all duration-300">
+                    <div class="flex h-full items-center justify-center">
+                        <i data-lucide="loader" class="animate-spin text-purple-600 w-8 h-8"></i>
+                    </div>
                 </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Mobiles</span>
+
             </div>
-
-            <div onclick="loadCategoryInView('Beauty')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Beauty</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Appliances')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Appliances</span>
-            </div>
-
-           <div onclick="loadCategoryInView('Toys')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-    <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-        <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-    </div>
-    <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Toys</span>
-</div>
-            <div onclick="loadCategoryInView('Grocery')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Grocery</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Laptops')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Laptops</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Furniture')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Furniture</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Sports')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Sports</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Footwear')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Footwear</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Watches')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Watches</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Jewellery')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Jewellery</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Bags')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Bags</span>
-            </div>
-
-      <div onclick="loadCategoryInView('Kitchen')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-    <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-        <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover">
-    </div>
-    <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Kitchen</span>
-</div>
-
-            <div onclick="loadCategoryInView('Baby Care')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Baby Care</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Automotive')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Automotive</span>
-            </div>
-
-            <div onclick="loadCategoryInView('Books')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-                <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=100&q=80" class="w-full h-full object-cover">
-                </div>
-                <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Books</span>
-            </div>
-
-       <div onclick="loadCategoryInView('Stationery')" class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
-    <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border border-gray-200 group-hover:border-purple-500 transition shadow-sm">
-        <img src="https://images.unsplash.com/photo-1587614382346-4ec70e388b28?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover">
-    </div>
-    <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Stationery</span>
-</div>
-
         </div>
 
-        <div id="category-right-content" class="flex-1 h-full overflow-y-auto bg-white p-4 pb-32 transition-all duration-300">
-             <div class="flex h-full items-center justify-center">
-                <i data-lucide="loader" class="animate-spin text-purple-600 w-8 h-8"></i>
-             </div>
-        </div>
-
-    </div>
-</div>
-     
 
 
         <!-- --- LISTING VIEW --- -->
-       <div id="view-listing" class="section-view container mx-auto px-6 py-12 min-h-screen pb-32">
-            <button onclick="switchView('home')" class="mb-6 flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-lg transition-all group">
+        <div id="view-listing" class="section-view container mx-auto px-6 py-12 min-h-screen pb-32">
+            <button onclick="switchView('home')"
+                class="mb-6 flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-lg transition-all group">
                 <div class="bg-gray-100 p-1.5 rounded-full group-hover:bg-purple-100 transition">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> 
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 </div>
                 Back to Home
             </button>
-            
-            <div id="dynamic-category-banner" class="w-full h-64 md:h-80 rounded-[2.5rem] overflow-hidden mb-12 relative shadow-2xl group hidden border border-purple-100">
-                 <div id="banner-slides-container" class="absolute inset-0 w-full h-full"></div>
-                 
-                 <div class="absolute inset-0 bg-gradient-to-r from-purple-900/80 to-transparent flex items-center p-10 md:p-16 z-10">
-                     <div class="max-w-xl slide-in-bottom">
-                         <span id="banner-subtitle" class="text-purple-300 font-bold tracking-widest uppercase text-xs mb-3 block">Premium Collection</span>
-                         <h2 id="banner-title" class="text-5xl md:text-6xl font-black text-white brand-font leading-none mb-4 drop-shadow-md">Category Name</h2>
-                         <p id="banner-desc" class="text-white/80 text-sm md:text-base mb-6 max-w-sm">Discover the best products curated just for you.</p>
-                     </div>
-                 </div>
 
-                 <div class="absolute bottom-0 left-0 h-1 bg-white/20 w-full z-20">
-                     <div id="banner-progress" class="h-full bg-purple-500 w-0 transition-all duration-[3000ms] ease-linear"></div>
-                 </div>
+            <div id="dynamic-category-banner"
+                class="w-full h-64 md:h-80 rounded-[2.5rem] overflow-hidden mb-12 relative shadow-2xl group hidden border border-purple-100">
+                <div id="banner-slides-container" class="absolute inset-0 w-full h-full"></div>
+
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-purple-900/80 to-transparent flex items-center p-10 md:p-16 z-10">
+                    <div class="max-w-xl slide-in-bottom">
+                        <span id="banner-subtitle"
+                            class="text-purple-300 font-bold tracking-widest uppercase text-xs mb-3 block">Premium
+                            Collection</span>
+                        <h2 id="banner-title"
+                            class="text-5xl md:text-6xl font-black text-white brand-font leading-none mb-4 drop-shadow-md">
+                            Category Name</h2>
+                        <p id="banner-desc" class="text-white/80 text-sm md:text-base mb-6 max-w-sm">Discover the best
+                            products curated just for you.</p>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-0 left-0 h-1 bg-white/20 w-full z-20">
+                    <div id="banner-progress"
+                        class="h-full bg-purple-500 w-0 transition-all duration-[3000ms] ease-linear"></div>
+                </div>
             </div>
 
             <div class="flex flex-col lg:flex-row gap-12">
                 <aside class="w-full lg:w-64 flex-shrink-0">
                     <div class="sticky top-28 space-y-8 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                         <div>
-                            <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider mb-4">Features / Tags</h3>
+                            <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider mb-4">Features / Tags
+                            </h3>
                             <div id="filter-categories" class="space-y-3"></div>
                         </div>
                         <div class="w-full h-px bg-gray-100"></div>
                         <div>
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider">Brands</h3>
-                                <button onclick="clearFilters()" class="text-xs text-purple-600 font-bold hover:underline">Clear All</button>
+                                <button onclick="clearFilters()"
+                                    class="text-xs text-purple-600 font-bold hover:underline">Clear All</button>
                             </div>
                             <div id="filter-brands" class="space-y-3"></div>
                         </div>
-                        <button onclick="clearSearch(); openListing('all', '')" class="w-full py-2 text-xs text-red-500 font-bold uppercase border border-red-100 rounded-lg hover:bg-red-50 transition">Reset All Filters</button>
+                        <button onclick="clearSearch(); openListing('all', '')"
+                            class="w-full py-2 text-xs text-red-500 font-bold uppercase border border-red-100 rounded-lg hover:bg-red-50 transition">Reset
+                            All Filters</button>
                     </div>
                 </aside>
-        
+
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
-                        <h2 class="text-4xl font-black text-purple-950 brand-font uppercase" id="listing-title">Collection</h2>
-                        <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full" id="listing-count">0 Items</span>
+                        <h2 class="text-4xl font-black text-purple-950 brand-font uppercase" id="listing-title">
+                            Collection</h2>
+                        <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full"
+                            id="listing-count">0 Items</span>
                     </div>
                     <div id="listing-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
                 </div>
@@ -933,10 +1234,11 @@ body {
         <!-- --- PROFILE VIEW --- -->
         <div id="view-profile" class="section-view container mx-auto px-6 py-12 max-w-4xl">
             <h2 class="text-3xl font-black mb-10 text-purple-950 brand-font uppercase">My Profile</h2>
-            
+
             <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl">
                 <div class="flex items-center gap-6 mb-8 pb-8 border-b border-gray-100">
-                    <div class="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-3xl" id="profile-avatar-big">U</div>
+                    <div class="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-3xl"
+                        id="profile-avatar-big">U</div>
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900" id="profile-display-name">User Name</h3>
                         <p class="text-gray-500" id="profile-display-email">user@email.com</p>
@@ -946,37 +1248,48 @@ body {
                 <form onsubmit="saveProfile(event)" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
-                            <input type="text" id="prof-name" class="w-full p-4 rounded-xl font-bold text-gray-800" required>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full
+                                Name</label>
+                            <input type="text" id="prof-name" class="w-full p-4 rounded-xl font-bold text-gray-800"
+                                required>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Mobile Number</label>
-                            <input type="tel" id="prof-mobile" class="w-full p-4 rounded-xl font-bold text-gray-800" placeholder="Enter Mobile">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Mobile
+                                Number</label>
+                            <input type="tel" id="prof-mobile" class="w-full p-4 rounded-xl font-bold text-gray-800"
+                                placeholder="Enter Mobile">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Street Address</label>
-                        <input type="text" id="prof-address" class="w-full p-4 rounded-xl font-bold text-gray-800" placeholder="House No, Street, Area">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Street
+                            Address</label>
+                        <input type="text" id="prof-address" class="w-full p-4 rounded-xl font-bold text-gray-800"
+                            placeholder="House No, Street, Area">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">City</label>
+                            <label
+                                class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">City</label>
                             <input type="text" id="prof-city" class="w-full p-4 rounded-xl font-bold text-gray-800">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">State</label>
+                            <label
+                                class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">State</label>
                             <input type="text" id="prof-state" class="w-full p-4 rounded-xl font-bold text-gray-800">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Pincode</label>
+                            <label
+                                class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Pincode</label>
                             <input type="text" id="prof-pincode" class="w-full p-4 rounded-xl font-bold text-gray-800">
                         </div>
                     </div>
 
                     <div class="pt-6 flex justify-end">
-                        <button type="submit" class="px-8 py-4 bg-purple-900 text-white font-bold rounded-xl shadow-lg hover:bg-purple-800 transition uppercase tracking-wider">Save Changes</button>
+                        <button type="submit"
+                            class="px-8 py-4 bg-purple-900 text-white font-bold rounded-xl shadow-lg hover:bg-purple-800 transition uppercase tracking-wider">Save
+                            Changes</button>
                     </div>
                 </form>
             </div>
@@ -984,64 +1297,88 @@ body {
 
         <!-- --- PRODUCT DETAILS VIEW --- -->
         <div id="view-product" class="section-view container mx-auto px-6 py-8">
-            <button onclick="window.history.back() || switchView('listing')" class="mb-8 flex items-center text-gray-500 hover:text-purple-600 transition font-medium">
+            <button onclick="window.history.back() || switchView('listing')"
+                class="mb-8 flex items-center text-gray-500 hover:text-purple-600 transition font-medium">
                 <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Back to Collection
             </button>
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-20">
                 <div class="space-y-6">
-                    <div id="pdp-img-container" class="aspect-square bg-white rounded-[2.5rem] overflow-hidden relative border border-gray-100 shadow-2xl shadow-purple-100 group cursor-ew-resize">
+                    <div id="pdp-img-container"
+                        class="aspect-square bg-white rounded-[2.5rem] overflow-hidden relative border border-gray-100 shadow-2xl shadow-purple-100 group cursor-ew-resize">
                         <img id="pdp-main-img" src="" class="w-full h-full object-cover transition duration-200">
-                        <div id="pdp-wishlist-btn" class="absolute top-6 right-6 z-20 cursor-pointer bg-white p-3 rounded-full hover:text-red-500 shadow-lg transition text-gray-400"></div>
-                        
-                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur px-4 py-2 rounded-full text-xs font-bold text-gray-600 flex items-center gap-2 pointer-events-none z-10">
+                        <div id="pdp-wishlist-btn"
+                            class="absolute top-6 right-6 z-20 cursor-pointer bg-white p-3 rounded-full hover:text-red-500 shadow-lg transition text-gray-400">
+                        </div>
+
+                        <div
+                            class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur px-4 py-2 rounded-full text-xs font-bold text-gray-600 flex items-center gap-2 pointer-events-none z-10">
                             <i data-lucide="rotate-3d" class="w-4 h-4"></i> Drag for 360&deg; View
                         </div>
 
-                        <div id="pdp-out-of-stock-overlay" class="absolute inset-0 bg-white/80 flex items-center justify-center hidden z-10 backdrop-blur-sm">
-                            <span class="text-red-500 text-3xl font-black uppercase tracking-widest border-4 border-red-500 px-8 py-4 transform -rotate-12 rounded-xl">Sold Out</span>
+                        <div id="pdp-out-of-stock-overlay"
+                            class="absolute inset-0 bg-white/80 flex items-center justify-center hidden z-10 backdrop-blur-sm">
+                            <span
+                                class="text-red-500 text-3xl font-black uppercase tracking-widest border-4 border-red-500 px-8 py-4 transform -rotate-12 rounded-xl">Sold
+                                Out</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-4">
-                        <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer hover:border-purple-500 transition border-2 border-purple-600" id="thumb-container-0" onclick="swapMainImage(0)"><img id="thumb-0" class="w-full h-full object-cover"></div>
-                        <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer hover:border-purple-500 transition" id="thumb-container-1" onclick="swapMainImage(1)"><img id="thumb-1" class="w-full h-full object-cover"></div>
-                        <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer hover:border-purple-500 transition" id="thumb-container-2" onclick="swapMainImage(2)"><img id="thumb-2" class="w-full h-full object-cover"></div>
+                        <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer hover:border-purple-500 transition border-2 border-purple-600"
+                            id="thumb-container-0" onclick="swapMainImage(0)"><img id="thumb-0"
+                                class="w-full h-full object-cover"></div>
+                        <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer hover:border-purple-500 transition"
+                            id="thumb-container-1" onclick="swapMainImage(1)"><img id="thumb-1"
+                                class="w-full h-full object-cover"></div>
+                        <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer hover:border-purple-500 transition"
+                            id="thumb-container-2" onclick="swapMainImage(2)"><img id="thumb-2"
+                                class="w-full h-full object-cover"></div>
                     </div>
                 </div>
-        
+
                 <div class="pt-4">
-                    <span id="pdp-brand" class="text-purple-600 font-bold tracking-widest uppercase mb-4 block text-xs">Brand</span>
-                    <h1 id="pdp-title" class="text-5xl font-black leading-tight mb-6 text-purple-950 brand-font">Title</h1>
-                    
+                    <span id="pdp-brand"
+                        class="text-purple-600 font-bold tracking-widest uppercase mb-4 block text-xs">Brand</span>
+                    <h1 id="pdp-title" class="text-5xl font-black leading-tight mb-6 text-purple-950 brand-font">Title
+                    </h1>
+
                     <div class="flex items-center gap-6 mb-10 border-b border-gray-100 pb-8">
                         <p id="pdp-price" class="text-4xl font-bold text-gray-900">₹0</p>
-                        <span id="pdp-stock-badge" class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">In Stock</span>
+                        <span id="pdp-stock-badge"
+                            class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">In Stock</span>
                     </div>
-                    
+
                     <div class="mb-10" id="size-selector-container">
                         <div class="flex justify-between mb-4">
                             <span class="font-bold text-sm uppercase text-gray-500">Select Size / Variant</span>
                             <a href="#" class="text-xs text-purple-600 underline">Size Guide</a>
                         </div>
                         <div class="grid grid-cols-5 gap-3" id="pdp-sizes"></div>
-                        <p id="size-error" class="text-red-500 text-sm mt-3 hidden font-bold flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> Select a size</p>
+                        <p id="size-error" class="text-red-500 text-sm mt-3 hidden font-bold flex items-center gap-2"><i
+                                data-lucide="alert-circle" class="w-4 h-4"></i> Select a size</p>
                     </div>
-        
+
                     <div class="mb-10 text-gray-600 leading-relaxed text-sm" id="pdp-desc"></div>
-        
+
                     <div class="flex flex-col gap-4">
                         <div class="flex items-center gap-4 mb-2">
-                             <span class="font-bold text-sm text-gray-500 uppercase">Quantity</span>
-                             <div class="flex items-center bg-gray-100 rounded-lg p-1">
-                                 <button onclick="updateQuantity(-1)" class="w-8 h-8 flex items-center justify-center bg-white rounded hover:text-purple-600 transition shadow-sm font-bold text-lg">-</button>
-                                 <span id="pdp-qty-display" class="w-10 text-center font-bold text-gray-900">1</span>
-                                 <button onclick="updateQuantity(1)" class="w-8 h-8 flex items-center justify-center bg-white rounded hover:text-purple-600 transition shadow-sm font-bold text-lg">+</button>
-                             </div>
+                            <span class="font-bold text-sm text-gray-500 uppercase">Quantity</span>
+                            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                                <button onclick="updateQuantity(-1)"
+                                    class="w-8 h-8 flex items-center justify-center bg-white rounded hover:text-purple-600 transition shadow-sm font-bold text-lg">-</button>
+                                <span id="pdp-qty-display" class="w-10 text-center font-bold text-gray-900">1</span>
+                                <button onclick="updateQuantity(1)"
+                                    class="w-8 h-8 flex items-center justify-center bg-white rounded hover:text-purple-600 transition shadow-sm font-bold text-lg">+</button>
+                            </div>
                         </div>
 
                         <div class="flex gap-4">
-                            <button type="button" id="btn-add-cart" onclick="addToCartFromPDP()" class="flex-1 py-4 border-2 border-gray-200 text-gray-900 rounded-xl font-bold uppercase tracking-wider hover:border-purple-600 hover:text-purple-600 transition">Add to Cart</button>
-                            <button type="button" id="btn-buy-now" onclick="buyNow()" class="flex-1 py-4 bg-purple-900 text-white rounded-xl font-bold uppercase tracking-wider hover:bg-purple-800 shadow-xl shadow-purple-200 transition">Buy Now</button>
+                            <button type="button" id="btn-add-cart" onclick="addToCartFromPDP()"
+                                class="flex-1 py-4 border-2 border-gray-200 text-gray-900 rounded-xl font-bold uppercase tracking-wider hover:border-purple-600 hover:text-purple-600 transition">Add
+                                to Cart</button>
+                            <button type="button" id="btn-buy-now" onclick="buyNow()"
+                                class="flex-1 py-4 bg-purple-900 text-white rounded-xl font-bold uppercase tracking-wider hover:bg-purple-800 shadow-xl shadow-purple-200 transition">Buy
+                                Now</button>
                         </div>
                     </div>
                 </div>
@@ -1054,48 +1391,60 @@ body {
 
             <div class="bg-gray-50 p-8 rounded-[2rem] border border-gray-100">
                 <h3 class="text-2xl font-black text-purple-950 brand-font mb-8">Reviews & Ratings</h3>
-                
-                <div id="pdp-write-review-container" class="hidden mb-12 bg-white p-6 rounded-2xl shadow-sm border border-purple-100">
+
+                <div id="pdp-write-review-container"
+                    class="hidden mb-12 bg-white p-6 rounded-2xl shadow-sm border border-purple-100">
                     <h4 class="font-bold text-lg mb-4">Write a Review</h4>
                     <form onsubmit="submitReview(event)" class="space-y-4">
                         <div class="flex gap-2 mb-2">
-                             <select id="review-rating" class="p-2 rounded border bg-gray-50 font-bold text-sm">
-                                 <option value="5">★★★★★ Excellent</option>
-                                 <option value="4">★★★★☆ Good</option>
-                                 <option value="3">★★★☆☆ Average</option>
-                                 <option value="2">★★☆☆☆ Poor</option>
-                                 <option value="1">★☆☆☆☆ Terrible</option>
-                             </select>
+                            <select id="review-rating" class="p-2 rounded border bg-gray-50 font-bold text-sm">
+                                <option value="5">★★★★★ Excellent</option>
+                                <option value="4">★★★★☆ Good</option>
+                                <option value="3">★★★☆☆ Average</option>
+                                <option value="2">★★☆☆☆ Poor</option>
+                                <option value="1">★☆☆☆☆ Terrible</option>
+                            </select>
                         </div>
-                        <textarea id="review-text" placeholder="How was the product? Quality, fit, etc." class="w-full p-3 rounded-xl border border-gray-200" required></textarea>
+                        <textarea id="review-text" placeholder="How was the product? Quality, fit, etc."
+                            class="w-full p-3 rounded-xl border border-gray-200" required></textarea>
                         <div class="flex items-center gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                                <i data-lucide="image" class="w-4 h-4 text-gray-500"></i> <span class="text-xs font-bold text-gray-600">Upload Photo</span>
+                            <label
+                                class="flex items-center gap-2 cursor-pointer px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                                <i data-lucide="image" class="w-4 h-4 text-gray-500"></i> <span
+                                    class="text-xs font-bold text-gray-600">Upload Photo</span>
                                 <input type="file" id="review-image" accept="image/*" class="hidden">
                             </label>
-                            <button type="submit" class="bg-purple-900 text-white px-6 py-2 rounded-lg text-sm font-bold">Post Review</button>
+                            <button type="submit"
+                                class="bg-purple-900 text-white px-6 py-2 rounded-lg text-sm font-bold">Post
+                                Review</button>
                         </div>
                     </form>
                 </div>
-                <button onclick="navigate('orders')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i data-lucide="package" class="mr-4 w-5 h-5 text-purple-500"></i> Orders</button>
-                <button onclick="navigate('my-reviews')" class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i data-lucide="star" class="mr-4 w-5 h-5 text-purple-500"></i> My Reviews</button>
+                <button onclick="navigate('orders')"
+                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i
+                        data-lucide="package" class="mr-4 w-5 h-5 text-purple-500"></i> Orders</button>
+                <button onclick="navigate('my-reviews')"
+                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i
+                        data-lucide="star" class="mr-4 w-5 h-5 text-purple-500"></i> My Reviews</button>
                 <div id="pdp-reviews-list" class="space-y-6"></div>
             </div>
         </div>
-        
+
         <!-- --- MY REVIEWS VIEW --- -->
         <div id="view-my-reviews" class="section-view container mx-auto px-6 py-12 max-w-4xl">
-             <h2 class="text-3xl font-black mb-10 text-purple-950 brand-font uppercase">My Reviews</h2>
-             <div id="my-reviews-list" class="space-y-6"></div>
+            <h2 class="text-3xl font-black mb-10 text-purple-950 brand-font uppercase">My Reviews</h2>
+            <div id="my-reviews-list" class="space-y-6"></div>
         </div>
 
         <!-- --- WISHLIST VIEW --- -->
         <div id="view-wishlist" class="section-view container mx-auto px-6 py-12">
             <h2 class="text-3xl font-black mb-10 text-purple-950 brand-font uppercase">My Wishlist</h2>
             <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-            <div id="wishlist-empty" class="hidden text-center py-32 bg-white border border-dashed border-gray-200 rounded-3xl">
+            <div id="wishlist-empty"
+                class="hidden text-center py-32 bg-white border border-dashed border-gray-200 rounded-3xl">
                 <p class="text-gray-400 mb-6">Your collection is empty.</p>
-                <button onclick="switchView('listing')" class="text-purple-600 font-bold uppercase underline">Start Browsing</button>
+                <button onclick="switchView('listing')" class="text-purple-600 font-bold uppercase underline">Start
+                    Browsing</button>
             </div>
         </div>
 
@@ -1103,22 +1452,27 @@ body {
         <div id="view-cart" class="section-view container mx-auto px-6 py-12 max-w-4xl">
             <h2 class="text-3xl font-black mb-10 text-purple-950 brand-font uppercase">Shopping Cart</h2>
             <div id="cart-items" class="space-y-4"></div>
-            
-            <div id="cart-empty" class="hidden text-center py-32 bg-white border border-dashed border-gray-200 rounded-3xl">
+
+            <div id="cart-empty"
+                class="hidden text-center py-32 bg-white border border-dashed border-gray-200 rounded-3xl">
                 <i data-lucide="shopping-bag" class="mx-auto w-12 h-12 text-gray-300 mb-4"></i>
                 <p class="text-gray-400">Cart is empty.</p>
-                <button onclick="switchView('listing')" class="mt-4 text-purple-600 font-bold uppercase">Go to Shop</button>
+                <button onclick="switchView('listing')" class="mt-4 text-purple-600 font-bold uppercase">Go to
+                    Shop</button>
             </div>
 
             <div id="cart-summary" class="mt-12 bg-white p-8 rounded-3xl border border-gray-100 shadow-xl hidden">
                 <div class="space-y-4 mb-8 text-gray-500 text-sm">
-                    <div class="flex justify-between"><span>Subtotal</span><span id="summary-subtotal" class="text-gray-900 font-bold">₹0</span></div>
+                    <div class="flex justify-between"><span>Subtotal</span><span id="summary-subtotal"
+                            class="text-gray-900 font-bold">₹0</span></div>
                     <div class="flex justify-between text-purple-600"><span>Platform Fee</span><span>₹5.00</span></div>
                 </div>
                 <div class="flex justify-between text-2xl font-bold border-t border-gray-100 pt-6 mb-8 text-purple-950">
                     <span>Total</span><span id="summary-total">₹0</span>
                 </div>
-                <button onclick="openCheckout()" class="w-full py-5 bg-purple-900 text-white font-bold rounded-2xl uppercase tracking-wider hover:bg-purple-800 shadow-lg shadow-purple-200 transition">Proceed to Checkout</button>
+                <button onclick="openCheckout()"
+                    class="w-full py-5 bg-purple-900 text-white font-bold rounded-2xl uppercase tracking-wider hover:bg-purple-800 shadow-lg shadow-purple-200 transition">Proceed
+                    to Checkout</button>
             </div>
         </div>
 
@@ -1128,33 +1482,38 @@ body {
             <div id="orders-list" class="space-y-6"></div>
             <div id="orders-empty" class="hidden text-center py-20 text-gray-400">No orders placed yet.</div>
         </div>
-        
+
         <!-- --- SUNDAY VIEW --- -->
-        <button id="exit-sunday-btn" onclick="toggleSundayMode(false)" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-8 py-3 rounded-full font-bold shadow-2xl hidden hover:bg-red-700 transition">
+        <button id="exit-sunday-btn" onclick="toggleSundayMode(false)"
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-8 py-3 rounded-full font-bold shadow-2xl hidden hover:bg-red-700 transition">
             Exit ₹150 Store
         </button>
         <div id="view-sunday" class="section-view container mx-auto px-6 py-12 hidden">
-            
+
             <div class="flex flex-col items-center mb-12 text-center">
-                <span class="bg-red-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 animate-pulse">Live Now</span>
+                <span
+                    class="bg-red-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 animate-pulse">Live
+                    Now</span>
                 <h2 class="text-5xl md:text-7xl font-black text-purple-950 brand-font italic">THE ₹150 STORE</h2>
-                <p class="text-gray-500 mt-4 max-w-md">Exclusive collection available only for today. Grab them before stock ends!</p>
+                <p class="text-gray-500 mt-4 max-w-md">Exclusive collection available only for today. Grab them before
+                    stock ends!</p>
             </div>
 
             <div id="sunday-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             </div>
 
             <div class="text-center mt-16">
-                <button onclick="switchView('home')" class="text-gray-400 hover:text-purple-600 font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 mx-auto">
+                <button onclick="switchView('home')"
+                    class="text-gray-400 hover:text-purple-600 font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 mx-auto">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
                 </button>
-       
 
+
+            </div>
         </div>
-    </div>
-</div>
+        </div>
 
-      
+
     </main>
 
     <!-- FOOTER -->
@@ -1162,9 +1521,11 @@ body {
         <div class="container mx-auto px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                 <div class="col-span-1 md:col-span-2">
-                    <h2 class="text-3xl font-black tracking-tighter mb-6 brand-font text-purple-950">KICKS<span class="text-purple-600">.</span></h2>
+                    <h2 class="text-3xl font-black tracking-tighter mb-6 brand-font text-purple-950">KICKS<span
+                            class="text-purple-600">.</span></h2>
                     <p class="text-gray-500 max-w-sm leading-relaxed text-sm">
-                        Engineered for the streets. We provide the highest quality footwear with a focus on future aesthetics and comfort.
+                        Engineered for the streets. We provide the highest quality footwear with a focus on future
+                        aesthetics and comfort.
                     </p>
                 </div>
                 <div>
@@ -1176,7 +1537,8 @@ body {
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 font-medium">
+            <div
+                class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 font-medium">
                 <p>&copy; KICKS INDIA. ALL RIGHTS RESERVED.</p>
                 <p>Develop By Hitesh Ingale</p>
             </div>
@@ -1188,34 +1550,47 @@ body {
         <div class="container mx-auto px-4 py-12 max-w-lg">
             <div class="bg-white p-8 rounded-3xl shadow-2xl">
                 <div class="flex items-center gap-4 mb-8">
-                    <button type="button" onclick="closeCheckout()" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-600"><i data-lucide="arrow-left"></i></button>
+                    <button type="button" onclick="closeCheckout()"
+                        class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-600"><i
+                            data-lucide="arrow-left"></i></button>
                     <h2 class="text-2xl font-bold text-purple-950 brand-font uppercase">Checkout</h2>
                 </div>
-                
+
                 <form onsubmit="processOrder(event)" class="space-y-6">
                     <div class="space-y-4">
                         <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest">Contact & Address</h3>
-                        <input type="text" id="checkout-name" placeholder="Full Name" required class="w-full p-4 rounded-xl">
-                        <input type="email" id="checkout-email" placeholder="Email" required class="w-full p-4 rounded-xl">
-                        <input type="tel" id="checkout-phone" placeholder="Phone" required class="w-full p-4 rounded-xl">
-                        <input type="text" id="checkout-street" placeholder="Street Address" required class="w-full p-4 rounded-xl">
+                        <input type="text" id="checkout-name" placeholder="Full Name" required
+                            class="w-full p-4 rounded-xl">
+                        <input type="email" id="checkout-email" placeholder="Email" required
+                            class="w-full p-4 rounded-xl">
+                        <input type="tel" id="checkout-phone" placeholder="Phone" required
+                            class="w-full p-4 rounded-xl">
+                        <input type="text" id="checkout-street" placeholder="Street Address" required
+                            class="w-full p-4 rounded-xl">
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="checkout-city" placeholder="City" required class="w-full p-4 rounded-xl">
-                            <input type="text" id="checkout-state" placeholder="State" required class="w-full p-4 rounded-xl">
+                            <input type="text" id="checkout-city" placeholder="City" required
+                                class="w-full p-4 rounded-xl">
+                            <input type="text" id="checkout-state" placeholder="State" required
+                                class="w-full p-4 rounded-xl">
                         </div>
-                        <input type="text" id="checkout-pincode" placeholder="Pincode" required class="w-full p-4 rounded-xl">
+                        <input type="text" id="checkout-pincode" placeholder="Pincode" required
+                            class="w-full p-4 rounded-xl">
                     </div>
 
                     <div class="space-y-4">
                         <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest">Payment</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <label class="border border-gray-200 bg-gray-50 p-4 rounded-xl flex flex-col gap-2 cursor-pointer hover:border-purple-600 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
-                                <input type="radio" name="payment-mode" value="Cash on Delivery" checked class="accent-purple-600 w-4 h-4 mb-2">
+                            <label
+                                class="border border-gray-200 bg-gray-50 p-4 rounded-xl flex flex-col gap-2 cursor-pointer hover:border-purple-600 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
+                                <input type="radio" name="payment-mode" value="Cash on Delivery" checked
+                                    class="accent-purple-600 w-4 h-4 mb-2">
                                 <span class="font-bold text-gray-900 text-sm">COD</span>
                                 <span class="text-[10px] text-gray-500">Pay on arrival</span>
                             </label>
-                            <label class="border border-gray-200 bg-gray-50 p-4 rounded-xl flex flex-col gap-2 cursor-pointer hover:border-purple-600 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
-                                <input type="radio" name="payment-mode" value="Online Payment" class="accent-purple-600 w-4 h-4 mb-2">
+                            <label
+                                class="border border-gray-200 bg-gray-50 p-4 rounded-xl flex flex-col gap-2 cursor-pointer hover:border-purple-600 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
+                                <input type="radio" name="payment-mode" value="Online Payment"
+                                    class="accent-purple-600 w-4 h-4 mb-2">
                                 <span class="font-bold text-gray-900 text-sm">UPI / Card</span>
                                 <span class="text-[10px] text-gray-500">Secure Transfer</span>
                             </label>
@@ -1223,10 +1598,13 @@ body {
                     </div>
 
                     <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                        <div class="flex justify-between font-black text-xl text-purple-900"><span>Total Pay</span><span id="checkout-final-amount">₹0</span></div>
+                        <div class="flex justify-between font-black text-xl text-purple-900"><span>Total Pay</span><span
+                                id="checkout-final-amount">₹0</span></div>
                         <div class="hidden" id="checkout-subtotal"></div>
                     </div>
-                    <button type="submit" class="w-full py-5 bg-purple-900 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg shadow-purple-200 hover:bg-purple-800 transition">Confirm Order</button>
+                    <button type="submit"
+                        class="w-full py-5 bg-purple-900 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg shadow-purple-200 hover:bg-purple-800 transition">Confirm
+                        Order</button>
                 </form>
             </div>
         </div>
@@ -1234,64 +1612,88 @@ body {
 
     <!-- TRACKING MODAL -->
     <div id="tracking-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center pointer-events-none">
-        <div class="absolute inset-0 bg-purple-900/30 backdrop-blur-sm pointer-events-auto" onclick="closeTracking()"></div>
+        <div class="absolute inset-0 bg-purple-900/30 backdrop-blur-sm pointer-events-auto" onclick="closeTracking()">
+        </div>
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 pointer-events-auto relative m-4">
-            <button onclick="closeTracking()" class="absolute top-4 right-4 text-gray-400 hover:text-black"><i data-lucide="x"></i></button>
-            <div class="mb-8"><h3 class="text-2xl font-bold text-purple-900 mb-1 uppercase brand-font">Status</h3><p class="text-purple-500 font-mono text-sm" id="track-order-id">#ORD...</p></div>
+            <button onclick="closeTracking()" class="absolute top-4 right-4 text-gray-400 hover:text-black"><i
+                    data-lucide="x"></i></button>
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-purple-900 mb-1 uppercase brand-font">Status</h3>
+                <p class="text-purple-500 font-mono text-sm" id="track-order-id">#ORD...</p>
+            </div>
             <div class="space-y-0" id="tracking-timeline"></div>
         </div>
     </div>
-    
+
     <!-- RETURN MODAL -->
     <div id="return-modal" class="fixed inset-0 z-[75] hidden flex items-center justify-center pointer-events-none">
-        <div class="absolute inset-0 bg-purple-900/30 backdrop-blur-sm pointer-events-auto" onclick="closeReturnModal()"></div>
+        <div class="absolute inset-0 bg-purple-900/30 backdrop-blur-sm pointer-events-auto"
+            onclick="closeReturnModal()"></div>
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 pointer-events-auto relative m-4">
-            <button onclick="closeReturnModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black"><i data-lucide="x"></i></button>
+            <button onclick="closeReturnModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black"><i
+                    data-lucide="x"></i></button>
             <h3 class="text-2xl font-bold text-purple-900 mb-6 uppercase brand-font">Return Item</h3>
             <form onsubmit="submitReturnRequest(event)" class="space-y-6">
                 <input type="hidden" id="return-order-id">
-                <p class="text-gray-500 text-sm">Order: <span id="return-order-display-id" class="text-black font-bold"></span></p>
-                <textarea id="return-reason" rows="3" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 outline-none" placeholder="Reason for return..." required></textarea>
-                <div class="relative border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-purple-50 transition group">
-                    <input type="file" id="return-image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                    <div class="text-gray-400 group-hover:text-purple-600 transition"><i data-lucide="image-plus" class="w-8 h-8 mx-auto mb-2"></i><span class="text-xs font-bold uppercase">Upload Proof</span></div>
+                <p class="text-gray-500 text-sm">Order: <span id="return-order-display-id"
+                        class="text-black font-bold"></span></p>
+                <textarea id="return-reason" rows="3"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-purple-500 outline-none"
+                    placeholder="Reason for return..." required></textarea>
+                <div
+                    class="relative border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-purple-50 transition group">
+                    <input type="file" id="return-image" accept="image/*"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div class="text-gray-400 group-hover:text-purple-600 transition"><i data-lucide="image-plus"
+                            class="w-8 h-8 mx-auto mb-2"></i><span class="text-xs font-bold uppercase">Upload
+                            Proof</span></div>
                 </div>
-                <button type="submit" class="w-full py-4 bg-purple-900 text-white font-bold uppercase tracking-wider hover:bg-purple-800 transition rounded-xl">Submit Request</button>
+                <button type="submit"
+                    class="w-full py-4 bg-purple-900 text-white font-bold uppercase tracking-wider hover:bg-purple-800 transition rounded-xl">Submit
+                    Request</button>
             </form>
         </div>
     </div>
-<div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-[80] md:hidden flex justify-around items-center py-3 pb-safe">
-    
-    <button onclick="navigate('home')" class="nav-btn active flex flex-col items-center gap-1 text-gray-400 transition" id="nav-home">
-        <i data-lucide="home" class="w-6 h-6"></i>
-        <span class="text-[10px] font-bold">Home</span>
-    </button>
+    <div
+        class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-[80] md:hidden flex justify-around items-center py-3 pb-safe">
 
-   
+        <button onclick="navigate('home')"
+            class="nav-btn active flex flex-col items-center gap-1 text-gray-400 transition" id="nav-home">
+            <i data-lucide="home" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </button>
 
-    <button onclick="navigate('categories')" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition" id="nav-categories">
-        <div class="bg-gray-100 p-1 rounded-lg">
-            <i data-lucide="layout-grid" class="w-6 h-6 text-gray-600"></i>
-        </div>
-        <span class="text-[10px] font-bold">Category</span>
-    </button>
 
-    <button onclick="toggleSidebar()" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition" id="nav-account">
-        <i data-lucide="user" class="w-6 h-6"></i>
-        <span class="text-[10px] font-bold">Account</span>
-    </button>
 
-    <button onclick="navigate('cart')" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition relative" id="nav-cart">
-        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
-        <span class="text-[10px] font-bold">Cart</span>
-        <span id="bottom-cart-count" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-    </button>
-</div>
+        <button onclick="navigate('categories')"
+            class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition" id="nav-categories">
+            <div class="bg-gray-100 p-1 rounded-lg">
+                <i data-lucide="layout-grid" class="w-6 h-6 text-gray-600"></i>
+            </div>
+            <span class="text-[10px] font-bold">Category</span>
+        </button>
+
+        <button onclick="toggleSidebar()" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition"
+            id="nav-account">
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Account</span>
+        </button>
+
+        <button onclick="navigate('cart')"
+            class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition relative" id="nav-cart">
+            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Cart</span>
+            <span id="bottom-cart-count"
+                class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+        </button>
+    </div>
     <!-- TOAST -->
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-purple-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 z-[90]">
+    <div id="toast"
+        class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-purple-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 z-[90]">
         <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
         <span id="toast-msg" class="font-bold text-sm tracking-wide">Notification</span>
     </div>
-   <script src="js/index.js"></script>
+    <script src="js/index.js"></script>
 </body>
+
 </html>
