@@ -129,28 +129,25 @@
             box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
         }
 
-        /* --- VIEW MANAGEMENT SYSTEM --- */
         .section-view {
-            display: none !important;
+            display: none;
             opacity: 0;
             visibility: hidden;
             position: absolute;
-            /* Prevents taking up space */
             top: 0;
             left: 0;
             width: 100%;
-            z-index: -1;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform: translateY(10px);
         }
 
-        /* Active state: Visible and on top */
         .section-view.active {
-            display: block !important;
+            display: block;
             opacity: 1;
             visibility: visible;
+            transform: translateY(0);
             position: relative;
-            /* Restores normal flow */
             z-index: 10;
-            animation: fadeUp 0.4s ease-out forwards;
         }
 
         @keyframes fadeUp {
@@ -382,6 +379,97 @@
             color: white !important;
             border-color: #9333ea !important;
         }
+        /* Western Wear maroon border style */
+.western-card {
+    border: 2px solid #800040;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.western-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    text-align: center;
+    font-weight: 800;
+    font-size: 10px;
+    padding: 4px 0;
+    text-transform: uppercase;
+}
+
+/* Winter Store arched background */
+.winter-arch-bg {
+    background: linear-gradient(to bottom, #e0f2fe, #ffffff);
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    padding-top: 15px;
+}
+
+.winter-header-bar {
+    background: linear-gradient(90deg, #dbeafe, #bfdbfe, #dbeafe);
+    border-radius: 8px;
+    text-align: center;
+    padding: 8px;
+    font-weight: 900;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+/* Men's Winter "Frost-Frame" Effect */
+.winter-frost-frame {
+    border: 1px solid rgba(191, 219, 254, 0.4); /* Soft Ice Blue Border */
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+    backdrop-filter: blur(2px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.winter-frost-frame:hover {
+    border: 1px solid rgba(37, 99, 235, 0.5); /* Strong Blue Border on Hover */
+    box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
+    transform: translateY(-8px) scale(1.02);
+}
+
+.winter-frost-frame img {
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+/* Stylish Men's Winter Frost-Frame */
+.winter-frost-frame {
+    border: 2px solid rgba(191, 219, 254, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+}
+
+/* Shimmering Glow Effect on Hover */
+.winter-frost-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(125deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.8s;
+}
+
+.winter-frost-frame:hover::after {
+    transform: translateX(100%);
+}
+
+.winter-frost-frame:hover {
+    border-color: rgba(37, 99, 235, 0.6);
+    box-shadow: 0 30px 60px -12px rgba(59, 130, 246, 0.3);
+    transform: translateY(-10px) rotateX(2deg);
+}
+
+.winter-frost-frame img {
+    mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+}
     </style>
 </head>
 
@@ -527,7 +615,17 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/3225/3225194.png" class="w-6 h-6 invert brightness-0">
                 <span class="text-[10px] font-bold">For You</span>
             </div>
+<div onclick="openListing('category','Mens Fashion')"
+    class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+    <i data-lucide="shirt" class="w-6 h-6 text-pink-300"></i>
+    <span class="text-[10px] font-medium">Men's</span>
+</div>
 
+<div onclick="openListing('category','Womens Fashion')"
+    class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
+    <i data-lucide="sparkles" class="w-6 h-6 text-pink-300"></i>
+    <span class="text-[10px] font-medium">Women's</span>
+</div>
             <div onclick="openListing('category','Electronics')"
                 class="min-w-[65px] flex flex-col items-center gap-1 p-2 cursor-pointer opacity-90 hover:opacity-100 hover:bg-white/5 transition rounded-lg">
                 <i data-lucide="cpu" class="w-6 h-6"></i>
@@ -867,7 +965,128 @@
                     </div>
                 </div>
             </div>
+<section class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-center gap-2 mb-6 text-[#800040]">
+        <i data-lucide="flower-2" class="w-4 h-4"></i>
+        <h2 class="text-xl font-bold brand-font italic">All Time Favorite</h2>
+        <i data-lucide="flower-2" class="w-4 h-4"></i>
+    </div>
 
+    <div class="grid grid-cols-3 gap-3">
+        <div onclick="openListing('category','Mens Fashion')" class="western-card aspect-[3/4] cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400" class="w-full h-full object-cover">
+            <div class="western-label">Tshirts</div>
+        </div>
+        <div onclick="openListing('category','Womens Fashion')" class="western-card aspect-[3/4] cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400" class="w-full h-full object-cover">
+            <div class="western-label">Dresses</div>
+        </div>
+        <div onclick="openListing('category','Womens Fashion')" class="western-card aspect-[3/4] cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400" class="w-full h-full object-cover">
+            <div class="western-label">Tops</div>
+        </div>
+    </div>
+</section>
+
+<section class="container mx-auto px-4 py-8 bg-slate-50">
+    <div class="winter-header-bar mb-8 brand-font text-lg tracking-widest">
+        Women Winter Store
+    </div>
+
+    <div class="grid grid-cols-3 gap-6">
+        <div onclick="openListing('category','Womens Fashion')" class="flex flex-col items-center cursor-pointer group">
+            <div class="winter-arch-bg w-full aspect-[4/5] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400" class="w-full h-full object-contain transform scale-110 transition-transform group-hover:scale-125">
+            </div>
+            <span class="mt-2 text-[10px] font-bold text-gray-700 uppercase">Sweatshirts</span>
+        </div>
+
+        <div onclick="openListing('category','Womens Fashion')" class="flex flex-col items-center cursor-pointer group">
+            <div class="winter-arch-bg w-full aspect-[4/5] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=400" class="w-full h-full object-contain transform scale-110 transition-transform group-hover:scale-125">
+            </div>
+            <span class="mt-2 text-[10px] font-bold text-gray-700 uppercase">Sweaters</span>
+        </div>
+
+        <div onclick="openListing('category','Womens Fashion')" class="flex flex-col items-center cursor-pointer group">
+            <div class="winter-arch-bg w-full aspect-[4/5] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400" class="w-full h-full object-contain transform scale-110 transition-transform group-hover:scale-125">
+            </div>
+            <span class="mt-2 text-[10px] font-bold text-gray-700 uppercase">Jackets</span>
+        </div>
+    </div>
+</section>
+
+<section class="container mx-auto px-4 py-12 bg-white">
+    <div class="mb-10 text-center relative">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-blue-100"></div></div>
+        <h2 class="relative inline-block px-6 bg-white brand-font text-2xl font-black italic text-blue-900 tracking-tighter">
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-lg shadow-lg mr-2 uppercase text-sm">Men</span> WINTER ESSENTIALS
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 md:gap-8">
+        <div onclick="openListing('category','Mens Fashion')" class="group cursor-pointer">
+            <div class="winter-frost-frame aspect-[4/5] rounded-[2.5rem] overflow-hidden relative shadow-md">
+                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80" 
+                     loading="lazy" decoding="async"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Men Sweatshirts">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 via-transparent to-transparent"></div>
+            </div>
+            <p class="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-gray-900 group-hover:text-blue-600 transition">Sweatshirts</p>
+        </div>
+
+        <div onclick="openListing('category','Mens Fashion')" class="group cursor-pointer">
+            <div class="winter-frost-frame aspect-[4/5] rounded-[2.5rem] overflow-hidden relative shadow-md">
+                <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80" 
+                     loading="lazy" decoding="async"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Men Jackets">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 via-transparent to-transparent"></div>
+            </div>
+            <p class="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-gray-900 group-hover:text-blue-600 transition">Jackets</p>
+        </div>
+
+        <div onclick="openListing('category','Mens Fashion')" class="group cursor-pointer">
+            <div class="winter-frost-frame aspect-[4/5] rounded-[2.5rem] overflow-hidden relative shadow-md">
+                <img src="https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?w=600&q=80" 
+                     loading="lazy" decoding="async"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Men Sweaters">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 via-transparent to-transparent"></div>
+            </div>
+            <p class="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-gray-900 group-hover:text-blue-600 transition">Sweaters</p>
+        </div>
+
+        <div onclick="openListing('category','Footwear')" class="group cursor-pointer">
+            <div class="winter-frost-frame aspect-[4/5] rounded-[2.5rem] overflow-hidden relative shadow-md">
+                <img src="https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=600&q=80" 
+                     loading="lazy" decoding="async"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Men Boots">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 via-transparent to-transparent"></div>
+            </div>
+            <p class="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-gray-900 group-hover:text-blue-600 transition">Footwear</p>
+        </div>
+
+        <div onclick="openListing('category','Mens Fashion')" class="group cursor-pointer">
+            <div class="winter-frost-frame aspect-[4/5] rounded-[2.5rem] overflow-hidden relative shadow-md">
+                <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80" 
+                     loading="lazy" decoding="async"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Men Coats">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 via-transparent to-transparent"></div>
+            </div>
+            <p class="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-gray-900 group-hover:text-blue-600 transition">Long Coats</p>
+        </div>
+
+        <div onclick="openListing('category','Watches')" class="group cursor-pointer">
+            <div class="winter-frost-frame aspect-[4/5] rounded-[2.5rem] overflow-hidden relative shadow-md">
+                <img src="https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=600&q=80" 
+                     loading="lazy" decoding="async"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Men Accessories">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 via-transparent to-transparent"></div>
+            </div>
+            <p class="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-gray-900 group-hover:text-blue-600 transition">Accessories</p>
+        </div>
+    </div>
+</section>
             <!-- TRENDING PRODUCTS (MESH BG) -->
             <div class="trending-bg-mesh py-20 mb-10 w-full">
                 <div class="container mx-auto px-6 relative z-10">
@@ -908,15 +1127,14 @@
                     </div>
                     <div class="text-center mt-12">
                         <button onclick="navigate('listing')"
-                            class="px-10 py-4 border border-white/20 hover:bg-white hover:text-black text-white rounded-full font-bold uppercase tracking-widest transition duration-300">View
-                            All Collections</button>
+                            class="px-10 py-4 bg-white text-black font-black rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:scale-110 transition duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.6)] uppercase tracking-wider">
+                            View All Collections
+                        </button>
                     </div>
                 </div>
             </div>
-
-        </div> <!-- IMPORTANT: Closing view-home HERE -->
-
         </div>
+
         <div id="view-categories" class="section-view w-full h-[calc(100vh-80px)] bg-white relative z-10">
             <div class="h-14 border-b border-gray-100 flex items-center px-4 bg-white sticky top-0 z-20 shadow-sm">
                 <h2 class="text-lg font-black brand-font text-gray-900">All Categories</h2>
@@ -949,7 +1167,21 @@
                         <span
                             class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-purple-600 group-hover:font-bold">Electronics</span>
                     </div>
+<div onclick="loadCategoryInView('Mens Fashion')"
+    class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+    <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border-2 border-blue-100 group-hover:border-blue-500 transition shadow-sm">
+        <img src="https://images.unsplash.com/photo-1490735891913-40897cdaafd1?w=100" class="w-full h-full object-cover">
+    </div>
+    <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-blue-600">Men's Fashion</span>
+</div>
 
+<div onclick="loadCategoryInView('Womens Fashion')"
+    class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
+    <div class="w-12 h-12 rounded-full overflow-hidden mb-1 border-2 border-pink-100 group-hover:border-pink-500 transition shadow-sm">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=100" class="w-full h-full object-cover">
+    </div>
+    <span class="text-[10px] font-medium text-gray-600 text-center leading-tight group-hover:text-pink-600">Women's Fashion</span>
+</div>
                     <div onclick="loadCategoryInView('Fashion')"
                         class="flex flex-col items-center justify-center py-4 px-1 border-b border-gray-100 hover:bg-white transition cursor-pointer group">
                         <div
@@ -1347,7 +1579,41 @@
                         <span id="pdp-stock-badge"
                             class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">In Stock</span>
                     </div>
+<div class="flex items-center gap-4 mt-4 mb-4">
+    <span class="text-green-600 font-black text-sm uppercase tracking-tight">Free Delivery</span>
+    <div class="flex items-center gap-1 bg-green-600 text-white px-2 py-0.5 rounded-lg text-xs font-bold">
+    <span id="pdp-rating-avg">0.0</span> <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+</div>
+<span class="text-gray-400 text-xs" id="pdp-rating-total-count">(0)</span>
+</div>
 
+<div class="grid grid-cols-3 gap-2 py-4 border-y border-gray-50 mb-6 bg-white">
+    <button onclick="showTrustGuide('return')" class="flex flex-col items-center gap-1">
+        <img src="https://cdn-icons-png.flaticon.com/512/3503/3503831.png" class="w-8 h-8 opacity-80">
+        <span class="text-[9px] font-black text-gray-500 uppercase leading-tight">7 Days <br> Easy Return</span>
+    </button>
+    <button onclick="showTrustGuide('cod')" class="flex flex-col items-center gap-1 border-x border-gray-100">
+        <img src="https://cdn-icons-png.flaticon.com/512/2335/2335451.png" class="w-8 h-8 opacity-80">
+        <span class="text-[9px] font-black text-gray-500 uppercase leading-tight">Cash on <br> Delivery</span>
+    </button>
+    <button onclick="showTrustGuide('price')" class="flex flex-col items-center gap-1">
+        <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png" class="w-8 h-8 opacity-80">
+        <span class="text-[9px] font-black text-gray-500 uppercase leading-tight">Lowest <br> Price</span>
+    </button>
+</div>
+
+<div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl mb-6 border border-gray-100 cursor-pointer hover:bg-gray-100 transition">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-purple-100">
+            <i data-lucide="store" class="w-5 h-5 text-purple-600"></i>
+        </div>
+        <div>
+            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Sold By</p>
+            <p id="pdp-vendor-shop-name" class="font-black text-gray-800 uppercase text-sm">Loading Shop...</p>
+        </div>
+    </div>
+    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+</div>
                     <div class="mb-10" id="size-selector-container">
                         <div class="flex justify-between mb-4">
                             <span class="font-bold text-sm uppercase text-gray-500">Select Size / Variant</span>
@@ -1389,45 +1655,44 @@
                 <div id="pdp-recommendations" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
             </div>
 
-            <div class="bg-gray-50 p-8 rounded-[2rem] border border-gray-100">
-                <h3 class="text-2xl font-black text-purple-950 brand-font mb-8">Reviews & Ratings</h3>
+            <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-12">
+    <h3 class="text-2xl font-black text-purple-950 brand-font mb-8 uppercase tracking-tight">Customer Ratings & Reviews</h3>
 
-                <div id="pdp-write-review-container"
-                    class="hidden mb-12 bg-white p-6 rounded-2xl shadow-sm border border-purple-100">
-                    <h4 class="font-bold text-lg mb-4">Write a Review</h4>
-                    <form onsubmit="submitReview(event)" class="space-y-4">
-                        <div class="flex gap-2 mb-2">
-                            <select id="review-rating" class="p-2 rounded border bg-gray-50 font-bold text-sm">
-                                <option value="5">★★★★★ Excellent</option>
-                                <option value="4">★★★★☆ Good</option>
-                                <option value="3">★★★☆☆ Average</option>
-                                <option value="2">★★☆☆☆ Poor</option>
-                                <option value="1">★☆☆☆☆ Terrible</option>
-                            </select>
-                        </div>
-                        <textarea id="review-text" placeholder="How was the product? Quality, fit, etc."
-                            class="w-full p-3 rounded-xl border border-gray-200" required></textarea>
-                        <div class="flex items-center gap-4">
-                            <label
-                                class="flex items-center gap-2 cursor-pointer px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                                <i data-lucide="image" class="w-4 h-4 text-gray-500"></i> <span
-                                    class="text-xs font-bold text-gray-600">Upload Photo</span>
-                                <input type="file" id="review-image" accept="image/*" class="hidden">
-                            </label>
-                            <button type="submit"
-                                class="bg-purple-900 text-white px-6 py-2 rounded-lg text-sm font-bold">Post
-                                Review</button>
-                        </div>
-                    </form>
+    <div id="pdp-rating-summary" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-8 border-b border-gray-50">
+        <div class="flex items-center gap-6">
+            <div class="bg-green-600 text-white p-6 rounded-3xl text-center min-w-[120px]">
+                <div class="text-4xl font-black flex items-center justify-center gap-1">
+                    <span id="avg-rating-val">0.0</span>
+                    <i data-lucide="star" class="w-6 h-6 fill-current"></i>
                 </div>
-                <button onclick="navigate('orders')"
-                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i
-                        data-lucide="package" class="mr-4 w-5 h-5 text-purple-500"></i> Orders</button>
-                <button onclick="navigate('my-reviews')"
-                    class="w-full flex items-center p-3 hover:bg-purple-50 rounded-xl text-gray-600 hover:text-purple-700 transition font-medium"><i
-                        data-lucide="star" class="mr-4 w-5 h-5 text-purple-500"></i> My Reviews</button>
-                <div id="pdp-reviews-list" class="space-y-6"></div>
+                <p class="text-[10px] opacity-80 mt-1 uppercase font-bold tracking-widest" id="total-ratings-count">0 Ratings</p>
             </div>
+            <div class="text-gray-400 text-xs font-medium">
+                <p class="mb-1"><span class="text-gray-900 font-bold" id="total-reviews-count">0</span> verified reviews</p>
+                <div class="flex gap-1 text-green-600">
+                    <i data-lucide="shield-check" class="w-3 h-3"></i>
+                    <span class="text-[9px] uppercase font-bold">100% Genuine Products</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-2" id="rating-bars-container">
+            </div>
+    </div>
+
+    <div id="real-photos-section" class="hidden mb-10">
+        <h4 class="text-sm font-black text-gray-900 mb-4 uppercase tracking-widest">Real Photos from Customers</h4>
+        <div id="pdp-photo-gallery" class="flex gap-3 overflow-x-auto no-scrollbar">
+            </div>
+    </div>
+
+    <div id="pdp-write-review-container" class="hidden mb-12 bg-purple-50/50 p-6 rounded-3xl border border-purple-100 border-dashed">
+        </div>
+
+    <div id="pdp-reviews-list" class="space-y-8">
+        </div>
+</div>
+
         </div>
 
         <!-- --- MY REVIEWS VIEW --- -->
@@ -1507,12 +1772,8 @@
                     class="text-gray-400 hover:text-purple-600 font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 mx-auto">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
                 </button>
-
-
             </div>
         </div>
-        </div>
-
 
     </main>
 
@@ -1687,6 +1948,18 @@
                 class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
         </button>
     </div>
+    <div id="guide-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeGuide()"></div>
+    <div class="bg-white w-full max-w-sm rounded-[2.5rem] relative overflow-hidden animate-bounce-in shadow-2xl">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-purple-50">
+            <h3 id="guide-title" class="font-black text-purple-900 uppercase tracking-widest text-sm">Policy Info</h3>
+            <button onclick="closeGuide()" class="p-2 bg-white rounded-full shadow-sm text-gray-400"><i data-lucide="x"></i></button>
+        </div>
+        <div id="guide-content" class="p-6 space-y-6">
+            </div>
+        <button onclick="closeGuide()" class="w-full py-5 bg-purple-700 text-white font-black uppercase tracking-widest text-sm hover:bg-purple-800">Continue Shopping</button>
+    </div>
+</div>
     <!-- TOAST -->
     <div id="toast"
         class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-purple-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 z-[90]">

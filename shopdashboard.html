@@ -251,7 +251,14 @@
 
                 <p class="px-3 mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Add New Product
                 </p>
-
+<button onclick="preloadCategory('Mens Fashion')"
+    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+    <i class="fa-solid fa-user-tie w-5 text-center text-blue-500"></i> Men's Fashion
+</button>
+<button onclick="preloadCategory('Womens Fashion')"
+    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+    <i class="fa-solid fa-person-dress w-5 text-center text-pink-500"></i> Women's Fashion
+</button>
                 <button onclick="preloadCategory('Fashion')"
                     class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-shirt w-5 text-center"></i> Fashion
@@ -582,51 +589,68 @@
     </div>
 
     <script>
-        const API_URL = window.location.hostname === 'localhost'
-            ? 'http://localhost:5000/api'
-            : '/api';
+        const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000/api'
+    : '/api';
         const KEY_SESSION = 'kicks_vendor_session';
         let currentSessionUser = null;
         let myProductsCache = [];
 
         // --- 1. EXPANDED CATEGORY DATA (19 CATEGORIES) ---
-        const categoryMap = {
-            "Fashion": ["Men's Clothing", "Women's Clothing", "Kids Wear", "Ethnic Wear", "Winter Wear"],
-            "Electronics": ["Audio", "Cameras", "Accessories", "Smart Home", "Printers"],
-            "Mobiles": ["Smartphones", "Feature Phones", "Refurbished", "Tablets", "Cases & Covers"],
-            "Laptops": ["Gaming Laptops", "Ultrabooks", "MacBooks", "Business Laptops", "Accessories"],
-            "Appliances": ["Televisions", "Washing Machines", "Refrigerators", "ACs", "Microwaves"],
-            "Furniture": ["Living Room", "Bedroom", "Office Furniture", "Outdoor", "Decor"],
-            "Beauty": ["Makeup", "Skincare", "Haircare", "Fragrances", "Men's Grooming"],
-            "Grocery": ["Staples", "Snacks & Beverages", "Household Care", "Personal Care", "Dairy"],
-            "Toys": ["Action Figures", "Board Games", "Dolls", "Remote Control", "Educational"],
-            "Sports": ["Cricket", "Football", "Badminton", "Gym Equipment", "Cycling"],
-            "Footwear": ["Men's Shoes", "Women's Shoes", "Kids' Shoes", "Sports Shoes", "Sandals"],
-            "Watches": ["Men's Watches", "Women's Watches", "Smartwatches", "Kids' Watches", "Luxury"],
-            "Jewellery": ["Necklaces", "Earrings", "Rings", "Bracelets", "Sets"],
-            "Bags": ["Backpacks", "Handbags", "Luggage", "Wallets", "Laptop Bags"],
-            "Kitchen": ["Cookware", "Dining", "Storage", "Tools", "Bakeware"],
-            "Baby Care": ["Diapers", "Baby Food", "Skin Care", "Gear & Strollers", "Toys"],
-            "Automotive": ["Car Accessories", "Bike Accessories", "Helmets", "Car Care", "Tools"],
-            "Books": ["Fiction", "Non-Fiction", "Academic", "Children", "Self-Help"],
-            "Stationery": ["Pens & Pencils", "Notebooks", "Art Supplies", "Office Supplies", "Calculators"]
-        };
+const categoryMap = {
+    "Mens Fashion": ["T-Shirts", "Shirts", "Jeans", "Trousers", "Jackets", "Ethnic Wear", "Winter Wear"],
+    "Womens Fashion": ["Tops", "Dresses", "Jeans", "Skirts", "Jackets", "Ethnic Wear", "Winter Wear"],
+    "Electronics": ["Audio", "Cameras", "Accessories", "Smart Home", "Printers"],
+    "Mobiles": ["Smartphones", "Feature Phones", "Refurbished", "Tablets", "Cases & Covers"],
+    "Laptops": ["Gaming Laptops", "Ultrabooks", "MacBooks", "Business Laptops", "Accessories"],
+    "Appliances": ["Televisions", "Washing Machines", "Refrigerators", "ACs", "Microwaves"],
+    "Furniture": ["Living Room", "Bedroom", "Office Furniture", "Outdoor", "Decor"],
+    "Beauty": ["Makeup", "Skincare", "Haircare", "Fragrances", "Men's Grooming"],
+    "Grocery": ["Staples", "Snacks & Beverages", "Household Care", "Personal Care", "Dairy"],
+    "Toys": ["Action Figures", "Board Games", "Dolls", "Remote Control", "Educational"],
+    "Sports": ["Cricket", "Football", "Badminton", "Gym Equipment", "Cycling"],
+    "Footwear": ["Men's Shoes", "Women's Shoes", "Kids' Shoes", "Sports Shoes", "Sandals"],
+    "Watches": ["Men's Watches", "Women's Watches", "Smartwatches", "Kids' Watches", "Luxury"],
+    "Jewellery": ["Necklaces", "Earrings", "Rings", "Bracelets", "Sets"],
+    "Bags": ["Backpacks", "Handbags", "Luggage", "Wallets", "Laptop Bags"],
+    "Kitchen": ["Cookware", "Dining", "Storage", "Tools", "Bakeware"],
+    "Baby Care": ["Diapers", "Baby Food", "Skin Care", "Gear & Strollers", "Toys"],
+    "Automotive": ["Car Accessories", "Bike Accessories", "Helmets", "Car Care", "Tools"],
+    "Books": ["Fiction", "Non-Fiction", "Academic", "Children", "Self-Help"],
+    "Stationery": ["Pens & Pencils", "Notebooks", "Art Supplies", "Office Supplies", "Calculators"]
+};
 
-        const sizeOptions = {
-            "Fashion": ["XS", "S", "M", "L", "XL", "XXL"],
-            "Footwear": ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
-            "Mobiles": ["64GB", "128GB", "256GB", "512GB", "1TB"],
-            "Laptops": ["256GB SSD", "512GB SSD", "1TB SSD", "8GB RAM", "16GB RAM"],
-            "Grocery": ["100g", "250g", "500g", "1kg", "5kg", "1L"],
-            "Beauty": ["50ml", "100ml", "200ml", "Standard"],
-            "Furniture": ["Standard", "Large", "Custom"],
-            "Watches": ["Standard", "Small Dial", "Large Dial"],
-            "Rings": ["Size 6", "Size 7", "Size 8", "Size 9"],
-            "Bags": ["Small", "Medium", "Large"],
-            "Books": ["Paperback", "Hardcover", "E-Book"],
-            "Default": ["Standard", "Pack of 1", "Pack of 2"]
-        };
+const sizeOptions = {
+    "Mens Fashion": ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    "Womens Fashion": ["XS", "S", "M", "L", "XL", "XXL"],
+    "Footwear": ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    "Mobiles": ["64GB", "128GB", "256GB", "512GB", "1TB"],
+    "Laptops": ["256GB SSD", "512GB SSD", "1TB SSD", "8GB RAM", "16GB RAM"],
+    "Default": ["Standard", "Pack of 1", "Pack of 2"]
+};
 
+const categoryIcons = {
+    "Mens Fashion": "fa-user-tie",
+    "Womens Fashion": "fa-person-dress",
+    "Electronics": "fa-plug",
+    "Mobiles": "fa-mobile-screen",
+    "Laptops": "fa-laptop",
+    "Appliances": "fa-blender",
+    "Furniture": "fa-chair",
+    "Beauty": "fa-spray-can-sparkles",
+    "Grocery": "fa-carrot",
+    "Toys": "fa-gamepad",
+    "Sports": "fa-baseball",
+    "Footwear": "fa-shoe-prints",
+    "Watches": "fa-clock",
+    "Jewellery": "fa-gem",
+    "Bags": "fa-suitcase",
+    "Kitchen": "fa-utensils",
+    "Baby Care": "fa-baby",
+    "Automotive": "fa-car",
+    "Books": "fa-book",
+    "Stationery": "fa-pen-ruler"
+};
         // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
@@ -1179,29 +1203,7 @@
                 });
             } else { document.getElementById('imagePlaceholder').classList.remove('hidden'); container.classList.add('hidden'); }
         }
-        // 1. Icon Mapping for all 19 categories
-        const categoryIcons = {
-            "Fashion": "fa-shirt",
-            "Electronics": "fa-plug",
-            "Mobiles": "fa-mobile-screen",
-            "Laptops": "fa-laptop",
-            "Appliances": "fa-blender",
-            "Furniture": "fa-chair",
-            "Beauty": "fa-spray-can-sparkles",
-            "Grocery": "fa-carrot",
-            "Toys": "fa-gamepad",
-            "Sports": "fa-baseball",
-            "Footwear": "fa-shoe-prints",
-            "Watches": "fa-clock",
-            "Jewellery": "fa-gem",
-            "Bags": "fa-suitcase",
-            "Kitchen": "fa-utensils",
-            "Baby Care": "fa-baby",
-            "Automotive": "fa-car",
-            "Books": "fa-book",
-            "Stationery": "fa-pen-ruler"
-        };
-
+        
         // 2. Function to render mobile categories
         function renderMobileMenu() {
             const container = document.getElementById('mobileCategoryContainer');

@@ -1,3 +1,5 @@
+// Helper to break up long tasks
+const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 0));
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000/api'
     : '/api';
@@ -57,6 +59,22 @@ const bannerConfig = {
             "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80"
         ]
     },
+    'Mens Fashion': {
+    title: "Men's Edit",
+    desc: "Urban essentials and winter wear for him.",
+    images: [
+        "https://images.unsplash.com/photo-1490735891913-40897cdaafd1?w=800",
+        "https://images.unsplash.com/photo-1550246140-5119ae4790b8?w=800"
+    ]
+},
+'Womens Fashion': {
+    title: "Women's Luxe",
+    desc: "Trending styles and winter favorites for her.",
+    images: [
+        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800",
+        "https://images.unsplash.com/photo-1534774592507-488885376ad3?w=800"
+    ]
+},
     'Fashion': {
         title: "Trend Setter",
         desc: "Style that speaks without words.",
@@ -264,7 +282,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // --- 4. CORE FUNCTIONS ---
 
-// Load Products with Error Handling
 async function loadAllProducts() {
     try {
         const res = await fetch(`${API_URL}/products`);
@@ -286,14 +303,14 @@ async function loadAllProducts() {
             images: (item.images && item.images.length > 0) ? item.images : [item.image],
             description: item.description,
             sizes: item.sizes,
-            stock: parseInt(item.stock || 0)
+            stock: parseInt(item.stock || 0), // <--- YAHAN COMMA (,) HONA ZAROORI HAI
+            shopName: item.shopName || "KICKS OFFICIAL STORE" // Database se asli naam aayega
         }));
     } catch (error) {
-        console.warn("Failed to load products (Backend might be offline)", error);
+        console.warn("Failed to load products", error);
         return [];
     }
 }
-
 // Format Currency
 const formatMoney = (amount) => "₹" + amount.toLocaleString('en-IN');
 
@@ -378,72 +395,49 @@ function navigate(view) {
     if (view === 'listing') { openListing('all', ''); return; }
     switchView(view);
 }
-
 function switchView(viewName) {
-    // 1. Force Scroll to Top Immediately
+    // 1. पेज को ऊपर स्क्रॉल करें
     window.scrollTo({ top: 0, behavior: 'auto' });
+
+    // 2. नीचे के नेविगेशन बार का रंग बदलें
+    updateBottomNav(viewName);
+
+    // 3. कैटेगरी हेडर छुपाएं/दिखाएं
     const topHeader = document.getElementById('category-header');
     if (topHeader) {
-        // Sirf 'home' par dikhao, baaki jagah chhupao
-        if (viewName === 'home') {
-            topHeader.classList.remove('hidden');
-        } else {
-            topHeader.classList.add('hidden');
-        }
-    }
-    const footer = document.querySelector('footer');
-    if (footer) {
-        footer.classList.remove('hidden');
+        viewName === 'home' ? topHeader.classList.remove('hidden') : topHeader.classList.add('hidden');
     }
 
-    // --- FIX START: Hide Exit Button on other pages ---
-    // This ensures the "Exit ₹150 Store" button disappears when you leave the Sunday page
-    const exitBtn = document.getElementById('exit-sunday-btn');
-    if (viewName !== 'sunday' && exitBtn) {
-        exitBtn.classList.add('hidden');
-    }
-    // --- FIX END ---
-
-    // 2. Hide ALL views first
+    // 4. सभी पुराने सेक्शन्स को छुपाएं
     const allViews = document.querySelectorAll('.section-view');
     allViews.forEach(el => {
         el.classList.remove('active');
-        // Force inline hide to override any lingering effects
-        el.style.display = 'none';
+        el.style.display = 'none'; // इनलाइन स्टाइल साफ़ करें
     });
 
-    // 3. Identify the target view
-    const target = document.getElementById(`view-${viewName}`);
-
-    // 4. Special Logic: Cleanup Intervals when leaving specific pages
-    if (viewName !== 'listing') {
-        if (bannerInterval) clearInterval(bannerInterval);
-    }
-
-    // 5. Data Refresh Logic (Keep your existing logic here)
-    if (viewName === 'home') {
-        state.searchQuery = "";
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) searchInput.value = "";
-    }
-    if (viewName === 'categories') {
-        loadDefaultCategoryView(); // Ye function "Popular Store" load karega
-    }
-    if (viewName === 'my-reviews') renderUserReviews();
-    if (viewName === 'profile') renderProfile();
+    // 5. डेटा रिफ्रेश करें (Cart/Orders/Wishlist)
     if (viewName === 'cart') renderCart();
     if (viewName === 'wishlist') renderWishlist();
     if (viewName === 'orders') { fetchUserOrders(); renderOrders(); }
+    if (viewName === 'profile') renderProfile();
 
-    // 6. SHOW Target View
+    // 6. टारगेट सेक्शन को दिखाएं
+    const target = document.getElementById(`view-${viewName}`);
     if (target) {
-        target.style.display = 'block'; // Prepare for animation
-
-        // Slight delay to allow display:block to apply before adding class
+        target.style.display = 'block'; // पहले डिस्प्ले ब्लॉक करें
         setTimeout(() => {
-            target.classList.add('active');
+            target.classList.add('active'); // फिर एनिमेशन क्लास जोड़ें
             if (window.lucide) lucide.createIcons();
-        }, 10);
+        }, 50);
+    }
+}
+
+// updateBottomNav function (Ensure it is defined but NOT called globally)
+function updateBottomNav(viewName) {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active', 'text-brand-pink'));
+    const activeBtn = document.getElementById(`nav-${viewName}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active', 'text-brand-pink');
     }
 }
 function toggleSidebar() {
@@ -625,8 +619,7 @@ function updateBottomNav(viewName) {
     if (activeBtn) activeBtn.classList.add('active');
 }
 
-// Call this inside your switchView(viewName) function
-updateBottomNav(viewName);
+
 // --- 8. VOICE SEARCH (FIXED) ---
 function startVoiceSearch() {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -1158,50 +1151,245 @@ function renderRecommendations(currentProduct) {
     `).join('');
 }
 
-// --- 12. REVIEWS ---
-
+// index.js: Is function ko replace karein
 async function renderReviews(productId) {
+    const list = document.getElementById('pdp-reviews-list');
+    const barsContainer = document.getElementById('rating-bars-container');
+    const photoSection = document.getElementById('real-photos-section');
+    const topAvgEl = document.getElementById('pdp-rating-avg');
+    const topCountEl = document.getElementById('pdp-rating-total-count');
+
     try {
         const res = await fetch(`${API_URL}/reviews/${productId}`);
         const reviews = await res.json();
 
-        const list = document.getElementById('pdp-reviews-list');
-        const writeContainer = document.getElementById('pdp-write-review-container');
-
-        let canReview = false;
-        if (state.user) {
-            const deliveredOrder = state.orders.find(o =>
-                o.items.some(i => i.id === productId) && o.status === 'Delivered'
-            );
-            if (deliveredOrder) canReview = true;
+        // --- AGAR REVIEW NAHI HAI (EMPTY STATE) ---
+        if (!reviews || reviews.length === 0) {
+            list.innerHTML = '<div class="text-center py-10 text-gray-400 italic">No reviews yet. Be the first to rate!</div>';
+            
+            // Sabhi values ko 0 karein
+            if(topAvgEl) topAvgEl.innerText = "0.0";
+            if(topCountEl) topCountEl.innerText = "(0)";
+            document.getElementById('avg-rating-val').innerText = "0.0";
+            document.getElementById('total-ratings-count').innerText = "0 Ratings";
+            document.getElementById('total-reviews-count').innerText = "0";
+            
+            // Bars aur Photos ko gayab karein
+            barsContainer.innerHTML = ""; 
+            photoSection.classList.add('hidden');
+            return;
         }
 
-        if (writeContainer) {
-            if (canReview) writeContainer.classList.remove('hidden');
-            else writeContainer.classList.add('hidden');
-        }
+        // --- AGAR REVIEW HAIN TOH CALCULATION KAREIN ---
+        let totalRating = 0;
+        let distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        let allImages = [];
 
-        if (reviews.length === 0) {
-            list.innerHTML = '<p class="text-gray-400 italic">No reviews yet.</p>';
-        } else {
-            list.innerHTML = reviews.map(r => `
-                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">${r.user[0]}</div>
-                        <div>
-                            <p class="font-bold text-sm text-gray-900">${r.user}</p>
-                            <div class="text-amber-400 text-xs">{'★'.repeat(r.rating) + '☆'.repeat(5-r.rating)}</div>
-                        </div>
-                        <span class="ml-auto text-xs text-gray-400">${r.date}</span>
+        reviews.forEach(r => {
+            totalRating += r.rating;
+            distribution[r.rating]++;
+            if (r.image) allImages.push(r.image);
+        });
+
+        const actualCount = reviews.length;
+        const avg = (totalRating / actualCount).toFixed(1);
+
+        // UI Update
+        if(topAvgEl) topAvgEl.innerText = avg;
+        if(topCountEl) topCountEl.innerText = `(${actualCount})`;
+        document.getElementById('avg-rating-val').innerText = avg;
+        document.getElementById('total-ratings-count').innerText = `${actualCount} Ratings`;
+
+        // Render Bars
+        barsContainer.innerHTML = [5, 4, 3, 2, 1].map(num => {
+            const pct = (distribution[num] / actualCount) * 100;
+            const barColor = num >= 4 ? 'bg-green-500' : (num === 3 ? 'bg-yellow-400' : 'bg-red-400');
+            return `
+                <div class="flex items-center gap-3 text-[11px] font-bold text-gray-500">
+                    <span class="w-12">${num} Stars</span>
+                    <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full ${barColor}" style="width: ${pct}%"></div>
                     </div>
-                    <p class="text-gray-600 text-sm mb-3">${r.text}</p>
-                    ${r.image ? `<img src="${r.image}" class="w-24 h-24 rounded-lg object-cover border border-gray-200">` : ''}
-                </div>
+                    <span class="w-8 text-right text-gray-400">${distribution[num]}</span>
+                </div>`;
+        }).join('');
+
+        // Photo Gallery Update
+        if (allImages.length > 0) {
+            photoSection.classList.remove('hidden');
+            document.getElementById('pdp-photo-gallery').innerHTML = allImages.map(img => `
+                <img src="${img}" class="w-20 h-20 rounded-xl object-cover border border-gray-100 flex-shrink-0">
             `).join('');
+        } else {
+            photoSection.classList.add('hidden');
         }
-    } catch (e) { console.warn("Could not fetch reviews", e); }
+
+        // Individual Reviews Render (Sahi style mein)
+        list.innerHTML = reviews.map(r => `
+            <div class="border-b border-gray-50 pb-6 last:border-0">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="${r.rating >= 4 ? 'bg-green-600' : 'bg-red-500'} text-white px-2 py-0.5 rounded text-[10px] font-bold">${r.rating} ★</span>
+                    <span class="font-bold text-sm text-gray-900">${r.user}</span>
+                    <span class="text-[10px] text-gray-400 ml-auto">${r.date}</span>
+                </div>
+                <p class="text-gray-600 text-sm leading-relaxed">${r.text}</p>
+                ${r.image ? `<img src="${r.image}" class="mt-3 w-24 h-24 rounded-2xl object-cover border border-gray-100">` : ''}
+            </div>
+        `).join('');
+
+        if (window.lucide) lucide.createIcons();
+
+    } catch (e) {
+        console.error("Review Load Error:", e);
+    }
+}
+// 1. Voice Synthesis Function
+function speakGuide(text) {
+    window.speechSynthesis.cancel(); // Pehle wala stop karein
+    const msg = new SpeechSynthesisUtterance();
+    msg.text = text;
+    msg.rate = 0.9; // Normal speed
+    msg.pitch = 1.1; // Slightly feminine
+    
+    // Female voice select karne ka try karein
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Female'));
+    if (femaleVoice) msg.voice = femaleVoice;
+    
+    window.speechSynthesis.speak(msg);
 }
 
+// 2. Trust Guide Function (Meesho Style)
+function showTrustGuide(type) {
+    const modal = document.getElementById('guide-modal');
+    const content = document.getElementById('guide-content');
+    const title = document.getElementById('guide-title');
+    modal.classList.remove('hidden');
+
+    let steps = [];
+    let voiceText = "";
+
+    if (type === 'return') {
+        title.innerText = "7 Days Easy Returns";
+        voiceText = "You can return this product for free within 7 days. Our agent will pick it up in 2 to 3 days and you will get a full refund within 24 hours.";
+        steps = [
+            { icon: 'package-check', text: 'Free returns in 7 days', color: 'text-green-600' },
+            { icon: 'truck', text: 'Pickup in 2-3 days', color: 'text-blue-600' },
+            { icon: 'circle-dollar-sign', text: 'Refund within 24 hours', color: 'text-purple-600' }
+        ];
+    } else if (type === 'cod') {
+        title.innerText = "Cash On Delivery";
+        voiceText = "Pay for your order at your doorstep when it arrives. No advance payment is needed.";
+        steps = [
+            { icon: 'wallet', text: 'No advance payment', color: 'text-amber-600' },
+            { icon: 'hand-coins', text: 'Pay at doorstep', color: 'text-green-600' }
+        ];
+    } else {
+        title.innerText = "Lowest Price Guarantee";
+        voiceText = "This product is available at the lowest market price only at Kicks India.";
+        steps = [
+            { icon: 'trending-down', text: 'Best Price Found', color: 'text-pink-600' },
+            { icon: 'award', text: 'Verified Quality', color: 'text-purple-600' }
+        ];
+    }
+
+    content.innerHTML = steps.map((s, i) => `
+        <div class="flex items-center gap-6 group">
+            <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center ${s.color} border border-gray-100 shadow-sm">
+                <i data-lucide="${s.icon}" class="w-6 h-6"></i>
+            </div>
+            <div class="flex-1">
+                <p class="font-black text-gray-800 text-sm uppercase tracking-tight">${s.text}</p>
+                <div class="w-full h-1 bg-gray-100 mt-2 rounded-full"><div class="h-full bg-green-500 w-full rounded-full transition-all duration-1000"></div></div>
+            </div>
+        </div>
+    `).join('');
+
+    if (window.lucide) lucide.createIcons();
+    speakGuide(voiceText);
+}
+
+function closeGuide() {
+    document.getElementById('guide-modal').classList.add('hidden');
+    window.speechSynthesis.cancel();
+}
+
+// 3. Update Product Page Logic (Accurate Ratings & Vendor Name)
+// index.js: Is function ko replace karein
+async function openProductPage(id) {
+    const product = products.find(p => p.id == id);
+
+    if (!product) {
+        console.error("Product not found for ID:", id);
+        return;
+    }
+
+    // State Reset
+    state.currentProductId = product.id;
+    state.selectedSize = null;
+    state.currentImageIndex = 0;
+    state.currentQuantity = 1;
+    addToRecent(product);
+    switchView('product');
+
+    // 1. Basic Details & Images
+    document.getElementById('pdp-main-img').src = product.images[0] || product.img;
+    const thumb0 = document.getElementById('thumb-0'); if (thumb0) thumb0.src = product.images[0] || product.img;
+    const thumb1 = document.getElementById('thumb-1'); if (thumb1) thumb1.src = product.images[1] || product.img;
+    const thumb2 = document.getElementById('thumb-2'); if (thumb2) thumb2.src = product.images[2] || product.img;
+    resetThumbBorders(0);
+
+    document.getElementById('pdp-brand').innerText = product.brand;
+    document.getElementById('pdp-title').innerText = product.name;
+    document.getElementById('pdp-price').innerText = formatMoney(product.price);
+    document.getElementById('pdp-desc').innerText = product.description || "No description provided.";
+    document.getElementById('pdp-qty-display').innerText = "1";
+
+    // 2. Vendor Shop Name Update
+const vendorEl = document.getElementById('pdp-vendor-shop-name');
+    if (vendorEl) {
+        // Ab ye product object se asli shopName uthayega
+        vendorEl.innerText = product.shopName;
+    }
+    // 3. Stock Badge & Buttons
+    const inStock = product.stock > 0;
+    const stockBadge = document.getElementById('pdp-stock-badge');
+    const stockOverlay = document.getElementById('pdp-out-of-stock-overlay');
+    const btnAdd = document.getElementById('btn-add-cart');
+    const btnBuy = document.getElementById('btn-buy-now');
+
+    if (inStock) {
+        stockBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 uppercase";
+        stockBadge.innerText = "In Stock";
+        stockOverlay.classList.add('hidden');
+        btnAdd.disabled = false; btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnBuy.disabled = false; btnBuy.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        stockBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-500 border border-red-200 uppercase";
+        stockBadge.innerText = "Out of Stock";
+        stockOverlay.classList.remove('hidden');
+        btnAdd.disabled = true; btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+        btnBuy.disabled = true; btnBuy.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    // 4. Wishlist Status
+    const isWish = state.wishlist.includes(id);
+    document.getElementById('pdp-wishlist-btn').innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
+
+    // 5. Sizes Logic
+    const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['Standard'];
+    const sizeContainer = document.getElementById('pdp-sizes');
+    sizeContainer.innerHTML = availableSizes.map(s => `
+        <button type="button" onclick="selectSize(this, '${s}')" class="size-btn py-3 rounded-lg border border-gray-200 font-bold text-gray-500 hover:border-purple-600 hover:text-purple-600 transition bg-white">${s}</button>
+    `).join('');
+
+    // 6. Accurate Rating & Reviews Fetch
+    renderReviews(product.id);
+    renderRecommendations(product);
+
+    if (window.lucide) lucide.createIcons();
+    window.scrollTo(0, 0);
+}
 async function submitReview(e) {
     e.preventDefault();
     if (!state.user) { showToast("Please login first"); return; }
@@ -2627,7 +2815,9 @@ function highlightSidebar(activeName) {
             }
         }
     });
-}// =========================================
+}
+
+// =========================================
 // NEW HOME SLIDESHOW LOGIC (Fixed & Clean)
 // =========================================
 function initHomeSlideshowLogic() {
