@@ -1170,15 +1170,22 @@ async function renderReviews(productId) {
     const topAvgEl = document.getElementById('pdp-rating-avg');
     const topCountEl = document.getElementById('pdp-rating-total-count');
 
-    // --- 1. VERIFIED BUYER CHECK (Strict Condition) ---
-    // Check if user is logged in AND has a 'Delivered' order for this specific productId
-    const hasDeliveredOrder = state.user && state.orders.some(order => 
-        (order.status === 'Delivered' || order.status === 'Return Completed') && 
-        order.items.some(item => item.id == productId)
-    );
+    // --- 1. Verified Buyer & 7 Days Check ---
+    const hasDeliveredOrder = state.user && state.orders.some(order => {
+        const isDelivered = (order.status === 'Delivered' || order.status === 'Return Completed');
+        const hasItem = order.items.some(item => item.id == productId);
+        
+        // 7 Days Logic
+        const orderDate = parseDate(order.date); 
+        const today = new Date();
+        const diffTime = Math.abs(today - orderDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const isWithin7Days = diffDays <= 7;
+
+        return isDelivered && hasItem && isWithin7Days;
+    });
 
     if (hasDeliveredOrder) {
-        // Form tabhi dikhega jab user verified buyer hoga
         writeReviewBox.classList.remove('hidden');
         writeReviewBox.innerHTML = `
             <div class="flex items-center gap-2 mb-4">
@@ -1209,21 +1216,23 @@ async function renderReviews(productId) {
             </form>
         `;
     } else {
-        // Agar user ne kharida nahi hai, toh form hide rahega
         writeReviewBox.classList.add('hidden');
-        // Optional: Yahan aap message dikha sakte hain agar aap chahein
     }
 
-    // --- 2. FETCH AND RENDER EXISTING REVIEWS ---
+    // --- 2. Fetch Reviews ---
     try {
         const res = await fetch(`${API_URL}/reviews/${productId}`);
         const reviews = await res.json();
 
-        // Stats elements ko default reset karein
+        // Reset stats if empty
         if(topAvgEl) topAvgEl.innerText = "0.0";
         if(topCountEl) topCountEl.innerText = "(0)";
         const avgValBig = document.getElementById('avg-rating-val');
         if(avgValBig) avgValBig.innerText = "0.0";
+        const totalRatingsCountEl = document.getElementById('total-ratings-count');
+        if(totalRatingsCountEl) totalRatingsCountEl.innerText = "0 Ratings";
+        const totalReviewsCountEl = document.getElementById('total-reviews-count');
+        if(totalReviewsCountEl) totalReviewsCountEl.innerText = "0";
 
         if (!reviews || reviews.length === 0) {
             list.innerHTML = `
@@ -1236,7 +1245,7 @@ async function renderReviews(productId) {
             return;
         }
 
-        // --- 3. CALCULATE STATS ---
+        // --- 3. Calculate Stats ---
         let totalRating = 0;
         let distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         let allImages = [];
@@ -1250,18 +1259,15 @@ async function renderReviews(productId) {
         const actualCount = reviews.length;
         const avg = (totalRating / actualCount).toFixed(1);
 
-        // Header and Summary update
         if(topAvgEl) topAvgEl.innerText = avg;
         if(topCountEl) topCountEl.innerText = `(${actualCount})`;
         if(avgValBig) avgValBig.innerText = avg;
-        
-        const totalRatingsCountEl = document.getElementById('total-ratings-count');
         if(totalRatingsCountEl) totalRatingsCountEl.innerText = `${actualCount} Ratings`;
+        if(totalReviewsCountEl) totalReviewsCountEl.innerText = `${actualCount}`;
 
-        // --- 4. RENDER RATING BARS ---
+        // --- 4. Render Bars ---
         barsContainer.innerHTML = [5, 4, 3, 2, 1].map(num => {
             const pct = (distribution[num] / actualCount) * 100;
-            // Star color logic
             const barColor = num >= 4 ? 'bg-green-500' : (num === 3 ? 'bg-yellow-400' : 'bg-red-400');
             return `
                 <div class="flex items-center gap-3 text-[11px] font-bold text-gray-500">
@@ -1273,17 +1279,24 @@ async function renderReviews(productId) {
                 </div>`;
         }).join('');
 
-        // --- 5. RENDER PHOTO GALLERY (If any) ---
+        // --- 5. Real Photos Gallery (CLICKABLE LOGIC ADDED) ---
         if (allImages.length > 0) {
             photoSection.classList.remove('hidden');
+            // Yahan onclick add kiya hai
             document.getElementById('pdp-photo-gallery').innerHTML = allImages.map(img => `
-                <img src="${img}" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm flex-shrink-0 hover:scale-105 transition">
+                <div class="relative group cursor-pointer flex-shrink-0" onclick="openImageViewer('${img}')">
+                    <img src="${img}" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition duration-300">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors"></div>
+                    <div class="absolute bottom-1 right-1 bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+                        <i data-lucide="maximize-2" class="w-3 h-3 text-white"></i>
+                    </div>
+                </div>
             `).join('');
         } else {
             photoSection.classList.add('hidden');
         }
 
-        // --- 6. RENDER INDIVIDUAL REVIEWS ---
+        // --- 6. Individual Reviews (IMAGES ALSO CLICKABLE) ---
         list.innerHTML = reviews.map(r => `
             <div class="bg-white p-6 rounded-2xl border border-gray-50 shadow-sm transition hover:shadow-md mb-4">
                 <div class="flex items-center gap-3 mb-3">
@@ -1299,7 +1312,12 @@ async function renderReviews(productId) {
                     </div>
                 </div>
                 <p class="text-gray-600 text-sm leading-relaxed mb-4 font-medium">"${r.text}"</p>
-                ${r.image ? `<img src="${r.image}" class="w-28 h-28 rounded-2xl object-cover border border-gray-100 shadow-sm hover:scale-105 transition">` : ''}
+                ${r.image ? `
+                    <div onclick="openImageViewer('${r.image}')" class="cursor-pointer inline-block group relative">
+                        <img src="${r.image}" class="w-28 h-28 rounded-2xl object-cover border border-gray-100 shadow-sm group-hover:scale-105 transition duration-300">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-2xl transition-colors"></div>
+                    </div>
+                ` : ''}
             </div>
         `).join('');
 
@@ -1308,6 +1326,151 @@ async function renderReviews(productId) {
     } catch (e) { 
         console.error("Error fetching reviews:", e); 
         list.innerHTML = '<p class="text-red-500 text-center text-sm">Failed to load reviews. Check server connection.</p>';
+    }
+}
+// --- NEW: VIEW BILL FUNCTION ---
+function viewUserBill(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const modal = document.getElementById('user-bill-modal');
+    const content = document.getElementById('user-bill-content');
+    
+    // Status Badge Logic
+    const statusColor = (order.status === 'Delivered') ? 'text-green-600 border-green-200 bg-green-50' : 'text-purple-600 border-purple-200 bg-purple-50';
+
+    // Items List
+    const itemsHtml = order.items.map(item => `
+        <div class="flex justify-between items-start py-3 border-b border-dashed border-gray-200">
+            <div class="flex gap-3">
+                <span class="font-bold text-gray-500">1x</span>
+                <div>
+                    <p class="font-bold text-gray-900 text-xs uppercase">${item.name}</p>
+                    <p class="text-[10px] text-gray-400">Size: ${item.selectedSize || 'Std'}</p>
+                </div>
+            </div>
+            <p class="font-bold text-gray-900">₹${item.price}</p>
+        </div>
+    `).join('');
+
+    // Full Invoice HTML
+    content.innerHTML = `
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black text-purple-900 tracking-tighter mb-1">KICKS INDIA<span class="text-purple-500">.</span></h1>
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest">Official Tax Invoice</p>
+        </div>
+
+        <div class="flex justify-between items-center mb-6 p-3 bg-gray-50 rounded-xl border border-gray-100">
+            <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase">Order ID</p>
+                <p class="font-black text-sm">#${order.id}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-400 font-bold uppercase">Date</p>
+                <p class="font-bold text-xs">${order.date}</p>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Billed To</p>
+            <p class="font-bold text-sm text-gray-800">${order.customerName}</p>
+            <p class="text-xs text-gray-500 w-3/4">${order.address}</p>
+            <p class="text-xs text-gray-500 mt-1">Phone: ${order.phone}</p>
+        </div>
+
+        <div class="mb-2">
+            <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 border-b border-gray-100 pb-1">Order Summary</p>
+            ${itemsHtml}
+        </div>
+
+        <div class="space-y-2 pt-2">
+            <div class="flex justify-between text-xs text-gray-500">
+                <span>Subtotal</span>
+                <span>₹${order.total - 5}</span>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500">
+                <span>Platform Fee</span>
+                <span>₹5.00</span>
+            </div>
+            <div class="flex justify-between text-lg font-black text-purple-900 pt-3 border-t border-gray-200 mt-2">
+                <span>Total Paid</span>
+                <span>₹${order.total}</span>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase border ${statusColor}">
+                ${order.status === 'Delivered' ? 'Delivered & Paid' : 'Return Completed'}
+            </span>
+            <p class="text-[10px] text-gray-400 mt-4">Thank you for shopping with Kicks India.</p>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    if(window.lucide) lucide.createIcons();
+}
+// --- Image Viewer Modal Logic ---
+function openImageViewer(src) {
+    // 1. Check agar modal pehle se bana hai
+    let modal = document.getElementById('image-viewer-modal');
+    
+    // 2. Agar nahi hai, toh dynamic HTML create karo
+    if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="image-viewer-modal" class="fixed inset-0 z-[150] hidden flex items-center justify-center bg-black/95 backdrop-blur-md transition-opacity duration-300 opacity-0" onclick="closeImageViewer()">
+                
+                <button class="absolute top-6 right-6 text-white p-3 rounded-full bg-white/10 hover:bg-white/20 transition hover:rotate-90 z-[160]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
+                </button>
+
+                <img id="image-viewer-img" src="" class="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            </div>
+        `);
+        modal = document.getElementById('image-viewer-modal');
+    }
+    
+    // 3. Image Src Set karo
+    const img = document.getElementById('image-viewer-img');
+    img.src = src;
+    
+    // 4. Modal Show karo (Animation ke saath)
+    modal.classList.remove('hidden');
+    // Thoda delay taaki opacity transition kaam kare
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        img.classList.remove('scale-95');
+        img.classList.add('scale-100');
+    }, 10);
+}
+
+function closeImageViewer() {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('image-viewer-img');
+    
+    if (modal) {
+        // Animation reverse karo
+        modal.classList.add('opacity-0');
+        if (img) {
+            img.classList.remove('scale-100');
+            img.classList.add('scale-95');
+        }
+        
+        // Animation khatam hone ke baad hidden karo
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            if (img) img.src = ''; // Memory clear
+        }, 300);
+    }
+}
+
+function closeImageViewer() {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('image-viewer-img');
+    if (modal) {
+        modal.classList.add('opacity-0');
+        img.classList.remove('scale-100');
+        img.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 300);
     }
 }
 // 1. Voice Synthesis Function
@@ -2065,56 +2228,38 @@ function renderOrders() {
         </div>
     `;
 
-    // Empty State Check
     if (state.orders.length === 0) {
         list.innerHTML = '';
         document.getElementById('orders-empty').classList.remove('hidden');
     } else {
         document.getElementById('orders-empty').classList.add('hidden');
 
-        // Generate HTML
         const ordersHtml = state.orders.map(o => {
             const displayStatus = o.status;
             const secretOtp = o.secretOtp;
 
             const isCancelled = displayStatus === 'Cancelled';
-            // ✅ FIX: 'Return Completed' ko bhi complete maano
             const isReturnComplete = displayStatus === 'Return Closed' || displayStatus === 'Returned' || displayStatus === 'Return Completed';
             const isReturnProcess = (displayStatus === 'Return Requested' || displayStatus === 'Return Approved' || displayStatus === 'Return Assigned' || displayStatus === 'Pickup Assigned' || displayStatus === 'Return Picked Up') && !isReturnComplete;
             const isDelivered = displayStatus === 'Delivered' && !isReturnProcess && !isReturnComplete;
 
-            // --- ✅ OTP LOGIC (UPDATED) ---
+            // --- OTP LOGIC ---
             let otpHtml = '';
-
-            // 1. Delivery OTP Condition (Picked Up OR Out for Delivery)
             if ((displayStatus === 'Out for Delivery' || displayStatus === 'Picked Up') && secretOtp) {
                 otpHtml = `
                     <div class="mt-4 bg-yellow-50 border-2 border-yellow-400 p-4 rounded-xl flex justify-between items-center mb-2 shadow-sm animate-pulse">
                         <div>
-                            <p class="text-xs font-bold text-yellow-800 uppercase tracking-widest flex items-center gap-2">
-                                <i data-lucide="shield-check" class="w-4 h-4"></i> Delivery OTP
-                            </p>
-                            <p class="text-[10px] text-gray-600 font-medium">Share with delivery partner</p>
+                            <p class="text-xs font-bold text-yellow-800 uppercase tracking-widest flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4"></i> Delivery OTP</p>
                         </div>
-                        <div class="bg-white px-4 py-2 rounded-lg border border-yellow-200 shadow-inner">
-                            <span class="font-black text-2xl text-black tracking-[0.2em]">${secretOtp}</span>
-                        </div>
+                        <span class="font-black text-2xl text-black tracking-[0.2em]">${secretOtp}</span>
                     </div>`;
-            }
-
-            // 2. Return OTP Condition (Approved, Assigned, or Pickup Started)
-            else if ((displayStatus === 'Return Approved' || displayStatus === 'Return Assigned' || displayStatus === 'Return Picked Up' || displayStatus === 'Pickup Assigned') && secretOtp) {
+            } else if ((displayStatus === 'Return Approved' || displayStatus === 'Return Assigned' || displayStatus === 'Return Picked Up' || displayStatus === 'Pickup Assigned') && secretOtp) {
                 otpHtml = `
                     <div class="mt-4 bg-orange-50 border-2 border-orange-400 p-4 rounded-xl flex justify-between items-center mb-2 shadow-sm animate-pulse">
                         <div>
-                            <p class="text-xs font-bold text-orange-800 uppercase tracking-widest flex items-center gap-2">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Return Pickup OTP
-                            </p>
-                            <p class="text-[10px] text-gray-600 font-medium">Give this to pickup agent</p>
+                            <p class="text-xs font-bold text-orange-800 uppercase tracking-widest flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Return OTP</p>
                         </div>
-                        <div class="bg-white px-4 py-2 rounded-lg border border-orange-200 shadow-inner">
-                            <span class="font-black text-2xl text-red-600 tracking-[0.2em]">${secretOtp}</span>
-                        </div>
+                        <span class="font-black text-2xl text-red-600 tracking-[0.2em]">${secretOtp}</span>
                     </div>`;
             }
 
@@ -2131,10 +2276,24 @@ function renderOrders() {
             const returnAction = canReturn ? `onclick="openReturnModal('${o.id}')"` : "";
 
             let actionButtons = '';
+
+            // --- BILL BUTTON LOGIC (Visible ONLY if Delivered OR Returned) ---
+            let billBtn = '';
+            if (isDelivered || isReturnComplete) {
+                billBtn = `
+                <button onclick="viewUserBill('${o.id}')" class="w-full mt-2 py-2 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 flex items-center justify-center gap-2">
+                    <i data-lucide="receipt" class="w-3 h-3"></i> View Invoice
+                </button>`;
+            }
+
             if (isCancelled) {
                 actionButtons = `<div class="mt-4 pt-3 border-t border-gray-100 text-sm text-red-500 font-bold flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4"></i> Cancelled</div>`;
             } else if (isReturnComplete) {
-                actionButtons = `<div class="mt-4 pt-3 border-t border-gray-100 text-green-600 font-bold text-sm flex gap-2"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Return Successful</div>`;
+                actionButtons = `
+                    <div class="mt-4 pt-3 border-t border-gray-100">
+                        <div class="text-green-600 font-bold text-sm flex gap-2 mb-2"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Return Successful</div>
+                        ${billBtn}
+                    </div>`;
             } else if (isReturnProcess) {
                 actionButtons = `
                     <div class="mt-4 pt-3 border-t border-gray-100 flex flex-col gap-2">
@@ -2143,11 +2302,15 @@ function renderOrders() {
                     </div>`;
             } else if (isDelivered) {
                 actionButtons = `
-                    <div class="mt-4 pt-3 border-t border-gray-100 flex gap-3">
-                        <button ${returnAction} class="flex-1 py-2 border border-gray-200 ${returnDisabledClass} rounded text-xs font-bold">${returnBtnText}</button>
-                       <button onclick="goToReview('${o.items[0].id}')" class="flex-1 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-xs font-bold transition">Write Review</button>
+                    <div class="mt-4 pt-3 border-t border-gray-100">
+                        <div class="flex gap-3 mb-2">
+                            <button ${returnAction} class="flex-1 py-2 border border-gray-200 ${returnDisabledClass} rounded text-xs font-bold">${returnBtnText}</button>
+                            <button onclick="goToReview('${o.items[0].id}')" class="flex-1 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-xs font-bold transition">Write Review</button>
+                        </div>
+                        ${billBtn}
                     </div>`;
             } else {
+                // Active Order (Pending/Shipped) - No Bill Yet
                 actionButtons = `
                     <div class="mt-4 pt-3 border-t border-gray-100 flex gap-3">
                         <button onclick="openTracking('${o.id}')" class="flex-1 py-2 bg-purple-50 text-purple-700 rounded text-xs font-bold hover:bg-purple-100">Track Order</button>
@@ -2170,8 +2333,6 @@ function renderOrders() {
         `}).join('');
 
         list.innerHTML = ordersHtml;
-
-        // Re-initialize icons
         if (window.lucide) lucide.createIcons();
     }
 }
