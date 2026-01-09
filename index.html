@@ -470,6 +470,45 @@
     mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
 }
+/* --- ACCURATE IMAGE THEME (SKY BLUE) --- */
+:root {
+    --brand-blue: #2874f0;      /* Classic Blue */
+    --brand-light-blue: #f0f2f5; /* Light Gray/Blue for location bar */
+    --brand-dark: #1b5cbd;
+    --brand-sky: #4ba3ff;
+}
+
+/* 1. Header Main Background (Gradient like image) */
+.bg-brand {
+    background: linear-gradient(180deg, #2874f0 0%, #71b1ff 100%) !important;
+}
+
+/* 2. Location Bar Color (Light Gray as per image) */
+.bg-brand-dark {
+    background-color: var(--brand-light-blue) !important;
+    color: #616161 !important; /* Dim gray text */
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* 3. Search Bar Design */
+#search-input {
+    background-color: white !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #212121 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+/* 4. Active Category Underline */
+.category-active {
+    border-bottom: 3px solid var(--brand-blue);
+    color: var(--brand-blue) !important;
+    font-weight: 800;
+}
+
+/* Bottom Nav Fix */
+.nav-btn.active {
+    color: var(--brand-blue) !important;
+}
     </style>
 </head>
 
@@ -1848,13 +1887,7 @@
                                 <span class="font-bold text-gray-900 text-sm">COD</span>
                                 <span class="text-[10px] text-gray-500">Pay on arrival</span>
                             </label>
-                            <label
-                                class="border border-gray-200 bg-gray-50 p-4 rounded-xl flex flex-col gap-2 cursor-pointer hover:border-purple-600 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
-                                <input type="radio" name="payment-mode" value="Online Payment"
-                                    class="accent-purple-600 w-4 h-4 mb-2">
-                                <span class="font-bold text-gray-900 text-sm">UPI / Card</span>
-                                <span class="text-[10px] text-gray-500">Secure Transfer</span>
-                            </label>
+                    
                         </div>
                     </div>
 
