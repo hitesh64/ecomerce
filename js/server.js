@@ -67,6 +67,29 @@ const verifyToken = (roles = []) => {
         });
     };
 };
+// --- OPTIMIZED CONNECTION FOR VERCEL ---
+let isConnected = false;
+
+const connectDB = async () => {
+    if (isConnected) {
+        return;
+    }
+    try {
+        const db = await mongoose.connect(MONGO_URI, {
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 10s
+        });
+        isConnected = db.connections[0].readyState;
+        console.log("✅ MongoDB Connected via Serverless");
+    } catch (error) {
+        console.log("❌ MongoDB Connection Error:", error);
+    }
+};
+
+// Middleware to ensure DB is connected before handling requests
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
+});
 // --- MAGIC FIX ROUTE (Paste this before app.listen) ---
 app.get('/api/make-me-vendor/:email', async (req, res) => {
     try {
