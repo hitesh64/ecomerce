@@ -1162,37 +1162,81 @@ function renderRecommendations(currentProduct) {
         </div>
     `).join('');
 }
-
-// index.js: Is function ko replace karein
 async function renderReviews(productId) {
     const list = document.getElementById('pdp-reviews-list');
     const barsContainer = document.getElementById('rating-bars-container');
     const photoSection = document.getElementById('real-photos-section');
+    const writeReviewBox = document.getElementById('pdp-write-review-container');
     const topAvgEl = document.getElementById('pdp-rating-avg');
     const topCountEl = document.getElementById('pdp-rating-total-count');
 
+    // --- 1. VERIFIED BUYER CHECK (Strict Condition) ---
+    // Check if user is logged in AND has a 'Delivered' order for this specific productId
+    const hasDeliveredOrder = state.user && state.orders.some(order => 
+        (order.status === 'Delivered' || order.status === 'Return Completed') && 
+        order.items.some(item => item.id == productId)
+    );
+
+    if (hasDeliveredOrder) {
+        // Form tabhi dikhega jab user verified buyer hoga
+        writeReviewBox.classList.remove('hidden');
+        writeReviewBox.innerHTML = `
+            <div class="flex items-center gap-2 mb-4">
+                <div class="bg-green-500 text-white p-1 rounded-full shadow-sm">
+                    <i data-lucide="check-check" class="w-3 h-3"></i>
+                </div>
+                <h4 class="text-xs font-black text-purple-900 uppercase tracking-widest">Verified Buyer: Rate this product</h4>
+            </div>
+            <form onsubmit="submitReview(event)" class="space-y-4">
+                <div class="flex gap-4 items-center mb-2">
+                    <span class="text-xs font-bold text-gray-500 uppercase">Rating:</span>
+                    <select id="review-rating" class="p-2 rounded-lg border border-purple-100 text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500 bg-white">
+                        <option value="5">5 ★ (Excellent)</option>
+                        <option value="4">4 ★ (Good)</option>
+                        <option value="3">3 ★ (Average)</option>
+                        <option value="2">2 ★ (Poor)</option>
+                        <option value="1">1 ★ (Terrible)</option>
+                    </select>
+                </div>
+                <textarea id="review-text" placeholder="Share your experience with this product..." class="w-full p-4 rounded-2xl border border-purple-100 text-sm h-24 focus:ring-2 focus:ring-purple-500 outline-none transition-all" required></textarea>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="w-full md:flex-1">
+                        <label class="text-[10px] font-black text-gray-400 uppercase mb-1 block">Upload Real Photo (Optional)</label>
+                        <input type="file" id="review-image" accept="image/*" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer">
+                    </div>
+                    <button type="submit" class="w-full md:w-auto px-10 py-4 bg-purple-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-colors shadow-lg shadow-purple-200">Submit Review</button>
+                </div>
+            </form>
+        `;
+    } else {
+        // Agar user ne kharida nahi hai, toh form hide rahega
+        writeReviewBox.classList.add('hidden');
+        // Optional: Yahan aap message dikha sakte hain agar aap chahein
+    }
+
+    // --- 2. FETCH AND RENDER EXISTING REVIEWS ---
     try {
         const res = await fetch(`${API_URL}/reviews/${productId}`);
         const reviews = await res.json();
 
-        // --- AGAR REVIEW NAHI HAI (EMPTY STATE) ---
+        // Stats elements ko default reset karein
+        if(topAvgEl) topAvgEl.innerText = "0.0";
+        if(topCountEl) topCountEl.innerText = "(0)";
+        const avgValBig = document.getElementById('avg-rating-val');
+        if(avgValBig) avgValBig.innerText = "0.0";
+
         if (!reviews || reviews.length === 0) {
-            list.innerHTML = '<div class="text-center py-10 text-gray-400 italic">No reviews yet. Be the first to rate!</div>';
-            
-            // Sabhi values ko 0 karein
-            if(topAvgEl) topAvgEl.innerText = "0.0";
-            if(topCountEl) topCountEl.innerText = "(0)";
-            document.getElementById('avg-rating-val').innerText = "0.0";
-            document.getElementById('total-ratings-count').innerText = "0 Ratings";
-            document.getElementById('total-reviews-count').innerText = "0";
-            
-            // Bars aur Photos ko gayab karein
-            barsContainer.innerHTML = ""; 
+            list.innerHTML = `
+                <div class="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                    <i data-lucide="message-square" class="w-10 h-10 text-gray-200 mx-auto mb-3"></i>
+                    <p class="text-gray-400 text-sm italic">No reviews yet. Be the first to share your thoughts!</p>
+                </div>`;
+            barsContainer.innerHTML = "";
             photoSection.classList.add('hidden');
             return;
         }
 
-        // --- AGAR REVIEW HAIN TOH CALCULATION KAREIN ---
+        // --- 3. CALCULATE STATS ---
         let totalRating = 0;
         let distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         let allImages = [];
@@ -1206,53 +1250,64 @@ async function renderReviews(productId) {
         const actualCount = reviews.length;
         const avg = (totalRating / actualCount).toFixed(1);
 
-        // UI Update
+        // Header and Summary update
         if(topAvgEl) topAvgEl.innerText = avg;
         if(topCountEl) topCountEl.innerText = `(${actualCount})`;
-        document.getElementById('avg-rating-val').innerText = avg;
-        document.getElementById('total-ratings-count').innerText = `${actualCount} Ratings`;
+        if(avgValBig) avgValBig.innerText = avg;
+        
+        const totalRatingsCountEl = document.getElementById('total-ratings-count');
+        if(totalRatingsCountEl) totalRatingsCountEl.innerText = `${actualCount} Ratings`;
 
-        // Render Bars
+        // --- 4. RENDER RATING BARS ---
         barsContainer.innerHTML = [5, 4, 3, 2, 1].map(num => {
             const pct = (distribution[num] / actualCount) * 100;
+            // Star color logic
             const barColor = num >= 4 ? 'bg-green-500' : (num === 3 ? 'bg-yellow-400' : 'bg-red-400');
             return `
                 <div class="flex items-center gap-3 text-[11px] font-bold text-gray-500">
                     <span class="w-12">${num} Stars</span>
-                    <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full ${barColor}" style="width: ${pct}%"></div>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full ${barColor} transition-all duration-1000" style="width: ${pct}%"></div>
                     </div>
                     <span class="w-8 text-right text-gray-400">${distribution[num]}</span>
                 </div>`;
         }).join('');
 
-        // Photo Gallery Update
+        // --- 5. RENDER PHOTO GALLERY (If any) ---
         if (allImages.length > 0) {
             photoSection.classList.remove('hidden');
             document.getElementById('pdp-photo-gallery').innerHTML = allImages.map(img => `
-                <img src="${img}" class="w-20 h-20 rounded-xl object-cover border border-gray-100 flex-shrink-0">
+                <img src="${img}" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm flex-shrink-0 hover:scale-105 transition">
             `).join('');
         } else {
             photoSection.classList.add('hidden');
         }
 
-        // Individual Reviews Render (Sahi style mein)
+        // --- 6. RENDER INDIVIDUAL REVIEWS ---
         list.innerHTML = reviews.map(r => `
-            <div class="border-b border-gray-50 pb-6 last:border-0">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="${r.rating >= 4 ? 'bg-green-600' : 'bg-red-500'} text-white px-2 py-0.5 rounded text-[10px] font-bold">${r.rating} ★</span>
-                    <span class="font-bold text-sm text-gray-900">${r.user}</span>
-                    <span class="text-[10px] text-gray-400 ml-auto">${r.date}</span>
+            <div class="bg-white p-6 rounded-2xl border border-gray-50 shadow-sm transition hover:shadow-md mb-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="${r.rating >= 4 ? 'bg-green-600' : 'bg-red-500'} text-white px-3 py-1 rounded-lg text-[12px] font-black flex items-center gap-1">
+                        ${r.rating} <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="font-black text-sm text-gray-900 truncate uppercase tracking-tight">${r.user}</h5>
+                        <div class="flex items-center gap-2">
+                             <span class="text-[9px] text-gray-400 font-bold uppercase">${r.date}</span>
+                             <span class="text-[9px] text-green-600 font-black uppercase flex items-center gap-0.5"><i data-lucide="check-circle" class="w-2.5 h-2.5"></i> Verified Buyer</span>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-gray-600 text-sm leading-relaxed">${r.text}</p>
-                ${r.image ? `<img src="${r.image}" class="mt-3 w-24 h-24 rounded-2xl object-cover border border-gray-100">` : ''}
+                <p class="text-gray-600 text-sm leading-relaxed mb-4 font-medium">"${r.text}"</p>
+                ${r.image ? `<img src="${r.image}" class="w-28 h-28 rounded-2xl object-cover border border-gray-100 shadow-sm hover:scale-105 transition">` : ''}
             </div>
         `).join('');
 
         if (window.lucide) lucide.createIcons();
 
-    } catch (e) {
-        console.error("Review Load Error:", e);
+    } catch (e) { 
+        console.error("Error fetching reviews:", e); 
+        list.innerHTML = '<p class="text-red-500 text-center text-sm">Failed to load reviews. Check server connection.</p>';
     }
 }
 // 1. Voice Synthesis Function
@@ -2090,7 +2145,7 @@ function renderOrders() {
                 actionButtons = `
                     <div class="mt-4 pt-3 border-t border-gray-100 flex gap-3">
                         <button ${returnAction} class="flex-1 py-2 border border-gray-200 ${returnDisabledClass} rounded text-xs font-bold">${returnBtnText}</button>
-                        <button onclick="openProductPage('${o.items[0].id}')" class="flex-1 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-xs font-bold">Write Review</button>
+                       <button onclick="goToReview('${o.items[0].id}')" class="flex-1 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-xs font-bold transition">Write Review</button>
                     </div>`;
             } else {
                 actionButtons = `
