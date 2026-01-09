@@ -50,7 +50,7 @@ const verifyToken = (roles = []) => {
 
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
-                console.log("❌ Blocked: Invalid/Expired Token");
+                console.log("❌ Blocked: Invalid/Expired Token Error:", err.message); // Log exact error
                 return res.status(401).json({ message: "Session Expired" });
             }
             

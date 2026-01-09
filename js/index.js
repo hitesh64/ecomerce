@@ -961,11 +961,16 @@ function renderListingGrid() {
     document.getElementById('listing-count').innerText = `${filtered.length} ITEMS`;
     const grid = document.getElementById('listing-grid');
 
-    grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full text-center py-12 text-gray-400">No products found.</div>` : filtered.map(p => `
+    grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full text-center py-12 text-gray-400">No products found.</div>` : filtered.map(p => {
+        const isWish = state.wishlist.includes(p.id);
+        return `
         <div onclick="openProductPage(${p.id})" class="bg-white p-4 rounded-3xl border border-gray-100 product-card group cursor-pointer relative overflow-hidden">
+            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-4 right-4 z-30 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm hover:scale-110 transition">
+                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>
+            </button>
+            
             <div class="aspect-square bg-gray-50 rounded-2xl mb-4 overflow-hidden relative">
                 <img src="${p.img}" class="w-full h-full object-cover">
-                ${state.wishlist.includes(p.id) ? '<div class="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow"><i data-lucide="heart" class="w-4 h-4 fill-red-500 text-red-500"></i></div>' : ''}
             </div>
             <div>
                 <div class="flex justify-between items-start">
@@ -976,7 +981,7 @@ function renderListingGrid() {
                 <span class="font-bold text-lg text-gray-500">${formatMoney(p.price)}</span>
             </div>
         </div>
-    `).join('');
+    `}).join('');
     if (window.lucide) lucide.createIcons();
 }
 
@@ -985,8 +990,13 @@ function renderProducts() {
     if (!grid) return;
     if (products.length === 0) { grid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-10">Loading products...</div>'; return; }
 
-    grid.innerHTML = products.slice(0, 4).map((p, i) => `
+    grid.innerHTML = products.slice(0, 4).map((p, i) => {
+        const isWish = state.wishlist.includes(p.id);
+        return `
         <div onclick="openProductPage(${p.id})" class="bg-white p-4 rounded-3xl border border-gray-100 product-card group cursor-pointer relative overflow-hidden" style="animation-delay: ${i * 100}ms">
+            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-4 right-4 z-30 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm">
+                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>
+            </button>
             <div class="aspect-square bg-gray-50 rounded-2xl mb-4 overflow-hidden">
                 <img src="${p.img}" class="w-full h-full object-cover">
             </div>
@@ -996,7 +1006,7 @@ function renderProducts() {
                 <span class="font-bold text-lg text-gray-500">${formatMoney(p.price)}</span>
             </div>
         </div>
-    `).join('');
+    `}).join('');
     if (window.lucide) lucide.createIcons();
 }
 
@@ -1049,8 +1059,10 @@ function openProductPage(id) {
         btnBuy.disabled = true; btnBuy.classList.add('opacity-50', 'cursor-not-allowed');
     }
 
-    const isWish = state.wishlist.includes(id);
-    document.getElementById('pdp-wishlist-btn').innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
+const isWish = state.wishlist.includes(id);
+const wishlistBtn = document.getElementById('pdp-wishlist-btn');
+wishlistBtn.setAttribute('onclick', `toggleWishlist(${id})`); // Yeh line click function add karegi
+wishlistBtn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
 
     const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['Standard'];
     const sizeContainer = document.getElementById('pdp-sizes');
@@ -1313,9 +1325,6 @@ function closeGuide() {
     document.getElementById('guide-modal').classList.add('hidden');
     window.speechSynthesis.cancel();
 }
-
-// 3. Update Product Page Logic (Accurate Ratings & Vendor Name)
-// index.js: Is function ko replace karein
 async function openProductPage(id) {
     const product = products.find(p => p.id == id);
 
@@ -1345,12 +1354,10 @@ async function openProductPage(id) {
     document.getElementById('pdp-desc').innerText = product.description || "No description provided.";
     document.getElementById('pdp-qty-display').innerText = "1";
 
-    // 2. Vendor Shop Name Update
-const vendorEl = document.getElementById('pdp-vendor-shop-name');
-    if (vendorEl) {
-        // Ab ye product object se asli shopName uthayega
-        vendorEl.innerText = product.shopName;
-    }
+    // 2. Vendor Shop Name
+    const vendorEl = document.getElementById('pdp-vendor-shop-name');
+    if (vendorEl) vendorEl.innerText = product.shopName || "KICKS OFFICIAL STORE";
+
     // 3. Stock Badge & Buttons
     const inStock = product.stock > 0;
     const stockBadge = document.getElementById('pdp-stock-badge');
@@ -1361,29 +1368,35 @@ const vendorEl = document.getElementById('pdp-vendor-shop-name');
     if (inStock) {
         stockBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 uppercase";
         stockBadge.innerText = "In Stock";
-        stockOverlay.classList.add('hidden');
+        if(stockOverlay) stockOverlay.classList.add('hidden');
         btnAdd.disabled = false; btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
         btnBuy.disabled = false; btnBuy.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {
         stockBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-500 border border-red-200 uppercase";
         stockBadge.innerText = "Out of Stock";
-        stockOverlay.classList.remove('hidden');
+        if(stockOverlay) stockOverlay.classList.remove('hidden');
         btnAdd.disabled = true; btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
         btnBuy.disabled = true; btnBuy.classList.add('opacity-50', 'cursor-not-allowed');
     }
 
-    // 4. Wishlist Status
-    const isWish = state.wishlist.includes(id);
-    document.getElementById('pdp-wishlist-btn').innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
+    // --- FIX: WISHLIST BUTTON HANDLER ---
+    const isWish = state.wishlist.includes(Number(id));
+    const wishlistBtn = document.getElementById('pdp-wishlist-btn');
+    if (wishlistBtn) {
+        wishlistBtn.setAttribute('onclick', `toggleWishlist(${id})`); // Click event add kiya
+        wishlistBtn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
+    }
 
     // 5. Sizes Logic
     const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['Standard'];
     const sizeContainer = document.getElementById('pdp-sizes');
-    sizeContainer.innerHTML = availableSizes.map(s => `
-        <button type="button" onclick="selectSize(this, '${s}')" class="size-btn py-3 rounded-lg border border-gray-200 font-bold text-gray-500 hover:border-purple-600 hover:text-purple-600 transition bg-white">${s}</button>
-    `).join('');
+    if (sizeContainer) {
+        sizeContainer.innerHTML = availableSizes.map(s => `
+            <button type="button" onclick="selectSize(this, '${s}')" class="size-btn py-3 rounded-lg border border-gray-200 font-bold text-gray-500 hover:border-purple-600 hover:text-purple-600 transition bg-white">${s}</button>
+        `).join('');
+    }
 
-    // 6. Accurate Rating & Reviews Fetch
+    // 6. Accurate Rating & Reviews
     renderReviews(product.id);
     renderRecommendations(product);
 
@@ -1695,21 +1708,41 @@ async function buyNow() {
     openCheckout();
 }
 function toggleWishlist(id) {
-    if (!state.user) { openAuth('login'); return; }
-    const index = state.wishlist.indexOf(id);
-    if (index === -1) { state.wishlist.push(id); showToast("Added to Wishlist"); }
-    else { state.wishlist.splice(index, 1); showToast("Removed from Wishlist"); }
+    if (!state.user) { 
+        openAuth('login'); 
+        return; 
+    }
+    
+    // Convert ID to number to avoid mismatch
+    const prodId = Number(id);
+    const index = state.wishlist.indexOf(prodId);
+    
+    if (index === -1) { 
+        state.wishlist.push(prodId); 
+        showToast("Added to Wishlist"); 
+    } else { 
+        state.wishlist.splice(index, 1); 
+        showToast("Removed from Wishlist"); 
+    }
+    
     saveState();
     updateAllUI();
-    if (document.getElementById('view-listing').classList.contains('active')) renderListingGrid();
-    if (document.getElementById('view-wishlist').classList.contains('active')) renderWishlist();
-    if (state.currentProductId === id && document.getElementById('view-product').classList.contains('active')) {
-        const isWish = state.wishlist.includes(id);
-        document.getElementById('pdp-wishlist-btn').innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
-        if (window.lucide) lucide.createIcons();
+
+    // UI Refresh
+    if (document.getElementById('view-listing').style.display !== 'none') renderListingGrid();
+    if (document.getElementById('view-wishlist').style.display !== 'none') renderWishlist();
+    if (document.getElementById('view-home').style.display !== 'none') renderProducts();
+
+    // PDP Page update
+    if (state.currentProductId == prodId) {
+        const btn = document.getElementById('pdp-wishlist-btn');
+        if (btn) {
+            const isNowWish = state.wishlist.includes(prodId);
+            btn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isNowWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
+            if (window.lucide) lucide.createIcons();
+        }
     }
 }
-
 function renderWishlist() {
     const grid = document.getElementById('wishlist-grid');
     const wishProducts = products.filter(p => state.wishlist.includes(p.id));
