@@ -132,6 +132,36 @@ app.get('/api/make-me-vendor/:email', async (req, res) => {
         res.send(`❌ Error: ${e.message}`);
     }
 });
+app.post('/api/user/sync', async (req, res) => {
+    try {
+        const { email, cart, wishlist } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+        // Find user by email and update cart & wishlist
+        const user = await User.findOneAndUpdate(
+            { email: email },
+            { 
+                $set: { 
+                    cart: cart, 
+                    wishlist: wishlist 
+                } 
+            },
+            { new: true } // Return the updated document
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ success: true, message: "Cart & Wishlist Synced", user });
+    } catch (e) {
+        console.error("Sync Error:", e);
+        res.status(500).json({ error: e.message });
+    }
+});
 // --- MAGIC FIX ROUTE (Paste in server.js before app.listen) ---
 app.get('/api/upgrade-me/:email', async (req, res) => {
     try {
@@ -1056,91 +1086,6 @@ app.get('/api/fix-admin-pass/:email/:newpass', verifyToken(['admin']), async (re
         await Admin.findOneAndUpdate({ email }, { pass: hashedPassword });
         res.send(`✅ Password updated for ${email}`);
     } catch (e) { res.status(500).send(e.message); }
-});
-// --- REELS API ---
-
-// 1. Get All Reels
-app.get('/api/reels', async (req, res) => {
-    try {
-        const reels = await Reel.find().sort({ createdAt: -1 }); // Newest first
-        res.json(reels);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 2. Upload a Reel
-app.post('/api/reels', verifyToken(['customer', 'admin', 'vendor']), async (req, res) => {
-    try {
-        const { videoUrl, caption } = req.body;
-        
-        // Backend Validation: MongoDB document limit 16MB hoti hai via BSON
-        if(!videoUrl) return res.status(400).json({ error: "Video data missing" });
-
-        const newReel = new Reel({
-            userId: req.user.id,
-            userName: req.user.name || 'User', // User details token se aayengi
-            userPic: req.user.picture || '',
-            videoUrl: videoUrl,
-            caption: caption
-        });
-
-        await newReel.save();
-        res.json({ success: true, message: "Reel Uploaded!" });
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Video too large or server error" });
-    }
-});
-// --- REELS SECTION (Corrected & Single Version) ---
-
-// 1. Reel Schema
-// Note: Agar Schema pehle se define hai to delete karne ki zaroorat nahi, bas check karo do baar na ho.
-const ReelSchema = new mongoose.Schema({
-    userId: String,
-    userName: String,
-    userPic: String,
-    videoData: String, // Base64 Video
-    caption: String,
-    likes: { type: Number, default: 0 },
-    createdAt: { type: Date, default: Date.now }
-});
-
-// Check if model already exists to prevent OverwriteModelError
-const Reel = mongoose.models.Reel || mongoose.model('Reel', ReelSchema);
-
-// 2. Get All Reels Route
-app.get('/api/reels', async (req, res) => {
-    try {
-        const reels = await Reel.find().sort({ createdAt: -1 });
-        res.json(reels);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 3. Upload Reel Route
-app.post('/api/reels', verifyToken(['customer', 'admin', 'vendor']), async (req, res) => {
-    try {
-        const { videoData, caption } = req.body;
-        
-        if(!videoData) return res.status(400).json({ error: "Video data missing" });
-
-        // MongoDB Limit Check (Safety)
-        if(videoData.length > 16 * 1024 * 1024) {
-             return res.status(400).json({ error: "Video too large for Database (Limit 15MB)" });
-        }
-
-        const newReel = new Reel({
-            userId: req.user.id,
-            userName: req.user.name || 'User',
-            userPic: req.user.picture || '',
-            videoData: videoData,
-            caption: caption
-        });
-
-        await newReel.save();
-        res.json({ success: true, message: "Reel Uploaded!" });
-    } catch (e) {
-        console.error("Reel Upload Error:", e);
-        res.status(500).json({ error: "Server Error or Video Too Large" });
-    }
 });
 
 if (require.main === module) {

@@ -340,13 +340,18 @@ const showToast = (msg) => {
 };
 
 // --- 5. STATE MANAGEMENT ---
-
 const saveState = async () => {
+    // 1. Save to LocalStorage immediately (Fast UI)
     if (state.user) {
+        // Update the user object in state with current cart/wishlist
+        state.user.cart = state.cart;
+        state.user.wishlist = state.wishlist;
+        
         localStorage.setItem('kicks_user_session', JSON.stringify(state.user));
 
+        // 2. Sync to MongoDB (Background Process)
         try {
-            await fetch(`${API_URL}/user/sync`, {
+            const res = await fetch(`${API_URL}/user/sync`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -355,7 +360,14 @@ const saveState = async () => {
                     wishlist: state.wishlist
                 })
             });
-        } catch (e) { console.error("Sync failed", e); }
+            
+            // Optional: Log success
+            // const data = await res.json();
+            // console.log("DB Sync Status:", data);
+
+        } catch (e) { 
+            console.error("Sync failed to server", e); 
+        }
     }
 };
 
