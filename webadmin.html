@@ -1,51 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KICKS | Admin Portal (MongoDB)</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-        
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .view-section { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .animation-fadeIn { animation: fadeIn 0.2s ease-out; }
+
+        #sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-section {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .animation-fadeIn {
+            animation: fadeIn 0.2s ease-out;
+        }
+
         .slide-up {
-        animation: slideUp 0.3s ease-out;
-    }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
+            animation: slideUp 0.3s ease-out;
         }
-        to {
-            opacity: 1;
-            transform: translateY(0);
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-    }
-    
-    /* OTP input styling */
-    input[type="text"].otp-input {
-        letter-spacing: 10px;
-        font-size: 24px;
-    }
+
+        /* OTP input styling */
+        input[type="text"].otp-input {
+            letter-spacing: 10px;
+            font-size: 24px;
+        }
     </style>
 </head>
+
 <body class="bg-gray-50 text-gray-900 h-screen flex flex-col overflow-hidden">
 
     <div id="auth-view" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-4">
@@ -54,17 +85,16 @@
                 <h1 class="text-4xl font-black tracking-tighter mb-2">KICKS<span class="text-orange-600">IN</span></h1>
                 <p class="text-gray-500 font-medium">Administrative Access Only (DB)</p>
             </div>
-            
+
             <div id="g_id_onload"
-                 data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="handleAdminGoogleLogin"
-                 data-auto_prompt="false">
+                data-client_id="322997860332-p6g82li62crt2b7nmpe5sf1k2cd11e0v.apps.googleusercontent.com"
+                data-context="signin" data-ux_mode="popup" data-callback="handleAdminGoogleLogin"
+                data-auto_prompt="false">
             </div>
 
             <div id="login-form" class="space-y-6">
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+                    data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
 
                 <div class="relative flex py-2 items-center">
                     <div class="flex-grow border-t border-gray-200"></div>
@@ -72,79 +102,117 @@
                     <div class="flex-grow border-t border-gray-200"></div>
                 </div>
 
-                <input type="email" id="login-email" placeholder="Admin Email" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
-                <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
-                <button id="btn-login" onclick="handleLogin()" class="w-full py-4 bg-black text-white font-bold rounded-xl shadow-lg">Secure Login</button>
+                <input type="email" id="login-email" placeholder="Admin Email"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <input type="password" id="login-pass" placeholder="Password"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <button id="btn-login" onclick="handleLogin()"
+                    class="w-full py-4 bg-black text-white font-bold rounded-xl shadow-lg">Secure Login</button>
                 <!-- Forgot Password Button -->
-                <button onclick="showForgotPassword()" class="text-sm text-blue-600 font-medium text-center w-full hover:underline">
+                <button onclick="showForgotPassword()"
+                    class="text-sm text-blue-600 font-medium text-center w-full hover:underline">
                     Forgot Password?
                 </button>
-                
-                <p class="text-center text-sm text-gray-500">First time? <button onclick="toggleAuth('register')" class="text-blue-600 font-bold">Register Admin</button></p>
+
+                <p class="text-center text-sm text-gray-500">First time? <button onclick="toggleAuth('register')"
+                        class="text-blue-600 font-bold">Register Admin</button></p>
             </div>
 
             <div id="register-form" class="space-y-6 hidden">
                 <div class="g_id_signin" data-type="standard" data-width="100%"></div>
                 <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-gray-200"></div><span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Manual</span><div class="flex-grow border-t border-gray-200"></div>
+                    <div class="flex-grow border-t border-gray-200"></div><span
+                        class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Manual</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
                 </div>
-                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
-                <input type="email" id="reg-email" placeholder="Work Email" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
-                <input type="password" id="reg-pass" placeholder="Create Password" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
-                <button onclick="handleRegister()" class="w-full py-4 bg-black text-white font-bold rounded-xl shadow-lg">Create Account</button>
-                <p class="text-center text-sm text-gray-500">Have an account? <button onclick="toggleAuth('login')" class="text-blue-600 font-bold">Login</button></p>
+                <input type="text" id="reg-name" placeholder="Full Name"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <input type="email" id="reg-email" placeholder="Work Email"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <input type="password" id="reg-pass" placeholder="Create Password"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                <button onclick="handleRegister()"
+                    class="w-full py-4 bg-black text-white font-bold rounded-xl shadow-lg">Create Account</button>
+                <p class="text-center text-sm text-gray-500">Have an account? <button onclick="toggleAuth('login')"
+                        class="text-blue-600 font-bold">Login</button></p>
             </div>
         </div>
     </div>
 
     <div id="dashboard-layout" class="flex h-full w-full hidden">
-        <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+        <div id="overlay" onclick="toggleSidebar()"
+            class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
 
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 z-50 transform -translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 z-50 transform -translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
             <div class="h-16 flex items-center px-6 border-b border-gray-100 bg-white">
                 <h1 class="text-xl font-black tracking-tighter">ADMIN<span class="text-blue-600">PANEL</span></h1>
-                <button onclick="toggleSidebar()" class="ml-auto md:hidden text-gray-500"><i data-lucide="x"></i></button>
+                <button onclick="toggleSidebar()" class="ml-auto md:hidden text-gray-500"><i
+                        data-lucide="x"></i></button>
             </div>
-            
+
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
                 <p class="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 mb-2">General</p>
-                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="w-full flex items-center p-3 rounded-lg bg-blue-50 text-blue-700 font-bold transition"><i data-lucide="layout-dashboard" class="mr-3 w-5 h-5"></i> Dashboard</button>
-                <button onclick="switchTab('vendors')" id="btn-vendors" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="store" class="mr-3 w-5 h-5"></i> Vendors</button>
-                
+                <button onclick="switchTab('dashboard')" id="btn-dashboard"
+                    class="w-full flex items-center p-3 rounded-lg bg-blue-50 text-blue-700 font-bold transition"><i
+                        data-lucide="layout-dashboard" class="mr-3 w-5 h-5"></i> Dashboard</button>
+                <button onclick="switchTab('vendors')" id="btn-vendors"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="store" class="mr-3 w-5 h-5"></i> Vendors</button>
+
                 <div class="border-t border-gray-100 my-4"></div>
-                
-                <p class="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Logistics Control</p>
-                <button onclick="switchTab('recruitment')" id="btn-recruitment" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="user-plus" class="mr-3 w-5 h-5"></i> Job Applications</button>
-                <button onclick="switchTab('fleet')" id="btn-fleet" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="users" class="mr-3 w-5 h-5"></i> Active Fleet</button>
-                <button onclick="switchTab('dispatch')" id="btn-dispatch" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="send" class="mr-3 w-5 h-5"></i> Dispatch Manager</button>
-                <button onclick="switchTab('returns')" id="btn-returns" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i data-lucide="rotate-ccw" class="mr-3 w-5 h-5"></i> Returns</button>
+
+                <p class="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Logistics Control
+                </p>
+                <button onclick="switchTab('recruitment')" id="btn-recruitment"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="user-plus" class="mr-3 w-5 h-5"></i> Job Applications</button>
+                <button onclick="switchTab('fleet')" id="btn-fleet"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="users" class="mr-3 w-5 h-5"></i> Active Fleet</button>
+                <button onclick="switchTab('dispatch')" id="btn-dispatch"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="send" class="mr-3 w-5 h-5"></i> Dispatch Manager</button>
+                <button onclick="switchTab('returns')" id="btn-returns"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="rotate-ccw" class="mr-3 w-5 h-5"></i> Returns</button>
             </nav>
 
             <div class="p-4 border-t border-gray-100">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold overflow-hidden" id="admin-avatar">A</div>
-                    <div class="overflow-hidden"><p class="text-sm font-bold truncate" id="admin-name">Admin</p><p class="text-xs text-gray-500 truncate" id="admin-email">admin@system.com</p></div>
+                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold overflow-hidden"
+                        id="admin-avatar">A</div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold truncate" id="admin-name">Admin</p>
+                        <p class="text-xs text-gray-500 truncate" id="admin-email">admin@system.com</p>
+                    </div>
                 </div>
-                <button onclick="handleLogout()" class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-50 flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+                <button onclick="handleLogout()"
+                    class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-50 flex items-center justify-center gap-2"><i
+                        data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
             </div>
         </aside>
 
         <div class="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden">
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center px-4 justify-between md:hidden flex-shrink-0">
-                <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="menu"></i></button>
+            <header
+                class="h-16 bg-white border-b border-gray-200 flex items-center px-4 justify-between md:hidden flex-shrink-0">
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><i
+                        data-lucide="menu"></i></button>
                 <span class="font-black tracking-tighter text-xl">KICKS<span class="text-orange-600">IN</span></span>
                 <div class="w-8"></div>
             </header>
 
             <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-gray-50">
                 <div class="p-4 md:p-8 max-w-7xl mx-auto min-h-[calc(100vh-100px)]">
-                    
+
                     <div id="view-dashboard" class="view-section">
                         <h2 class="text-3xl font-black text-gray-900 mb-2">Product Approvals</h2>
-                        <p class="text-gray-500 text-sm mb-6">Review product and shop owner details before approving.</p>
+                        <p class="text-gray-500 text-sm mb-6">Review product and shop owner details before approving.
+                        </p>
                         <div id="pending-container" class="grid grid-cols-1 gap-6 mb-12"></div>
-                        
-                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-xl"><i data-lucide="database" class="w-5 h-5 text-blue-600"></i> Live Inventory</h3>
+
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-xl"><i
+                                data-lucide="database" class="w-5 h-5 text-blue-600"></i> Live Inventory</h3>
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                             <div class="overflow-x-auto custom-scroll">
                                 <table class="w-full text-sm text-left whitespace-nowrap">
@@ -165,7 +233,8 @@
                     <div id="view-vendors" class="view-section hidden">
                         <div class="flex justify-between items-center mb-8">
                             <h2 class="text-3xl font-black">Registered Vendors</h2>
-                            <button onclick="openVendorModal()" class="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-gray-800">
+                            <button onclick="openVendorModal()"
+                                class="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-gray-800">
                                 <i data-lucide="plus" class="w-4 h-4"></i> Add Vendor
                             </button>
                         </div>
@@ -190,13 +259,15 @@
 
                     <div id="view-recruitment" class="view-section hidden">
                         <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600"><i data-lucide="user-plus" class="w-6 h-6"></i></div>
+                            <div
+                                class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">
+                                <i data-lucide="user-plus" class="w-6 h-6"></i></div>
                             Job Applications
                         </h2>
-                        
+
                         <h3 class="font-bold text-gray-800 mb-4">Pending Review</h3>
                         <div class="max-w-3xl mb-10">
-                             <div id="delivery-apps-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                            <div id="delivery-apps-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                         </div>
 
                         <h3 class="font-bold text-gray-800 mb-4">Application History (Rejected / Inactive)</h3>
@@ -219,26 +290,32 @@
 
                     <div id="view-fleet" class="view-section hidden">
                         <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600"><i data-lucide="users" class="w-6 h-6"></i></div>
+                            <div
+                                class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                                <i data-lucide="users" class="w-6 h-6"></i></div>
                             Active Fleet Management
                         </h2>
-                        <p class="text-sm text-gray-500 mb-4">Manage online status, view orders, and manage accounts.</p>
+                        <p class="text-sm text-gray-500 mb-4">Manage online status, view orders, and manage accounts.
+                        </p>
                         <div class="max-w-3xl">
                             <div id="active-drivers-list" class="space-y-4"></div>
                         </div>
                     </div>
 
                     <div id="view-dispatch" class="view-section hidden">
-                         <div class="flex justify-between items-center mb-6">
+                        <div class="flex justify-between items-center mb-6">
                             <h2 class="text-3xl font-black text-gray-900 flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i data-lucide="send" class="w-6 h-6"></i></div>
+                                <div
+                                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                                    <i data-lucide="send" class="w-6 h-6"></i></div>
                                 Dispatch Manager
                             </h2>
                             <button onclick="loadData()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
                                 <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
                             </button>
                         </div>
-                        <p class="text-sm text-gray-500 mb-4">All orders (Active, Delivered, Returned & Cancelled) are listed here.</p>
+                        <p class="text-sm text-gray-500 mb-4">All orders (Active, Delivered, Returned & Cancelled) are
+                            listed here.</p>
                         <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left">
@@ -258,13 +335,15 @@
 
                     <div id="view-returns" class="view-section hidden">
                         <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600"><i data-lucide="rotate-ccw" class="w-6 h-6"></i></div>
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                                <i data-lucide="rotate-ccw" class="w-6 h-6"></i></div>
                             Returns & Reverse Logistics
                         </h2>
                         <div class="bg-white border border-red-100 rounded-xl overflow-hidden shadow-sm">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left">
-                                    <thead class="bg-red-50 text-xs uppercase font-bold text-red-800 border-b border-red-100">
+                                    <thead
+                                        class="bg-red-50 text-xs uppercase font-bold text-red-800 border-b border-red-100">
                                         <tr>
                                             <th class="p-4">Return Item</th>
                                             <th class="p-4">Reason / Proof</th>
@@ -282,20 +361,24 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]">
+    <div id="toast"
+        class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]">
         <span id="toast-msg" class="font-medium text-sm">Notification</span>
     </div>
 
     <div id="assign-modal" class="fixed inset-0 bg-black/50 z-[150] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <h3 class="font-bold text-lg mb-1">Select Delivery Partner</h3>
-            <p class="text-xs text-gray-500 mb-4">Assigning Task <span id="modal-order-id" class="font-mono text-black">#...</span></p>
-            
+            <p class="text-xs text-gray-500 mb-4">Assigning Task <span id="modal-order-id"
+                    class="font-mono text-black">#...</span></p>
+
             <div class="grid grid-cols-2 gap-2 mb-4">
-                <select id="assign-filter-state" onchange="filterAssignDrivers()" class="w-full p-2 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
+                <select id="assign-filter-state" onchange="filterAssignDrivers()"
+                    class="w-full p-2 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
                     <option value="">All States</option>
                 </select>
-                <select id="assign-filter-city" onchange="filterAssignDrivers()" class="w-full p-2 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
+                <select id="assign-filter-city" onchange="filterAssignDrivers()"
+                    class="w-full p-2 bg-gray-50 border rounded-lg text-xs font-bold outline-none">
                     <option value="">All Cities</option>
                 </select>
             </div>
@@ -311,27 +394,37 @@
                 <h3 class="font-bold text-lg" id="vendor-modal-title">Add Vendor</h3>
                 <button onclick="closeVendorModal()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
             </div>
-            
+
             <form onsubmit="saveVendor(event)" class="space-y-4">
-                <input type="hidden" id="v-id"> <div>
+                <input type="hidden" id="v-id">
+                <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Shop Name</label>
-                    <input type="text" id="v-shop" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                    <input type="text" id="v-shop"
+                        class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none"
+                        required>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Owner Name</label>
-                    <input type="text" id="v-owner" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                    <input type="text" id="v-owner"
+                        class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none"
+                        required>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Mobile</label>
-                        <input type="tel" id="v-mobile" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                        <input type="tel" id="v-mobile"
+                            class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none"
+                            required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
-                        <input type="email" id="v-email" class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none" required>
+                        <input type="email" id="v-email"
+                            class="w-full p-3 bg-gray-50 border rounded-lg text-sm font-bold focus:border-black outline-none"
+                            required>
                     </div>
                 </div>
-                <button type="submit" class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg mt-2">Save Vendor</button>
+                <button type="submit" class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg mt-2">Save
+                    Vendor</button>
             </form>
         </div>
     </div>
@@ -354,16 +447,20 @@
                     <input type="text" id="edit-app-vehicle" class="w-full p-3 border rounded-lg text-sm font-bold">
                 </div>
             </div>
-            <button onclick="saveEditedApp()" class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg mt-4">Save Changes</button>
-            <button onclick="document.getElementById('edit-app-modal').classList.add('hidden')" class="w-full py-3 text-gray-500 font-bold text-sm mt-1">Cancel</button>
+            <button onclick="saveEditedApp()"
+                class="w-full py-3 bg-black text-white font-bold rounded-xl shadow-lg mt-4">Save Changes</button>
+            <button onclick="document.getElementById('edit-app-modal').classList.add('hidden')"
+                class="w-full py-3 text-gray-500 font-bold text-sm mt-1">Cancel</button>
         </div>
     </div>
-    
-    <div id="driver-history-modal" class="fixed inset-0 bg-black/50 z-[170] hidden flex items-center justify-center p-4">
+
+    <div id="driver-history-modal"
+        class="fixed inset-0 bg-black/50 z-[170] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg">Delivery History</h3>
-                <button onclick="document.getElementById('driver-history-modal').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+                <button onclick="document.getElementById('driver-history-modal').classList.add('hidden')"><i
+                        data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
             </div>
             <div class="overflow-y-auto custom-scroll flex-1">
                 <table class="w-full text-sm text-left">
@@ -379,18 +476,23 @@
                 </table>
             </div>
             <div class="mt-4 pt-4 border-t text-right">
-                <button onclick="document.getElementById('driver-history-modal').classList.add('hidden')" class="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200">Close</button>
+                <button onclick="document.getElementById('driver-history-modal').classList.add('hidden')"
+                    class="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200">Close</button>
             </div>
         </div>
     </div>
 
-    <div id="bill-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div id="bill-modal"
+        class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 border-b flex justify-between items-center bg-gray-50 print:hidden">
                 <h3 class="font-bold text-lg">Order Invoice</h3>
                 <div class="flex gap-2">
-                    <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Print</button>
-                    <button onclick="document.getElementById('bill-modal').classList.add('hidden')" class="p-2 hover:bg-gray-200 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button onclick="window.print()"
+                        class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg flex items-center gap-2"><i
+                            data-lucide="printer" class="w-4 h-4"></i> Print</button>
+                    <button onclick="document.getElementById('bill-modal').classList.add('hidden')"
+                        class="p-2 hover:bg-gray-200 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
             </div>
             <div id="bill-content" class="p-8 overflow-y-auto bg-white text-sm font-mono">
@@ -399,22 +501,24 @@
     </div>
 
     <!-- Forgot Password Modal -->
-    <div id="forgot-password-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
+    <div id="forgot-password-modal"
+        class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-lg">Reset Password</h3>
                 <button onclick="closeForgotPassword()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
             </div>
-            
+
             <div id="forgot-step-1" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
-                    <input type="email" id="forgot-email" placeholder="Enter your email" 
-                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                    <input type="email" id="forgot-email" placeholder="Enter your email"
+                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">User Type</label>
-                    <select id="forgot-role" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                    <select id="forgot-role"
+                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
                         <option value="admin">Admin</option>
                         <option value="driver">Delivery Driver</option>
                         <option value="user">Customer/Vendor</option>
@@ -424,37 +528,38 @@
                     Send OTP
                 </button>
             </div>
-            
+
             <div id="forgot-step-2" class="space-y-4 hidden">
-                <p class="text-sm text-gray-600 mb-4">Enter the 6-digit OTP sent to <span id="otp-email" class="font-bold"></span></p>
-                
+                <p class="text-sm text-gray-600 mb-4">Enter the 6-digit OTP sent to <span id="otp-email"
+                        class="font-bold"></span></p>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">OTP Code</label>
                     <input type="text" id="forgot-otp" placeholder="Enter 6-digit OTP" maxlength="6"
-                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-center text-lg font-mono focus:border-black outline-none">
+                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-center text-lg font-mono focus:border-black outline-none">
                 </div>
-                
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">New Password</label>
-                    <input type="password" id="forgot-new-password" placeholder="Enter new password" 
-                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                    <input type="password" id="forgot-new-password" placeholder="Enter new password"
+                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
                 </div>
-                
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Confirm Password</label>
-                    <input type="password" id="forgot-confirm-password" placeholder="Confirm new password" 
-                           class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
+                    <input type="password" id="forgot-confirm-password" placeholder="Confirm new password"
+                        class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-black outline-none">
                 </div>
-                
+
                 <button onclick="resetPassword()" class="w-full py-3 bg-green-600 text-white font-bold rounded-lg">
                     Reset Password
                 </button>
-                
+
                 <button onclick="backToStep1()" class="w-full py-2 text-gray-600 font-medium text-sm">
                     Back
                 </button>
             </div>
-            
+
             <div id="forgot-success" class="text-center hidden">
                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
@@ -470,389 +575,411 @@
 
     <style>
         @media print {
-            body * { visibility: hidden; }
-            #bill-modal, #bill-modal * { visibility: visible; }
-            #bill-modal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; padding: 0; }
-            #bill-content { overflow: visible; height: auto; }
-            .print\:hidden { display: none !important; }
+            body * {
+                visibility: hidden;
+            }
+
+            #bill-modal,
+            #bill-modal * {
+                visibility: visible;
+            }
+
+            #bill-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                padding: 0;
+            }
+
+            #bill-content {
+                overflow: visible;
+                height: auto;
+            }
+
+            .print\:hidden {
+                display: none !important;
+            }
         }
     </style>
-<script>
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000/api'
-    : '/api';
-    const DB_SESSION = 'kicks_admin_session';
-    
-    let currentUser = null;
-    let allDrivers = [];
-    let allOrders = [];
-    let allProducts = [];
-    let allVendors = [];
-    let allReturnRequests = [];
+    <script>
+        const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:5000/api'
+            : '/api';
+        const DB_SESSION = 'kicks_admin_session';
 
-   window.addEventListener('DOMContentLoaded', init);
+        let currentUser = null;
+        let allDrivers = [];
+        let allOrders = [];
+        let allProducts = [];
+        let allVendors = [];
+        let allReturnRequests = [];
 
-async function init() {
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-    
-    try {
-        // LocalStorage se session check karein
-        const session = localStorage.getItem(DB_SESSION);
-        
-        if(session) {
-            // 1. Session Found
-            currentUser = JSON.parse(session);
-            
-            // 2. Check minimal requirements
-            if(currentUser && currentUser.token) {
-                console.log("✅ Restoring Session for:", currentUser.email);
-                routeUser(currentUser); // Dashboard dikhao
-            } else {
-                console.warn("❌ Invalid Session Data");
-                handleLogout(); // Bad data, clear it
-            }
-        } else {
-            console.log("ℹ️ No Session Found, showing login");
-            document.getElementById('auth-view').classList.remove('hidden');
-        }
-    } catch (e) {
-        console.error("Init Error:", e);
-        // Agar koi error aaye to login screen dikha do (Safe fallback)
-        document.getElementById('auth-view').classList.remove('hidden');
-    }
-}
+        window.addEventListener('DOMContentLoaded', init);
 
-function routeUser(user) {
-    try {
-        // 1. Hide Login Screen & Show Dashboard (IMMEDIATELY)
-        const authView = document.getElementById('auth-view');
-        const dashLayout = document.getElementById('dashboard-layout');
-        
-        if(authView) authView.classList.add('hidden');
-        if(dashLayout) dashLayout.classList.remove('hidden');
+        async function init() {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        // 2. Safe UI Updates (Crash Proof)
-        // Agar koi element nahi mila to crash nahi hoga
-        const nameEl = document.getElementById('admin-name');
-        const emailEl = document.getElementById('admin-email');
-        const avatarEl = document.getElementById('admin-avatar');
+            try {
+                // LocalStorage se session check karein
+                const session = localStorage.getItem(DB_SESSION);
 
-        if(nameEl) nameEl.innerText = user.name || 'Admin';
-        if(emailEl) emailEl.innerText = user.email || 'admin@kicks.in';
-        
-        if(avatarEl) {
-            if(user.picture) {
-                avatarEl.innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover rounded-full">`;
-            } else {
-                const initial = (user.name && user.name[0]) ? user.name[0].toUpperCase() : 'A';
-                avatarEl.innerText = initial;
+                if (session) {
+                    // 1. Session Found
+                    currentUser = JSON.parse(session);
+
+                    // 2. Check minimal requirements
+                    if (currentUser && currentUser.token) {
+                        console.log("✅ Restoring Session for:", currentUser.email);
+                        routeUser(currentUser); // Dashboard dikhao
+                    } else {
+                        console.warn("❌ Invalid Session Data");
+                        handleLogout(); // Bad data, clear it
+                    }
+                } else {
+                    console.log("ℹ️ No Session Found, showing login");
+                    document.getElementById('auth-view').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Init Error:", e);
+                // Agar koi error aaye to login screen dikha do (Safe fallback)
+                document.getElementById('auth-view').classList.remove('hidden');
             }
         }
-        
-        // 3. Load Data
-        switchTab('dashboard');
 
-    } catch(e) {
-        console.error("RouteUser Error:", e);
-        // Agar UI render fail ho jaye, to logout karo taaki user fanse nahi
-        handleLogout();
-    }
-}
-    // --- GOOGLE LOGIN ---
-    function decodeJwtResponse(token) {
-        var base64Url = token.split('.')[1];
-        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    }
+        function routeUser(user) {
+            try {
+                // 1. Hide Login Screen & Show Dashboard (IMMEDIATELY)
+                const authView = document.getElementById('auth-view');
+                const dashLayout = document.getElementById('dashboard-layout');
 
-    async function handleAdminGoogleLogin(response) {
-        const data = decodeJwtResponse(response.credential);
-        
-        try {
-            const res = await fetch(`${API_URL}/admin/google`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    email: data.email, 
-                    name: data.name, 
-                    picture: data.picture 
-                })
+                if (authView) authView.classList.add('hidden');
+                if (dashLayout) dashLayout.classList.remove('hidden');
+
+                // 2. Safe UI Updates (Crash Proof)
+                // Agar koi element nahi mila to crash nahi hoga
+                const nameEl = document.getElementById('admin-name');
+                const emailEl = document.getElementById('admin-email');
+                const avatarEl = document.getElementById('admin-avatar');
+
+                if (nameEl) nameEl.innerText = user.name || 'Admin';
+                if (emailEl) emailEl.innerText = user.email || 'admin@kicks.in';
+
+                if (avatarEl) {
+                    if (user.picture) {
+                        avatarEl.innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover rounded-full">`;
+                    } else {
+                        const initial = (user.name && user.name[0]) ? user.name[0].toUpperCase() : 'A';
+                        avatarEl.innerText = initial;
+                    }
+                }
+
+                // 3. Load Data
+                switchTab('dashboard');
+
+            } catch (e) {
+                console.error("RouteUser Error:", e);
+                // Agar UI render fail ho jaye, to logout karo taaki user fanse nahi
+                handleLogout();
+            }
+        }
+        // --- GOOGLE LOGIN ---
+        function decodeJwtResponse(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        async function handleAdminGoogleLogin(response) {
+            const data = decodeJwtResponse(response.credential);
+
+            try {
+                const res = await fetch(`${API_URL}/admin/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: data.email,
+                        name: data.name,
+                        picture: data.picture
+                    })
+                });
+
+                const adminData = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem(DB_SESSION, JSON.stringify(adminData));
+                    currentUser = adminData;
+                    routeUser(currentUser);
+                } else {
+                    alert("Login Failed: " + (adminData.message || "Unauthorized Email"));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection Error. Is Server Running?");
+            }
+        }
+
+        // --- MANUAL LOGIN & REGISTER ---
+        function toggleAuth(mode) {
+            if (mode === 'register') {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            } else {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const loginBtn = document.getElementById('btn-login'); // ID से बटन ढूंढ रहे हैं
+
+            // 1. Validation
+            if (!email || !pass) {
+                showToast("Please enter email and password", "error");
+                return;
+            }
+
+            // 2. Button Loading State
+            const originalText = loginBtn ? loginBtn.innerHTML : 'Secure Login';
+            if (loginBtn) {
+                loginBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Logging in...';
+                loginBtn.disabled = true;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            try {
+                console.log("🔑 Attempting login for:", email);
+
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, pass })
+                });
+
+                const data = await res.json();
+
+                // 3. Reset Button
+                if (loginBtn) {
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
+                }
+
+                if (res.ok && data.token) {
+                    console.log("✅ Login successful");
+                    localStorage.setItem(DB_SESSION, JSON.stringify(data));
+                    currentUser = data;
+                    routeUser(currentUser);
+                    showToast("Login successful!", "success");
+                } else {
+                    console.log("❌ Login failed:", data.message);
+                    showToast(data.message || "Invalid credentials", "error");
+                    document.getElementById('login-pass').value = ''; // Password clear करें
+                }
+            } catch (e) {
+                console.error("❌ Login error:", e);
+                if (loginBtn) {
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
+                }
+                showToast("Server connection error. Is server running?", "error");
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            if (!name || !email || !pass) return alert("Fill all fields");
+
+            try {
+                const res = await fetch(`${API_URL}/admin/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, pass })
+                });
+                if (res.ok) {
+                    alert("Registered! Please Login.");
+                    toggleAuth('login');
+                } else {
+                    alert("Registration Failed");
+                }
+            } catch (e) { alert("Server Error"); }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem(DB_SESSION);
+            location.reload();
+        }
+
+        // --- ROUTING & DASHBOARD ---
+        function routeUser(user) {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('dashboard-layout').classList.remove('hidden');
+            document.getElementById('admin-name').innerText = user.name;
+            document.getElementById('admin-email').innerText = user.email;
+            if (user.picture) {
+                document.getElementById('admin-avatar').innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover rounded-full">`;
+            } else {
+                document.getElementById('admin-avatar').innerText = user.name[0].toUpperCase();
+            }
+
+            switchTab('dashboard');
+        }
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabName) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+
+            // Remove active from all buttons
+            document.querySelectorAll('#sidebar button').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'text-blue-700', 'font-bold');
+                btn.classList.add('hover:bg-gray-100', 'text-gray-600', 'font-medium');
             });
 
-            const adminData = await res.json();
+            // Show selected section
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
 
-            if(res.ok) {
-                localStorage.setItem(DB_SESSION, JSON.stringify(adminData));
-                currentUser = adminData;
-                routeUser(currentUser);
+            // Set active button
+            document.getElementById(`btn-${tabName}`).classList.remove('hover:bg-gray-100', 'text-gray-600', 'font-medium');
+            document.getElementById(`btn-${tabName}`).classList.add('bg-blue-50', 'text-blue-700', 'font-bold');
+
+            // Load data for this tab
+            switch (tabName) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'vendors':
+                    loadVendors();
+                    break;
+                case 'recruitment':
+                    loadJobApplications();
+                    break;
+                case 'fleet':
+                    loadActiveFleet();
+                    break;
+                case 'dispatch':
+                    loadDispatchManager();
+                    break;
+                case 'returns':
+                    loadReturns();
+                    break;
+            }
+
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
             } else {
-                alert("Login Failed: " + (adminData.message || "Unauthorized Email"));
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
             }
-        } catch(err) { 
-            console.error(err); 
-            alert("Connection Error. Is Server Running?"); 
         }
-    }
 
-    // --- MANUAL LOGIN & REGISTER ---
-    function toggleAuth(mode) {
-        if(mode === 'register') {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('register-form').classList.remove('hidden');
-        } else {
-            document.getElementById('register-form').classList.add('hidden');
-            document.getElementById('login-form').classList.remove('hidden');
-        }
-    }
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
 
-    async function handleLogin() {
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-pass').value;
-    const loginBtn = document.getElementById('btn-login'); // ID से बटन ढूंढ रहे हैं
+            if (!message || message.trim() === '') return;
 
-    // 1. Validation
-    if(!email || !pass) {
-        showToast("Please enter email and password", "error");
-        return;
-    }
+            // Set color based on type
+            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]';
 
-    // 2. Button Loading State
-    const originalText = loginBtn ? loginBtn.innerHTML : 'Secure Login';
-    if(loginBtn) {
-        loginBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Logging in...';
-        loginBtn.disabled = true;
-        if(typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    try {
-        console.log("🔑 Attempting login for:", email);
-        
-        const res = await fetch(`${API_URL}/admin/login`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email, pass })
-        });
-        
-        const data = await res.json();
-        
-        // 3. Reset Button
-        if(loginBtn) {
-            loginBtn.innerHTML = originalText;
-            loginBtn.disabled = false;
-        }
-        
-        if(res.ok && data.token) {
-            console.log("✅ Login successful");
-            localStorage.setItem(DB_SESSION, JSON.stringify(data));
-            currentUser = data;
-            routeUser(currentUser);
-            showToast("Login successful!", "success");
-        } else {
-            console.log("❌ Login failed:", data.message);
-            showToast(data.message || "Invalid credentials", "error");
-            document.getElementById('login-pass').value = ''; // Password clear करें
-        }
-    } catch(e) {
-        console.error("❌ Login error:", e);
-        if(loginBtn) {
-            loginBtn.innerHTML = originalText;
-            loginBtn.disabled = false;
-        }
-        showToast("Server connection error. Is server running?", "error");
-    }
-}
-
-    async function handleRegister() {
-        const name = document.getElementById('reg-name').value;
-        const email = document.getElementById('reg-email').value;
-        const pass = document.getElementById('reg-pass').value;
-        if(!name || !email || !pass) return alert("Fill all fields");
-
-        try {
-            const res = await fetch(`${API_URL}/admin/register`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, email, pass })
-            });
-            if(res.ok) {
-                alert("Registered! Please Login.");
-                toggleAuth('login');
+            if (type === 'success') {
+                toast.classList.add('bg-green-600', 'text-white');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-600', 'text-white');
+            } else if (type === 'warning') {
+                toast.classList.add('bg-yellow-600', 'text-white');
             } else {
-                alert("Registration Failed");
+                toast.classList.add('bg-gray-900', 'text-white');
             }
-        } catch(e) { alert("Server Error"); }
-    }
 
-    function handleLogout() {
-        localStorage.removeItem(DB_SESSION);
-        location.reload();
-    }
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0');
 
-    // --- ROUTING & DASHBOARD ---
-    function routeUser(user) {
-        document.getElementById('auth-view').classList.add('hidden');
-        document.getElementById('dashboard-layout').classList.remove('hidden');
-        document.getElementById('admin-name').innerText = user.name;
-        document.getElementById('admin-email').innerText = user.email;
-        if(user.picture) {
-            document.getElementById('admin-avatar').innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover rounded-full">`;
-        } else {
-            document.getElementById('admin-avatar').innerText = user.name[0].toUpperCase();
+            // 5 seconds के लिए show करें (5000ms)
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => {
+                    toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]';
+                }, 300);
+            }, 5000); // Changed from 3000 to 5000
         }
-        
-        switchTab('dashboard');
-    }
 
-    // --- TAB SWITCHING ---
-    function switchTab(tabName) {
-        // Hide all sections
-        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-        
-        // Remove active from all buttons
-        document.querySelectorAll('#sidebar button').forEach(btn => {
-            btn.classList.remove('bg-blue-50', 'text-blue-700', 'font-bold');
-            btn.classList.add('hover:bg-gray-100', 'text-gray-600', 'font-medium');
-        });
-        
-        // Show selected section
-        document.getElementById(`view-${tabName}`).classList.remove('hidden');
-        
-        // Set active button
-        document.getElementById(`btn-${tabName}`).classList.remove('hover:bg-gray-100', 'text-gray-600', 'font-medium');
-        document.getElementById(`btn-${tabName}`).classList.add('bg-blue-50', 'text-blue-700', 'font-bold');
-        
-        // Load data for this tab
-        switch(tabName) {
-            case 'dashboard':
-                loadDashboardData();
-                break;
-            case 'vendors':
-                loadVendors();
-                break;
-            case 'recruitment':
-                loadJobApplications();
-                break;
-            case 'fleet':
-                loadActiveFleet();
-                break;
-            case 'dispatch':
-                loadDispatchManager();
-                break;
-            case 'returns':
-                loadReturns();
-                break;
-        }
-        
-        // Close sidebar on mobile
-        if(window.innerWidth < 768) {
-            toggleSidebar();
-        }
-    }
+        async function loadDashboardData() {
+            try {
+                // 1. Load products (Public Route - Token Optional but good practice)
+                const productsRes = await fetch(`${API_URL}/products`);
+                const products = await productsRes.json();
+                allProducts = products;
 
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        
-        if(sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-        } else {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-        }
-    }
+                // 2. Load vendors (SECURE ROUTE - TOKEN REQUIRED)
+                // Yahan 'Authorization' header add karna zaroori hai
+                const vendorsRes = await fetch(`${API_URL}/vendors`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // <--- YE LINE MISSING THI
+                    }
+                });
 
-    function showToast(message, type = 'info') {
-    const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toast-msg');
-    
-    if(!message || message.trim() === '') return;
-    
-    // Set color based on type
-    toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]';
-    
-    if(type === 'success') {
-        toast.classList.add('bg-green-600', 'text-white');
-    } else if(type === 'error') {
-        toast.classList.add('bg-red-600', 'text-white');
-    } else if(type === 'warning') {
-        toast.classList.add('bg-yellow-600', 'text-white');
-    } else {
-        toast.classList.add('bg-gray-900', 'text-white');
-    }
-    
-    toastMsg.innerText = message;
-    toast.classList.remove('opacity-0');
-    
-    // 5 seconds के लिए show करें (5000ms)
-    setTimeout(() => {
-        toast.classList.add('opacity-0');
-        setTimeout(() => {
-            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 opacity-0 transition-opacity duration-300 z-[200]';
-        }, 300);
-    }, 5000); // Changed from 3000 to 5000
-}
+                if (!vendorsRes.ok) {
+                    // Agar Admin nahi hai ya Token expire ho gaya
+                    if (vendorsRes.status === 401 || vendorsRes.status === 403) {
+                        console.error("Auth Failed for Vendors");
+                        allVendors = []; // Empty array taki crash na ho
+                    } else {
+                        throw new Error("Failed to fetch vendors");
+                    }
+                } else {
+                    allVendors = await vendorsRes.json();
+                }
 
-    async function loadDashboardData() {
-    try {
-        // 1. Load products (Public Route - Token Optional but good practice)
-        const productsRes = await fetch(`${API_URL}/products`);
-        const products = await productsRes.json();
-        allProducts = products;
-        
-        // 2. Load vendors (SECURE ROUTE - TOKEN REQUIRED)
-        // Yahan 'Authorization' header add karna zaroori hai
-        const vendorsRes = await fetch(`${API_URL}/vendors`, {
-            method: 'GET',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}` // <--- YE LINE MISSING THI
+                renderPendingProducts(products.filter(p => p.status === 'Pending Review'));
+                renderLiveInventory(products.filter(p => p.status !== 'Pending Review'));
+
+            } catch (e) {
+                console.error('Error loading dashboard:', e);
+                showToast('Failed to load dashboard data', 'error');
             }
-        });
-
-        if(!vendorsRes.ok) {
-            // Agar Admin nahi hai ya Token expire ho gaya
-            if(vendorsRes.status === 401 || vendorsRes.status === 403) {
-                console.error("Auth Failed for Vendors");
-                allVendors = []; // Empty array taki crash na ho
-            } else {
-                throw new Error("Failed to fetch vendors");
-            }
-        } else {
-            allVendors = await vendorsRes.json();
         }
-        
-        renderPendingProducts(products.filter(p => p.status === 'Pending Review'));
-        renderLiveInventory(products.filter(p => p.status !== 'Pending Review'));
 
-    } catch(e) {
-        console.error('Error loading dashboard:', e);
-        showToast('Failed to load dashboard data', 'error');
-    }
-}
+        function renderPendingProducts(products) {
+            const container = document.getElementById('pending-container');
 
-    function renderPendingProducts(products) {
-        const container = document.getElementById('pending-container');
-        
-        if(products.length === 0) {
-            container.innerHTML = `
+            if (products.length === 0) {
+                container.innerHTML = `
                 <div class="bg-white p-8 rounded-xl border border-gray-200 text-center">
                     <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
                     <p class="text-gray-600">No pending products for review</p>
                 </div>
             `;
-            lucide.createIcons();
-            return;
-        }
-        
-        container.innerHTML = products.map(product => {
-            const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
-            const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/300';
-            
-            return `
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = products.map(product => {
+                const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
+                const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/300';
+
+                return `
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div class="flex gap-6">
                         <img src="${firstImage}" alt="${product.name}" 
@@ -903,31 +1030,31 @@ function routeUser(user) {
                     </div>
                 </div>
             `;
-        }).join('');
-    }
+            }).join('');
+        }
 
-    // --- REPLACE IN webadmin.html ---
+        // --- REPLACE IN webadmin.html ---
 
-function renderLiveInventory(products) {
-    const tbody = document.getElementById('log-body');
-    
-    if(products.length === 0) {
-        tbody.innerHTML = `
+        function renderLiveInventory(products) {
+            const tbody = document.getElementById('log-body');
+
+            if (products.length === 0) {
+                tbody.innerHTML = `
             <tr>
                 <td colspan="4" class="px-6 py-8 text-center text-gray-500">
                     No approved products in inventory
                 </td>
             </tr>
         `;
-        return;
-    }
-    
-    tbody.innerHTML = products.map(product => {
-        // Find Vendor Details
-        const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
-        const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/50';
-        
-        return `
+                return;
+            }
+
+            tbody.innerHTML = products.map(product => {
+                // Find Vendor Details
+                const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
+                const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/50';
+
+                return `
             <tr class="hover:bg-gray-50 transition border-b border-gray-100">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
@@ -974,154 +1101,154 @@ function renderLiveInventory(products) {
                 </td>
             </tr>
         `;
-    }).join('');
-    
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-}
-    async function approveProduct(productId) {
-    if(!confirm('Approve this product?')) return;
-    
-    try {
-        const res = await fetch(`${API_URL}/products/${productId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
-            },
-            body: JSON.stringify({ status: 'Approved' })
-        });
-        
-        if(res.ok) {
-            showToast('Product approved successfully', 'success');
-            loadDashboardData(); // List Refresh
-        } else {
-            const data = await res.json();
-            console.error("Server Error:", data);
-            showToast(data.message || 'Failed to approve product', 'error');
+            }).join('');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
-    } catch(e) {
-        console.error(e);
-        showToast('Server Connection Error', 'error');
-    }
-}
+        async function approveProduct(productId) {
+            if (!confirm('Approve this product?')) return;
 
-// Ye function shayad missing tha, isse bhi add karein
-async function rejectProduct(productId) {
-    const reason = prompt("Enter rejection reason (Optional):");
-    if(reason === null) return; // Cancelled
+            try {
+                const res = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                    },
+                    body: JSON.stringify({ status: 'Approved' })
+                });
 
-    try {
-        const res = await fetch(`${API_URL}/products/${productId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
-            },
-            body: JSON.stringify({ 
-                status: 'Rejected',
-                rejectionReason: reason 
-            })
-        });
-        
-        if(res.ok) {
-            showToast('Product Rejected', 'warning');
-            loadDashboardData(); // List Refresh
-        } else {
-            showToast('Failed to reject product', 'error');
+                if (res.ok) {
+                    showToast('Product approved successfully', 'success');
+                    loadDashboardData(); // List Refresh
+                } else {
+                    const data = await res.json();
+                    console.error("Server Error:", data);
+                    showToast(data.message || 'Failed to approve product', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server Connection Error', 'error');
+            }
         }
-    } catch(e) {
-        console.error(e);
-        showToast('Server Connection Error', 'error');
-    }
-}
-// ==========================================
-// DRIVER AUTH (MANUAL LOGIN & REGISTER)
-// ==========================================
 
-// 1. Driver Register
-app.post('/api/driver/register', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const cleanEmail = email.toLowerCase().trim();
+        // Ye function shayad missing tha, isse bhi add karein
+        async function rejectProduct(productId) {
+            const reason = prompt("Enter rejection reason (Optional):");
+            if (reason === null) return; // Cancelled
 
-        // Check if driver already exists
-        const exists = await DeliveryUser.findOne({ email: cleanEmail });
-        if (exists) return res.status(400).json({ message: "Driver email already exists" });
+            try {
+                const res = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                    },
+                    body: JSON.stringify({
+                        status: 'Rejected',
+                        rejectionReason: reason
+                    })
+                });
 
-        // Hash Password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create New Driver
-        const newDriver = new DeliveryUser({
-            name,
-            email: cleanEmail,
-            password: hashedPassword,
-            status: 'pending', // Admin verification ke liye pending
-            role: 'driver',
-            wallet: 0
-        });
-
-        await newDriver.save();
-        res.json({ ...newDriver.toObject(), token: generateToken(newDriver._id, 'driver') });
-
-    } catch (e) {
-        console.error("Driver Register Error:", e);
-        res.status(500).json({ message: "Server Error" });
-    }
-});
-
-// 2. Driver Login
-app.post('/api/driver/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const cleanEmail = email.toLowerCase().trim();
-
-        // Find Driver
-        const driver = await DeliveryUser.findOne({ email: cleanEmail });
-        if (!driver) return res.status(404).json({ message: "Driver not found" });
-
-        // Check Password (Bcrypt)
-        const isMatch = await bcrypt.compare(password, driver.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid Password" });
-
-        // Success
-        const driverObj = driver.toObject();
-        delete driverObj.password; // Security: Password remove karein response se
-        
-        res.json({ ...driverObj, token: generateToken(driver._id, 'driver') });
-
-    } catch (e) {
-        console.error("Driver Login Error:", e);
-        res.status(500).json({ message: "Server Error" });
-    }
-});
-async function deleteProduct(productId) {
-    if(!confirm('Delete this product permanently?')) return;
-    
-    try {
-        const res = await fetch(`${API_URL}/products/${productId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
-        });
-        
-        if(res.ok) {
-            showToast('Product deleted', 'success');
-            loadDashboardData();
-        } else {
-            showToast('Failed to delete product', 'error');
+                if (res.ok) {
+                    showToast('Product Rejected', 'warning');
+                    loadDashboardData(); // List Refresh
+                } else {
+                    showToast('Failed to reject product', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server Connection Error', 'error');
+            }
         }
-    } catch(e) { console.error(e); }
-}
-    function viewProduct(productId) {
-        const product = allProducts.find(p => p._id === productId || p.id == productId);
-        if(!product) return alert('Product not found');
-        
-        const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/300';
-        const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
-        
-        // FIX: Changed onclick to remove the closest parent with class 'fixed' (The Overlay)
-        const modalContent = `
+        // ==========================================
+        // DRIVER AUTH (MANUAL LOGIN & REGISTER)
+        // ==========================================
+
+        // 1. Driver Register
+        app.post('/api/driver/register', async (req, res) => {
+            try {
+                const { name, email, password } = req.body;
+                const cleanEmail = email.toLowerCase().trim();
+
+                // Check if driver already exists
+                const exists = await DeliveryUser.findOne({ email: cleanEmail });
+                if (exists) return res.status(400).json({ message: "Driver email already exists" });
+
+                // Hash Password
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+
+                // Create New Driver
+                const newDriver = new DeliveryUser({
+                    name,
+                    email: cleanEmail,
+                    password: hashedPassword,
+                    status: 'pending', // Admin verification ke liye pending
+                    role: 'driver',
+                    wallet: 0
+                });
+
+                await newDriver.save();
+                res.json({ ...newDriver.toObject(), token: generateToken(newDriver._id, 'driver') });
+
+            } catch (e) {
+                console.error("Driver Register Error:", e);
+                res.status(500).json({ message: "Server Error" });
+            }
+        });
+
+        // 2. Driver Login
+        app.post('/api/driver/login', async (req, res) => {
+            try {
+                const { email, password } = req.body;
+                const cleanEmail = email.toLowerCase().trim();
+
+                // Find Driver
+                const driver = await DeliveryUser.findOne({ email: cleanEmail });
+                if (!driver) return res.status(404).json({ message: "Driver not found" });
+
+                // Check Password (Bcrypt)
+                const isMatch = await bcrypt.compare(password, driver.password);
+                if (!isMatch) return res.status(400).json({ message: "Invalid Password" });
+
+                // Success
+                const driverObj = driver.toObject();
+                delete driverObj.password; // Security: Password remove karein response se
+
+                res.json({ ...driverObj, token: generateToken(driver._id, 'driver') });
+
+            } catch (e) {
+                console.error("Driver Login Error:", e);
+                res.status(500).json({ message: "Server Error" });
+            }
+        });
+        async function deleteProduct(productId) {
+            if (!confirm('Delete this product permanently?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
+                });
+
+                if (res.ok) {
+                    showToast('Product deleted', 'success');
+                    loadDashboardData();
+                } else {
+                    showToast('Failed to delete product', 'error');
+                }
+            } catch (e) { console.error(e); }
+        }
+        function viewProduct(productId) {
+            const product = allProducts.find(p => p._id === productId || p.id == productId);
+            if (!product) return alert('Product not found');
+
+            const firstImage = product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/300';
+            const vendor = allVendors.find(v => v.email === product.vendorEmail) || {};
+
+            // FIX: Changed onclick to remove the closest parent with class 'fixed' (The Overlay)
+            const modalContent = `
             <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div class="p-6">
@@ -1188,39 +1315,50 @@ async function deleteProduct(productId) {
                 </div>
             </div>
         `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalContent);
-        lucide.createIcons();
-    }
 
-    // --- VENDORS MANAGEMENT ---
-    async function loadVendors() {
-    try {
-        const res = await fetch(`${API_URL}/vendors`, {
-            headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
-        });
-        allVendors = await res.json();
-        renderVendors(allVendors);
-    } catch(e) {
-        console.error('Error loading vendors:', e);
-        showToast('Failed to load vendors', 'error');
-    }
-}
-    function renderVendors(vendors) {
-        const tbody = document.getElementById('vendor-list-body');
-        
-        if(vendors.length === 0) {
-            tbody.innerHTML = `
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            lucide.createIcons();
+        }
+
+        // --- VENDORS MANAGEMENT ---
+        // webadmin.html mein loadVendors function dhoondhein
+        async function loadVendors() {
+            try {
+                const res = await fetch(`${API_URL}/vendors`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+
+                if (!res.ok) {
+                    // Ye line add karein debug ke liye
+                    alert(`Error Status: ${res.status}`);
+                    // 401 = Token Expired/Invalid (Re-login karein)
+                    // 500 = Server/Database Error (MongoDB IP check karein)
+                    // 404 = API URL Galat hai
+                    return;
+                }
+
+                allVendors = await res.json();
+                renderVendors(allVendors);
+            } catch (e) {
+                console.error('Error loading vendors:', e);
+                showToast('Failed to load vendors', 'error');
+            }
+        }
+        function renderVendors(vendors) {
+            const tbody = document.getElementById('vendor-list-body');
+
+            if (vendors.length === 0) {
+                tbody.innerHTML = `
                 <tr>
                     <td colspan="6" class="p-6 text-center text-gray-500">
                         No vendors registered yet
                     </td>
                 </tr>
             `;
-            return;
-        }
-        
-        tbody.innerHTML = vendors.map(vendor => `
+                return;
+            }
+
+            tbody.innerHTML = vendors.map(vendor => `
             <tr class="hover:bg-gray-50">
                 <td class="p-6 font-bold">${vendor.shopName}</td>
                 <td class="p-6">${vendor.ownerName}</td>
@@ -1242,313 +1380,313 @@ async function deleteProduct(productId) {
                 </td>
             </tr>
         `).join('');
-    }
-
-    function openVendorModal(vendorId = null) {
-        const modal = document.getElementById('vendor-modal');
-        const title = document.getElementById('vendor-modal-title');
-        
-        if(vendorId) {
-            // Edit mode
-            const vendor = allVendors.find(v => v._id === vendorId);
-            if(vendor) {
-                document.getElementById('v-id').value = vendor._id;
-                document.getElementById('v-shop').value = vendor.shopName;
-                document.getElementById('v-owner').value = vendor.ownerName;
-                document.getElementById('v-mobile').value = vendor.mobile;
-                document.getElementById('v-email').value = vendor.email;
-                title.innerText = 'Edit Vendor';
-            }
-        } else {
-            // Add mode
-            document.getElementById('v-id').value = '';
-            document.getElementById('v-shop').value = '';
-            document.getElementById('v-owner').value = '';
-            document.getElementById('v-mobile').value = '';
-            document.getElementById('v-email').value = '';
-            title.innerText = 'Add Vendor';
         }
-        
-        modal.classList.remove('hidden');
-    }
 
-    function closeVendorModal() {
-        document.getElementById('vendor-modal').classList.add('hidden');
-    }
+        function openVendorModal(vendorId = null) {
+            const modal = document.getElementById('vendor-modal');
+            const title = document.getElementById('vendor-modal-title');
 
-    async function saveVendor(event) {
-        event.preventDefault();
-        
-        const vendorId = document.getElementById('v-id').value;
-        const vendorData = {
-            shopName: document.getElementById('v-shop').value,
-            ownerName: document.getElementById('v-owner').value,
-            mobile: document.getElementById('v-mobile').value,
-            email: document.getElementById('v-email').value,
-            joined: new Date().toLocaleDateString()
-        };
-        
-        try {
-            let res;
-            if(vendorId) {
-                // Update existing
-                res = await fetch(`${API_URL}/vendors/${vendorId}`, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(vendorData)
-                });
+            if (vendorId) {
+                // Edit mode
+                const vendor = allVendors.find(v => v._id === vendorId);
+                if (vendor) {
+                    document.getElementById('v-id').value = vendor._id;
+                    document.getElementById('v-shop').value = vendor.shopName;
+                    document.getElementById('v-owner').value = vendor.ownerName;
+                    document.getElementById('v-mobile').value = vendor.mobile;
+                    document.getElementById('v-email').value = vendor.email;
+                    title.innerText = 'Edit Vendor';
+                }
             } else {
-                // Create new
-                res = await fetch(`${API_URL}/vendors`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(vendorData)
-                });
+                // Add mode
+                document.getElementById('v-id').value = '';
+                document.getElementById('v-shop').value = '';
+                document.getElementById('v-owner').value = '';
+                document.getElementById('v-mobile').value = '';
+                document.getElementById('v-email').value = '';
+                title.innerText = 'Add Vendor';
             }
-            
-            if(res.ok) {
-                showToast(vendorId ? 'Vendor updated' : 'Vendor added', 'success');
-                closeVendorModal();
-                loadVendors();
-            } else {
-                showToast('Failed to save vendor', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error saving vendor', 'error');
+
+            modal.classList.remove('hidden');
         }
-    }
-// Forgot Password Functions
-function showForgotPassword() {
-    document.getElementById('forgot-password-modal').classList.remove('hidden');
-    document.getElementById('forgot-step-1').classList.remove('hidden');
-    document.getElementById('forgot-step-2').classList.add('hidden');
-    document.getElementById('forgot-success').classList.add('hidden');
-    
-    // Pre-fill email if user was trying to login
-    const loginEmail = document.getElementById('login-email')?.value;
-    if(loginEmail) {
-        document.getElementById('forgot-email').value = loginEmail;
-    }
-}
 
-function closeForgotPassword() {
-    document.getElementById('forgot-password-modal').classList.add('hidden');
-}
-
-async function sendOTP() {
-    const email = document.getElementById('forgot-email').value;
-    const role = document.getElementById('forgot-role').value;
-    
-    if(!email) {
-        showToast("Please enter your email", "error");
-        return;
-    }
-    
-    try {
-        showToast("Sending OTP...", "info");
-        
-        const res = await fetch(`${API_URL}/forgot-password`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email, role })
-        });
-        
-        const data = await res.json();
-        
-        if(res.ok) {
-            // Show OTP step
-            document.getElementById('forgot-step-1').classList.add('hidden');
-            document.getElementById('forgot-step-2').classList.remove('hidden');
-            document.getElementById('otp-email').innerText = email;
-            
-            // Focus on OTP input
-            setTimeout(() => {
-                document.getElementById('forgot-otp').focus();
-            }, 100);
-            
-            showToast("OTP sent successfully!", "success");
-            
-            // For testing - show OTP in console
-            if(data.otp) {
-                console.log(`🔐 OTP for ${email}: ${data.otp}`);
-                showToast(`OTP: ${data.otp} (Check console)`, "info");
-            }
-        } else {
-            showToast(data.message || "Failed to send OTP", "error");
+        function closeVendorModal() {
+            document.getElementById('vendor-modal').classList.add('hidden');
         }
-    } catch(e) {
-        console.error("OTP send error:", e);
-        showToast("Server error. Please try again.", "error");
-    }
-}
 
-async function resetPassword() {
-    const email = document.getElementById('forgot-email').value;
-    const otp = document.getElementById('forgot-otp').value;
-    const newPassword = document.getElementById('forgot-new-password').value;
-    const confirmPassword = document.getElementById('forgot-confirm-password').value;
-    const role = document.getElementById('forgot-role').value;
-    
-    // Clear previous errors
-    showToast("", "info");
-    
-    // Client-side validation
-    if(!otp || otp.length !== 6) {
-        showToast("Please enter a valid 6-digit OTP", "error");
-        document.getElementById('forgot-otp').focus();
-        return;
-    }
-    
-    if(!newPassword) {
-        showToast("Please enter new password", "error");
-        document.getElementById('forgot-new-password').focus();
-        return;
-    }
-    
-    if(!confirmPassword) {
-        showToast("Please confirm your password", "error");
-        document.getElementById('forgot-confirm-password').focus();
-        return;
-    }
-    
-    if(newPassword !== confirmPassword) {
-        showToast("Passwords do not match. Please check again.", "error");
-        // Highlight the mismatched fields
-        document.getElementById('forgot-new-password').classList.add('border-red-500');
-        document.getElementById('forgot-confirm-password').classList.add('border-red-500');
-        return;
-    } else {
-        // Remove error styling if passwords match
-        document.getElementById('forgot-new-password').classList.remove('border-red-500');
-        document.getElementById('forgot-confirm-password').classList.remove('border-red-500');
-    }
-    
-    if(newPassword.length < 6) {
-        showToast("Password must be at least 6 characters", "error");
-        return;
-    }
-    
-    try {
-        // Show loading state
-        const resetBtn = document.querySelector('#forgot-step-2 button[onclick="resetPassword()"]');
-        const originalText = resetBtn.innerHTML;
-        resetBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Resetting...';
-        resetBtn.disabled = true;
-        
-        const res = await fetch(`${API_URL}/reset-password`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                email, 
-                otp, 
-                newPassword, 
-                // confirmPassword नहीं भेज रहे - server में check नहीं है
-                role 
-            })
-        });
-        
-        const data = await res.json();
-        
-        // Reset button state
-        resetBtn.innerHTML = originalText;
-        resetBtn.disabled = false;
-        lucide.createIcons();
-        
-        if(res.ok && data.success) {
-            // Show success message
+        async function saveVendor(event) {
+            event.preventDefault();
+
+            const vendorId = document.getElementById('v-id').value;
+            const vendorData = {
+                shopName: document.getElementById('v-shop').value,
+                ownerName: document.getElementById('v-owner').value,
+                mobile: document.getElementById('v-mobile').value,
+                email: document.getElementById('v-email').value,
+                joined: new Date().toLocaleDateString()
+            };
+
+            try {
+                let res;
+                if (vendorId) {
+                    // Update existing
+                    res = await fetch(`${API_URL}/vendors/${vendorId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(vendorData)
+                    });
+                } else {
+                    // Create new
+                    res = await fetch(`${API_URL}/vendors`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(vendorData)
+                    });
+                }
+
+                if (res.ok) {
+                    showToast(vendorId ? 'Vendor updated' : 'Vendor added', 'success');
+                    closeVendorModal();
+                    loadVendors();
+                } else {
+                    showToast('Failed to save vendor', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Error saving vendor', 'error');
+            }
+        }
+        // Forgot Password Functions
+        function showForgotPassword() {
+            document.getElementById('forgot-password-modal').classList.remove('hidden');
+            document.getElementById('forgot-step-1').classList.remove('hidden');
             document.getElementById('forgot-step-2').classList.add('hidden');
-            document.getElementById('forgot-success').classList.remove('hidden');
-            showToast("Password reset successful! You can now login.", "success");
-            
-            // Auto-close modal after 3 seconds
-            setTimeout(() => {
-                closeForgotPassword();
-            }, 3000);
-        } else {
-            // Show error from server
-            showToast(data.message || "Failed to reset password", "error");
-            
-            // If OTP is wrong, focus on OTP field
-            if(data.message && data.message.includes("OTP")) {
+            document.getElementById('forgot-success').classList.add('hidden');
+
+            // Pre-fill email if user was trying to login
+            const loginEmail = document.getElementById('login-email')?.value;
+            if (loginEmail) {
+                document.getElementById('forgot-email').value = loginEmail;
+            }
+        }
+
+        function closeForgotPassword() {
+            document.getElementById('forgot-password-modal').classList.add('hidden');
+        }
+
+        async function sendOTP() {
+            const email = document.getElementById('forgot-email').value;
+            const role = document.getElementById('forgot-role').value;
+
+            if (!email) {
+                showToast("Please enter your email", "error");
+                return;
+            }
+
+            try {
+                showToast("Sending OTP...", "info");
+
+                const res = await fetch(`${API_URL}/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, role })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Show OTP step
+                    document.getElementById('forgot-step-1').classList.add('hidden');
+                    document.getElementById('forgot-step-2').classList.remove('hidden');
+                    document.getElementById('otp-email').innerText = email;
+
+                    // Focus on OTP input
+                    setTimeout(() => {
+                        document.getElementById('forgot-otp').focus();
+                    }, 100);
+
+                    showToast("OTP sent successfully!", "success");
+
+                    // For testing - show OTP in console
+                    if (data.otp) {
+                        console.log(`🔐 OTP for ${email}: ${data.otp}`);
+                        showToast(`OTP: ${data.otp} (Check console)`, "info");
+                    }
+                } else {
+                    showToast(data.message || "Failed to send OTP", "error");
+                }
+            } catch (e) {
+                console.error("OTP send error:", e);
+                showToast("Server error. Please try again.", "error");
+            }
+        }
+
+        async function resetPassword() {
+            const email = document.getElementById('forgot-email').value;
+            const otp = document.getElementById('forgot-otp').value;
+            const newPassword = document.getElementById('forgot-new-password').value;
+            const confirmPassword = document.getElementById('forgot-confirm-password').value;
+            const role = document.getElementById('forgot-role').value;
+
+            // Clear previous errors
+            showToast("", "info");
+
+            // Client-side validation
+            if (!otp || otp.length !== 6) {
+                showToast("Please enter a valid 6-digit OTP", "error");
                 document.getElementById('forgot-otp').focus();
-                document.getElementById('forgot-otp').select();
+                return;
+            }
+
+            if (!newPassword) {
+                showToast("Please enter new password", "error");
+                document.getElementById('forgot-new-password').focus();
+                return;
+            }
+
+            if (!confirmPassword) {
+                showToast("Please confirm your password", "error");
+                document.getElementById('forgot-confirm-password').focus();
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast("Passwords do not match. Please check again.", "error");
+                // Highlight the mismatched fields
+                document.getElementById('forgot-new-password').classList.add('border-red-500');
+                document.getElementById('forgot-confirm-password').classList.add('border-red-500');
+                return;
+            } else {
+                // Remove error styling if passwords match
+                document.getElementById('forgot-new-password').classList.remove('border-red-500');
+                document.getElementById('forgot-confirm-password').classList.remove('border-red-500');
+            }
+
+            if (newPassword.length < 6) {
+                showToast("Password must be at least 6 characters", "error");
+                return;
+            }
+
+            try {
+                // Show loading state
+                const resetBtn = document.querySelector('#forgot-step-2 button[onclick="resetPassword()"]');
+                const originalText = resetBtn.innerHTML;
+                resetBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Resetting...';
+                resetBtn.disabled = true;
+
+                const res = await fetch(`${API_URL}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email,
+                        otp,
+                        newPassword,
+                        // confirmPassword नहीं भेज रहे - server में check नहीं है
+                        role
+                    })
+                });
+
+                const data = await res.json();
+
+                // Reset button state
+                resetBtn.innerHTML = originalText;
+                resetBtn.disabled = false;
+                lucide.createIcons();
+
+                if (res.ok && data.success) {
+                    // Show success message
+                    document.getElementById('forgot-step-2').classList.add('hidden');
+                    document.getElementById('forgot-success').classList.remove('hidden');
+                    showToast("Password reset successful! You can now login.", "success");
+
+                    // Auto-close modal after 3 seconds
+                    setTimeout(() => {
+                        closeForgotPassword();
+                    }, 3000);
+                } else {
+                    // Show error from server
+                    showToast(data.message || "Failed to reset password", "error");
+
+                    // If OTP is wrong, focus on OTP field
+                    if (data.message && data.message.includes("OTP")) {
+                        document.getElementById('forgot-otp').focus();
+                        document.getElementById('forgot-otp').select();
+                    }
+                }
+            } catch (e) {
+                console.error("Reset password error:", e);
+                showToast("Network error. Please check your connection.", "error");
+
+                // Reset button state
+                const resetBtn = document.querySelector('#forgot-step-2 button[onclick="resetPassword()"]');
+                resetBtn.innerHTML = 'Reset Password';
+                resetBtn.disabled = false;
             }
         }
-    } catch(e) {
-        console.error("Reset password error:", e);
-        showToast("Network error. Please check your connection.", "error");
-        
-        // Reset button state
-        const resetBtn = document.querySelector('#forgot-step-2 button[onclick="resetPassword()"]');
-        resetBtn.innerHTML = 'Reset Password';
-        resetBtn.disabled = false;
-    }
-}
 
-async function deleteVendor(vendorId) {
-    // 1. Confirmation Popup
-    if(!confirm('Delete this vendor? This action cannot be undone.')) return;
-    
-    try {
-        // 2. Send DELETE Request with TOKEN
-        const res = await fetch(`${API_URL}/vendors/${vendorId}`, {
-            method: 'DELETE',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}` // <--- Token यहाँ Add किया है
+        async function deleteVendor(vendorId) {
+            // 1. Confirmation Popup
+            if (!confirm('Delete this vendor? This action cannot be undone.')) return;
+
+            try {
+                // 2. Send DELETE Request with TOKEN
+                const res = await fetch(`${API_URL}/vendors/${vendorId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // <--- Token यहाँ Add किया है
+                    }
+                });
+
+                if (res.ok) {
+                    showToast('Vendor deleted', 'success');
+                    loadVendors(); // List refresh करें
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Failed to delete vendor', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server connection error', 'error');
             }
-        });
-        
-        if(res.ok) {
-            showToast('Vendor deleted', 'success');
-            loadVendors(); // List refresh करें
-        } else {
-            const data = await res.json();
-            showToast(data.message || 'Failed to delete vendor', 'error');
         }
-    } catch(e) {
-        console.error(e);
-        showToast('Server connection error', 'error');
-    }
-}
 
-    // --- JOB APPLICATIONS (DEBUGGED VERSION) ---
-   async function loadJobApplications() {
-    try {
-        // /api/users route ab ADMIN ONLY hai, token chahiye
-        const res = await fetch(`${API_URL}/users`, {
-            headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
-        });
-        const drivers = await res.json();
-        allDrivers = drivers;
-        
-        const pendingApps = drivers.filter(d => (d.status || "").toLowerCase().trim() === 'pending');
-        renderDeliveryApplications(pendingApps);
-        
-        const historyApps = drivers.filter(d => (d.status || "").toLowerCase().trim() !== 'pending');
-        renderAppHistory(historyApps);
+        // --- JOB APPLICATIONS (DEBUGGED VERSION) ---
+        async function loadJobApplications() {
+            try {
+                // /api/users route ab ADMIN ONLY hai, token chahiye
+                const res = await fetch(`${API_URL}/users`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
+                });
+                const drivers = await res.json();
+                allDrivers = drivers;
 
-    } catch(e) {
-        console.error('Error loading applications:', e);
-        showToast('Failed to load applications', 'error');
-    }
-}
-    function renderDeliveryApplications(applications) {
-        const container = document.getElementById('delivery-apps-container');
-        
-        if(applications.length === 0) {
-            container.innerHTML = `
+                const pendingApps = drivers.filter(d => (d.status || "").toLowerCase().trim() === 'pending');
+                renderDeliveryApplications(pendingApps);
+
+                const historyApps = drivers.filter(d => (d.status || "").toLowerCase().trim() !== 'pending');
+                renderAppHistory(historyApps);
+
+            } catch (e) {
+                console.error('Error loading applications:', e);
+                showToast('Failed to load applications', 'error');
+            }
+        }
+        function renderDeliveryApplications(applications) {
+            const container = document.getElementById('delivery-apps-container');
+
+            if (applications.length === 0) {
+                container.innerHTML = `
                 <div class="col-span-2 bg-white p-8 rounded-xl border border-gray-200 text-center">
                     <i data-lucide="user-check" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
                     <p class="text-gray-600">No pending applications</p>
                 </div>
             `;
-            lucide.createIcons();
-            return;
-        }
-        
-        container.innerHTML = applications.map(app => `
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = applications.map(app => `
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -1591,30 +1729,30 @@ async function deleteVendor(vendorId) {
                 </div>
             </div>
         `).join('');
-        
-        lucide.createIcons();
-    }
 
-    function renderAppHistory(applications) {
-        const tbody = document.getElementById('app-history-body');
-        
-        if(applications.length === 0) {
-            tbody.innerHTML = `
+            lucide.createIcons();
+        }
+
+        function renderAppHistory(applications) {
+            const tbody = document.getElementById('app-history-body');
+
+            if (applications.length === 0) {
+                tbody.innerHTML = `
                 <tr>
                     <td colspan="4" class="p-4 text-center text-gray-500">
                         No application history
                     </td>
                 </tr>
             `;
-            return;
-        }
-        
-        tbody.innerHTML = applications.map(app => {
-            const statusColor = app.status === 'active' ? 'bg-green-100 text-green-800' : 
-                              app.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                              'bg-gray-100 text-gray-800';
-            
-            return `
+                return;
+            }
+
+            tbody.innerHTML = applications.map(app => {
+                const statusColor = app.status === 'active' ? 'bg-green-100 text-green-800' :
+                    app.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800';
+
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="p-4">
                         <p class="font-bold">${app.name || 'No Name'}</p>
@@ -1647,199 +1785,199 @@ async function deleteVendor(vendorId) {
                     </td>
                 </tr>
             `;
-        }).join('');
-    }
-async function approveDriver(email) {
-        if(!confirm('Approve this driver?')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
-                },
-                body: JSON.stringify({ status: 'active' })
-            });
-            
-            if(res.ok) {
-                showToast('Driver approved', 'success');
-                loadJobApplications();
-            } else {
-                const data = await res.json();
-                showToast(data.message || 'Failed to approve driver', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Server Connection Error', 'error');
+            }).join('');
         }
-    }
+        async function approveDriver(email) {
+            if (!confirm('Approve this driver?')) return;
 
-    async function rejectDriver(email) {
-        if(!confirm('Reject this application?')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
-                },
-                body: JSON.stringify({ status: 'rejected' })
-            });
-            
-            if(res.ok) {
-                showToast('Application rejected', 'success');
-                loadJobApplications();
-            } else {
-                showToast('Failed to reject application', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Server Connection Error', 'error');
-        }
-    }
+            try {
+                const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                    },
+                    body: JSON.stringify({ status: 'active' })
+                });
 
-    async function blockDriver(email) {
-        if(!confirm('Block this driver?')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
-                },
-                body: JSON.stringify({ status: 'blocked' })
-            });
-            
-            if(res.ok) {
-                showToast('Driver blocked', 'success');
-                loadJobApplications();
-            } else {
-                showToast('Failed to block driver', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Server Connection Error', 'error');
-        }
-    }
-
-    // Edit Application Save Function Fix
-    async function saveEditedApp() {
-        const origEmail = document.getElementById('edit-app-orig-email').value;
-        const updates = {
-            name: document.getElementById('edit-app-name').value,
-            phone: document.getElementById('edit-app-phone').value,
-            vehicleNo: document.getElementById('edit-app-vehicle').value,
-            mobile: document.getElementById('edit-app-phone').value
-        };
-        
-        try {
-            const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(origEmail)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added here too
-                },
-                body: JSON.stringify(updates)
-            });
-            
-            if(res.ok) {
-                showToast('Application updated', 'success');
-                document.getElementById('edit-app-modal').classList.add('hidden');
-                loadJobApplications();
-            } else {
-                showToast('Failed to update application', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error updating application', 'error');
-        }
-    }
-   // REPLACE THIS FUNCTION IN webadmin.html
-
-async function loadActiveFleet() {
-    try {
-        // 1. Fetch Users (SECURE - Needs Token) & Orders (Public)
-        const [usersRes, ordersRes] = await Promise.all([
-            fetch(`${API_URL}/users`, {
-                method: 'GET',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+                if (res.ok) {
+                    showToast('Driver approved', 'success');
+                    loadJobApplications();
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Failed to approve driver', 'error');
                 }
-            }),
-            fetch(`${API_URL}/orders`) // Orders route public hai server.js mein
-        ]);
+            } catch (e) {
+                console.error(e);
+                showToast('Server Connection Error', 'error');
+            }
+        }
 
-        if(!usersRes.ok) throw new Error("Failed to fetch drivers (Auth Error)");
-        
-        const drivers = await usersRes.json();
-        const orders = await ordersRes.json();
+        async function rejectDriver(email) {
+            if (!confirm('Reject this application?')) return;
 
-        // 2. Update Global Variables
-        allOrders = orders;
-        
-        // 3. Filter Active Drivers
-        const activeDrivers = drivers.filter(d => d.status === 'active');
-        
-        renderActiveFleet(activeDrivers);
-        
-    } catch(e) {
-        console.error('Error loading fleet:', e);
-        showToast('Failed to load fleet data', 'error');
-    }
-}
-   // --- REPLACE THIS FUNCTION IN webadmin.html ---
+            try {
+                const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                    },
+                    body: JSON.stringify({ status: 'rejected' })
+                });
 
-function renderActiveFleet(drivers) {
-    const container = document.getElementById('active-drivers-list');
-    
-    if(drivers.length === 0) {
-        container.innerHTML = `
+                if (res.ok) {
+                    showToast('Application rejected', 'success');
+                    loadJobApplications();
+                } else {
+                    showToast('Failed to reject application', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server Connection Error', 'error');
+            }
+        }
+
+        async function blockDriver(email) {
+            if (!confirm('Block this driver?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added
+                    },
+                    body: JSON.stringify({ status: 'blocked' })
+                });
+
+                if (res.ok) {
+                    showToast('Driver blocked', 'success');
+                    loadJobApplications();
+                } else {
+                    showToast('Failed to block driver', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server Connection Error', 'error');
+            }
+        }
+
+        // Edit Application Save Function Fix
+        async function saveEditedApp() {
+            const origEmail = document.getElementById('edit-app-orig-email').value;
+            const updates = {
+                name: document.getElementById('edit-app-name').value,
+                phone: document.getElementById('edit-app-phone').value,
+                vehicleNo: document.getElementById('edit-app-vehicle').value,
+                mobile: document.getElementById('edit-app-phone').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(origEmail)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIX: Token Added here too
+                    },
+                    body: JSON.stringify(updates)
+                });
+
+                if (res.ok) {
+                    showToast('Application updated', 'success');
+                    document.getElementById('edit-app-modal').classList.add('hidden');
+                    loadJobApplications();
+                } else {
+                    showToast('Failed to update application', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Error updating application', 'error');
+            }
+        }
+        // REPLACE THIS FUNCTION IN webadmin.html
+
+        async function loadActiveFleet() {
+            try {
+                // 1. Fetch Users (SECURE - Needs Token) & Orders (Public)
+                const [usersRes, ordersRes] = await Promise.all([
+                    fetch(`${API_URL}/users`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+                        }
+                    }),
+                    fetch(`${API_URL}/orders`) // Orders route public hai server.js mein
+                ]);
+
+                if (!usersRes.ok) throw new Error("Failed to fetch drivers (Auth Error)");
+
+                const drivers = await usersRes.json();
+                const orders = await ordersRes.json();
+
+                // 2. Update Global Variables
+                allOrders = orders;
+
+                // 3. Filter Active Drivers
+                const activeDrivers = drivers.filter(d => d.status === 'active');
+
+                renderActiveFleet(activeDrivers);
+
+            } catch (e) {
+                console.error('Error loading fleet:', e);
+                showToast('Failed to load fleet data', 'error');
+            }
+        }
+        // --- REPLACE THIS FUNCTION IN webadmin.html ---
+
+        function renderActiveFleet(drivers) {
+            const container = document.getElementById('active-drivers-list');
+
+            if (drivers.length === 0) {
+                container.innerHTML = `
             <div class="bg-white p-8 rounded-xl border border-gray-200 text-center">
                 <i data-lucide="users" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
                 <p class="text-gray-600">No active drivers in fleet</p>
             </div>
         `;
-        if(typeof lucide !== 'undefined') lucide.createIcons();
-        return;
-    }
-    
-    container.innerHTML = drivers.map(driver => {
-        // 1. Safe Email Matching
-        const driverEmail = (driver.email || "").toLowerCase().trim();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
 
-        const driverOrders = allOrders.filter(o => 
-            (o.assignedTo || "").toLowerCase().trim() === driverEmail
-        );
+            container.innerHTML = drivers.map(driver => {
+                // 1. Safe Email Matching
+                const driverEmail = (driver.email || "").toLowerCase().trim();
 
-        // 2. STATS CALCULATION
-        const deliveryVerifiedCount = driverOrders.filter(o => o.isDeliveryVerified).length;
-        const returnVerifiedCount = driverOrders.filter(o => o.isReturnVerified).length;
-        const totalCompleted = deliveryVerifiedCount + returnVerifiedCount;
-        
-        const pendingCount = driverOrders.filter(o => 
-            !o.isDeliveryVerified && 
-            !o.isReturnVerified && 
-            !['Cancelled', 'Return Cancelled', 'Return Rejected'].includes(o.status)
-        ).length;
+                const driverOrders = allOrders.filter(o =>
+                    (o.assignedTo || "").toLowerCase().trim() === driverEmail
+                );
 
-        // 3. WALLET CALCULATION
-        const calculatedEarnings = totalCompleted * 20; 
-        
-        // 4. SHIFT DATA DISPLAY LOGIC (NEW)
-        // Check if shift data exists, otherwise show 'Not Booked'
-        const hasShift = driver.shift && driver.shift.type;
-        const shiftType = hasShift ? driver.shift.type : 'Not Booked';
-        const shiftHours = hasShift ? driver.shift.hours : '--';
-        
-        // Styling based on if shift is booked
-        const shiftBg = hasShift ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500';
-        const shiftLabelColor = hasShift ? 'text-gray-400' : 'text-gray-400';
+                // 2. STATS CALCULATION
+                const deliveryVerifiedCount = driverOrders.filter(o => o.isDeliveryVerified).length;
+                const returnVerifiedCount = driverOrders.filter(o => o.isReturnVerified).length;
+                const totalCompleted = deliveryVerifiedCount + returnVerifiedCount;
 
-        return `
+                const pendingCount = driverOrders.filter(o =>
+                    !o.isDeliveryVerified &&
+                    !o.isReturnVerified &&
+                    !['Cancelled', 'Return Cancelled', 'Return Rejected'].includes(o.status)
+                ).length;
+
+                // 3. WALLET CALCULATION
+                const calculatedEarnings = totalCompleted * 20;
+
+                // 4. SHIFT DATA DISPLAY LOGIC (NEW)
+                // Check if shift data exists, otherwise show 'Not Booked'
+                const hasShift = driver.shift && driver.shift.type;
+                const shiftType = hasShift ? driver.shift.type : 'Not Booked';
+                const shiftHours = hasShift ? driver.shift.hours : '--';
+
+                // Styling based on if shift is booked
+                const shiftBg = hasShift ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500';
+                const shiftLabelColor = hasShift ? 'text-gray-400' : 'text-gray-400';
+
+                return `
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -1900,15 +2038,15 @@ function renderActiveFleet(drivers) {
                 </div>
             </div>
         `;
-    }).join('');
-    
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-}
-    function manageDriverSlot(email) {
-        const driver = allDrivers.find(d => d.email === email);
-        if(!driver) return;
-        
-        const modalContent = `
+            }).join('');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        function manageDriverSlot(email) {
+            const driver = allDrivers.find(d => d.email === email);
+            if (!driver) return;
+
+            const modalContent = `
             <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-sm">
                     <div class="p-6">
@@ -1945,133 +2083,133 @@ function renderActiveFleet(drivers) {
                 </div>
             </div>
         `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalContent);
-        lucide.createIcons();
-    }
 
-    
-
-    function selectSlotType(btn, type) {
-        btn.parentElement.querySelectorAll('button').forEach(b => {
-            b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-            b.classList.add('border-gray-300');
-        });
-        btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-    }
-
-    async function saveDriverSlot(email) {
-        const typeBtn = document.querySelector('.bg-blue-600.text-white');
-        const hours = document.getElementById('slot-hours').value;
-        
-        if(!typeBtn || !hours) {
-            alert('Please select shift type and hours');
-            return;
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            lucide.createIcons();
         }
-        
-        const type = typeBtn.textContent.trim();
-        
-        try {
-            const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(email)}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ shift: { type, hours } })
+
+
+
+        function selectSlotType(btn, type) {
+            btn.parentElement.querySelectorAll('button').forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                b.classList.add('border-gray-300');
             });
-            
-            if(res.ok) {
-                showToast('Shift updated successfully', 'success');
-                document.querySelector('.fixed.inset-0.bg-black\\/50').remove();
-                loadActiveFleet();
-            } else {
-                showToast('Failed to update shift', 'error');
-            }
-        } catch(e) {
-            console.error(e);
-            showToast('Error updating shift', 'error');
+            btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
         }
-    }
-async function rejectOrder(orderId) {
-    if(!confirm('Reject this order? This will restock the items for other customers.')) return;
-    
-    try {
-        const res = await fetch(`${API_URL}/orders/cancel`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                id: orderId, 
-                status: 'Rejected' // Status pass kar rahe hain taaki restock trigger ho
-            })
-        });
-        
-        if(res.ok) {
-            showToast('Order Rejected & Items Restocked', 'success');
-            loadDispatchManager(); // Table refresh karne ke liye
-        } else {
-            const data = await res.json();
-            showToast(data.error || 'Failed to reject order', 'error');
-        }
-    } catch(e) {
-        console.error("Reject Error:", e);
-        showToast('Server Connection Error', 'error');
-    }
-}
-   // --- REPLACE IN webadmin.html ---
 
-async function viewDriverHistory(email) {
-    try {
-        const ordersRes = await fetch(`${API_URL}/orders`);
-        const orders = await ordersRes.json();
-        
-        // Filter Orders for this specific driver
-        const driverOrders = orders.filter(o => 
-            o.assignedTo && o.assignedTo.toLowerCase().trim() === email.toLowerCase().trim()
-        );
-        
-        const modal = document.getElementById('driver-history-modal');
-        const tbody = document.getElementById('driver-history-body');
-        
-        if(driverOrders.length === 0) {
-            tbody.innerHTML = `
+        async function saveDriverSlot(email) {
+            const typeBtn = document.querySelector('.bg-blue-600.text-white');
+            const hours = document.getElementById('slot-hours').value;
+
+            if (!typeBtn || !hours) {
+                alert('Please select shift type and hours');
+                return;
+            }
+
+            const type = typeBtn.textContent.trim();
+
+            try {
+                const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(email)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shift: { type, hours } })
+                });
+
+                if (res.ok) {
+                    showToast('Shift updated successfully', 'success');
+                    document.querySelector('.fixed.inset-0.bg-black\\/50').remove();
+                    loadActiveFleet();
+                } else {
+                    showToast('Failed to update shift', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Error updating shift', 'error');
+            }
+        }
+        async function rejectOrder(orderId) {
+            if (!confirm('Reject this order? This will restock the items for other customers.')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/orders/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: orderId,
+                        status: 'Rejected' // Status pass kar rahe hain taaki restock trigger ho
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Order Rejected & Items Restocked', 'success');
+                    loadDispatchManager(); // Table refresh karne ke liye
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || 'Failed to reject order', 'error');
+                }
+            } catch (e) {
+                console.error("Reject Error:", e);
+                showToast('Server Connection Error', 'error');
+            }
+        }
+        // --- REPLACE IN webadmin.html ---
+
+        async function viewDriverHistory(email) {
+            try {
+                const ordersRes = await fetch(`${API_URL}/orders`);
+                const orders = await ordersRes.json();
+
+                // Filter Orders for this specific driver
+                const driverOrders = orders.filter(o =>
+                    o.assignedTo && o.assignedTo.toLowerCase().trim() === email.toLowerCase().trim()
+                );
+
+                const modal = document.getElementById('driver-history-modal');
+                const tbody = document.getElementById('driver-history-body');
+
+                if (driverOrders.length === 0) {
+                    tbody.innerHTML = `
                 <tr>
                     <td colspan="4" class="p-6 text-center text-gray-500">
                         No delivery history found for this driver.
                     </td>
                 </tr>
             `;
-        } else {
-            // Sort by latest first (assuming ID or Date helps sort, usually API sends sorted)
-            driverOrders.reverse();
+                } else {
+                    // Sort by latest first (assuming ID or Date helps sort, usually API sends sorted)
+                    driverOrders.reverse();
 
-            tbody.innerHTML = driverOrders.map(order => {
-                let badge = '';
-                let amountEarned = 0;
+                    tbody.innerHTML = driverOrders.map(order => {
+                        let badge = '';
+                        let amountEarned = 0;
 
-                // LOGIC: Determine Type and Earnings based on Verified Flags
-                
-                // Case 1: Delivery Verified
-                if (order.isDeliveryVerified) {
-                    badge = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-green-200">DELIVERY</span>`;
-                    amountEarned += 20;
-                }
-                
-                // Case 2: Return Verified
-                else if (order.isReturnVerified) {
-                    badge = `<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-purple-200">RETURN PICKUP</span>`;
-                    amountEarned += 20;
-                }
-                
-                // Case 3: Pending / Active
-                else {
-                    const isReturnProcess = order.status.includes('Return') || order.status.includes('Pickup');
-                    const label = isReturnProcess ? 'RETURN (PENDING)' : 'DELIVERY (PENDING)';
-                    const color = isReturnProcess ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600';
-                    badge = `<span class="${color} px-2 py-1 rounded text-[10px] font-bold uppercase border border-gray-200">${label}</span>`;
-                }
+                        // LOGIC: Determine Type and Earnings based on Verified Flags
 
-                // Amount Badge Color
-                const amountClass = amountEarned > 0 ? "text-green-600 bg-green-50 border-green-200" : "text-gray-400 bg-gray-50 border-gray-200";
+                        // Case 1: Delivery Verified
+                        if (order.isDeliveryVerified) {
+                            badge = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-green-200">DELIVERY</span>`;
+                            amountEarned += 20;
+                        }
 
-                return `
+                        // Case 2: Return Verified
+                        else if (order.isReturnVerified) {
+                            badge = `<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-purple-200">RETURN PICKUP</span>`;
+                            amountEarned += 20;
+                        }
+
+                        // Case 3: Pending / Active
+                        else {
+                            const isReturnProcess = order.status.includes('Return') || order.status.includes('Pickup');
+                            const label = isReturnProcess ? 'RETURN (PENDING)' : 'DELIVERY (PENDING)';
+                            const color = isReturnProcess ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600';
+                            badge = `<span class="${color} px-2 py-1 rounded text-[10px] font-bold uppercase border border-gray-200">${label}</span>`;
+                        }
+
+                        // Amount Badge Color
+                        const amountClass = amountEarned > 0 ? "text-green-600 bg-green-50 border-green-200" : "text-gray-400 bg-gray-50 border-gray-200";
+
+                        return `
                     <tr class="hover:bg-gray-50 border-b border-gray-100">
                         <td class="p-3 font-mono text-xs font-bold text-gray-600">
                             #${order.id || order._id?.substr(-6)}
@@ -2091,95 +2229,95 @@ async function viewDriverHistory(email) {
                         </td>
                     </tr>
                 `;
-            }).join('');
+                    }).join('');
+                }
+
+                modal.classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                alert('Failed to load driver history');
+            }
         }
-        
-        modal.classList.remove('hidden');
-    } catch(e) {
-        console.error(e);
-        alert('Failed to load driver history');
-    }
-}
-// ==========================================
-//  HISTORY MODAL - SEPARATE RECORDS FIX
-// ==========================================
+        // ==========================================
+        //  HISTORY MODAL - SEPARATE RECORDS FIX
+        // ==========================================
 
-// 1. Global Variables
+        // 1. Global Variables
 
-let currentHistoryTab = 'delivery';
+        let currentHistoryTab = 'delivery';
 
-var historyOrdersCache = []; 
+        var historyOrdersCache = [];
 
-async function viewDriverHistory(email) {
-    try {
-        console.log("Opening History for:", email);
-
-        if (!email) {
-            alert("Error: Invalid Driver Email");
-            return;
-        }
-
-        // 1. Data Loading (Safe Check)
-        // Pehle check karein ki global variable 'allOrders' hai ya nahi
-        let orders = (typeof allOrders !== 'undefined') ? allOrders : [];
-        
-        // Agar data khali hai, to server se fetch karein
-        if (!orders || orders.length === 0) {
+        async function viewDriverHistory(email) {
             try {
-                const res = await fetch(`${API_URL}/orders`);
-                if(!res.ok) throw new Error("API Error");
-                orders = await res.json();
-                // Global variable update karein
-                if(typeof allOrders !== 'undefined') allOrders = orders;
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                alert("Failed to load data. Please refresh the page.");
-                return;
-            }
-        }
-        
-        // 2. Filter Logic (String conversion ke saath taaki crash na ho)
-        const targetEmail = String(email).toLowerCase().trim();
-        
-        historyOrdersCache = orders.filter(o => 
-            o.assignedTo && String(o.assignedTo).toLowerCase().trim() === targetEmail
-        );
+                console.log("Opening History for:", email);
 
-        console.log(`Found ${historyOrdersCache.length} orders`);
+                if (!email) {
+                    alert("Error: Invalid Driver Email");
+                    return;
+                }
 
-        // 3. Calculate Totals (Hissab)
-        let totalVerified = 0;
-        let totalPending = 0;
+                // 1. Data Loading (Safe Check)
+                // Pehle check karein ki global variable 'allOrders' hai ya nahi
+                let orders = (typeof allOrders !== 'undefined') ? allOrders : [];
 
-        historyOrdersCache.forEach(o => {
-            // Delivery Pay
-            if (o.isDeliveryVerified) totalVerified += 20;
-            else if (o.status === 'Delivered') totalPending += 20;
+                // Agar data khali hai, to server se fetch karein
+                if (!orders || orders.length === 0) {
+                    try {
+                        const res = await fetch(`${API_URL}/orders`);
+                        if (!res.ok) throw new Error("API Error");
+                        orders = await res.json();
+                        // Global variable update karein
+                        if (typeof allOrders !== 'undefined') allOrders = orders;
+                    } catch (err) {
+                        console.error("Fetch Error:", err);
+                        alert("Failed to load data. Please refresh the page.");
+                        return;
+                    }
+                }
 
-            // Return Pay
-            if (o.isReturnVerified) totalVerified += 20;
-            else if (['Returned', 'Return Completed'].includes(o.status) && !o.isReturnVerified) {
-                totalPending += 20;
-            }
-        });
+                // 2. Filter Logic (String conversion ke saath taaki crash na ho)
+                const targetEmail = String(email).toLowerCase().trim();
 
-        // 4. Update UI Elements
-        // Check karein ki element page par hai ya nahi
-        const elEarned = document.getElementById('hist-total-earned');
-        const elPending = document.getElementById('hist-total-pending');
-        
-        if(elEarned) elEarned.innerText = `₹${totalVerified}`;
-        if(elPending) elPending.innerText = `₹${totalPending}`;
-        
-        // 5. Initialize UI (Tabs & Header)
-        const modal = document.getElementById('driver-history-modal');
-        const container = modal.querySelector('.bg-white'); 
-        
-        // Header UI inject karein agar nahi hai
-        if (!document.getElementById('history-ui-container')) {
-            const header = container.querySelector('.flex.justify-between');
-            if(header) {
-                const uiHTML = `
+                historyOrdersCache = orders.filter(o =>
+                    o.assignedTo && String(o.assignedTo).toLowerCase().trim() === targetEmail
+                );
+
+                console.log(`Found ${historyOrdersCache.length} orders`);
+
+                // 3. Calculate Totals (Hissab)
+                let totalVerified = 0;
+                let totalPending = 0;
+
+                historyOrdersCache.forEach(o => {
+                    // Delivery Pay
+                    if (o.isDeliveryVerified) totalVerified += 20;
+                    else if (o.status === 'Delivered') totalPending += 20;
+
+                    // Return Pay
+                    if (o.isReturnVerified) totalVerified += 20;
+                    else if (['Returned', 'Return Completed'].includes(o.status) && !o.isReturnVerified) {
+                        totalPending += 20;
+                    }
+                });
+
+                // 4. Update UI Elements
+                // Check karein ki element page par hai ya nahi
+                const elEarned = document.getElementById('hist-total-earned');
+                const elPending = document.getElementById('hist-total-pending');
+
+                if (elEarned) elEarned.innerText = `₹${totalVerified}`;
+                if (elPending) elPending.innerText = `₹${totalPending}`;
+
+                // 5. Initialize UI (Tabs & Header)
+                const modal = document.getElementById('driver-history-modal');
+                const container = modal.querySelector('.bg-white');
+
+                // Header UI inject karein agar nahi hai
+                if (!document.getElementById('history-ui-container')) {
+                    const header = container.querySelector('.flex.justify-between');
+                    if (header) {
+                        const uiHTML = `
                     <div id="history-ui-container" class="mb-4">
                         <div class="mx-6 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-2 gap-4 text-center">
                             <div>
@@ -2196,70 +2334,70 @@ async function viewDriverHistory(email) {
                             <button onclick="renderHistoryTable('return')" id="tab-hist-ret" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400">Returns</button>
                         </div>
                     </div>`;
-                header.insertAdjacentHTML('afterend', uiHTML);
-            }
-        }
-        
-        renderHistoryTable('delivery');
-        modal.classList.remove('hidden');
+                        header.insertAdjacentHTML('afterend', uiHTML);
+                    }
+                }
 
-    } catch(e) {
-        console.error("ViewHistory Critical Error:", e);
-        // Error ko toast/alert mein dikhayein
-        if(typeof showToast === 'function') showToast("System Error: " + e.message, 'error');
-        else alert("System Error: " + e.message);
-    }
-}
+                renderHistoryTable('delivery');
+                modal.classList.remove('hidden');
 
-// Helper Function: Render Table
-function renderHistoryTable(type) {
-    try {
-        const tbody = document.getElementById('driver-history-body');
-        const tabDel = document.getElementById('tab-hist-del');
-        const tabRet = document.getElementById('tab-hist-ret');
-        
-        if(!tbody) return;
-
-        // Update Tabs Style
-        if (tabDel && tabRet) {
-            if (type === 'delivery') {
-                tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black";
-                tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400";
-            } else {
-                tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400";
-                tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black";
+            } catch (e) {
+                console.error("ViewHistory Critical Error:", e);
+                // Error ko toast/alert mein dikhayein
+                if (typeof showToast === 'function') showToast("System Error: " + e.message, 'error');
+                else alert("System Error: " + e.message);
             }
         }
 
-        // Filter Data
-        let filtered = [];
-        if (type === 'delivery') {
-            filtered = historyOrdersCache.filter(o => o.isDeliveryVerified === true || o.status === 'Delivered');
-        } else {
-            filtered = historyOrdersCache.filter(o => o.isReturnVerified === true || (o.status && o.status.includes('Return')));
-        }
+        // Helper Function: Render Table
+        function renderHistoryTable(type) {
+            try {
+                const tbody = document.getElementById('driver-history-body');
+                const tabDel = document.getElementById('tab-hist-del');
+                const tabRet = document.getElementById('tab-hist-ret');
 
-        // Empty State
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No records found.</td></tr>`;
-            return;
-        }
+                if (!tbody) return;
 
-        // Sort (Safe string compare)
-        filtered.sort((a, b) => {
-            const idA = String(a._id || a.id || '');
-            const idB = String(b._id || b.id || '');
-            return idB.localeCompare(idA);
-        });
+                // Update Tabs Style
+                if (tabDel && tabRet) {
+                    if (type === 'delivery') {
+                        tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black";
+                        tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400";
+                    } else {
+                        tabDel.className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-400";
+                        tabRet.className = "flex-1 py-3 text-sm font-bold border-b-2 border-black text-black";
+                    }
+                }
 
-        // Render Rows
-        tbody.innerHTML = filtered.map(order => {
-            const isPaid = (type === 'delivery' ? order.isDeliveryVerified : order.isReturnVerified);
-            const badge = isPaid 
-                ? `<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">Verified</span>`
-                : `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">Pending</span>`;
+                // Filter Data
+                let filtered = [];
+                if (type === 'delivery') {
+                    filtered = historyOrdersCache.filter(o => o.isDeliveryVerified === true || o.status === 'Delivered');
+                } else {
+                    filtered = historyOrdersCache.filter(o => o.isReturnVerified === true || (o.status && o.status.includes('Return')));
+                }
 
-            return `
+                // Empty State
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No records found.</td></tr>`;
+                    return;
+                }
+
+                // Sort (Safe string compare)
+                filtered.sort((a, b) => {
+                    const idA = String(a._id || a.id || '');
+                    const idB = String(b._id || b.id || '');
+                    return idB.localeCompare(idA);
+                });
+
+                // Render Rows
+                tbody.innerHTML = filtered.map(order => {
+                    const isPaid = (type === 'delivery' ? order.isDeliveryVerified : order.isReturnVerified);
+                    const badge = isPaid
+                        ? `<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">Verified</span>`
+                        : `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">Pending</span>`;
+
+                    return `
                 <tr class="hover:bg-gray-50 border-b border-gray-100">
                     <td class="p-4"><p class="font-mono text-xs font-bold">#${order.id || String(order._id).substr(-6)}</p><p class="text-[10px] text-gray-400">${order.date || ''}</p></td>
                     <td class="p-4"><p class="font-bold text-sm">${order.customerName || 'Unknown'}</p><p class="text-xs text-gray-500">${order.address || ''}</p></td>
@@ -2267,51 +2405,51 @@ function renderHistoryTable(type) {
                     <td class="p-4 text-right"><span class="font-bold text-sm ${isPaid ? 'text-green-600' : 'text-gray-400'}">₹20</span></td>
                 </tr>
             `;
-        }).join('');
-    } catch(e) { console.error("Table Render Error:", e); }
-}
-    // --- DISPATCH MANAGER ---
-    async function loadDispatchManager() {
-        try {
-            const res = await fetch(`${API_URL}/orders`);
-            allOrders = await res.json();
-            renderOrdersTable(allOrders);
-        } catch(e) {
-            console.error('Error loading orders:', e);
-            showToast('Failed to load orders', 'error');
+                }).join('');
+            } catch (e) { console.error("Table Render Error:", e); }
         }
-    }
-
-    // --- REPLACE IN webadmin.html: renderOrdersTable ---
-function renderOrdersTable(orders) {
-    const tbody = document.getElementById('orders-table-body');
-    
-    if(orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">No orders found</td></tr>`;
-        return;
-    }
-    
-    tbody.innerHTML = orders.map(order => {
-        let firstImage = 'https://via.placeholder.com/50';
-        if(order.items && order.items.length > 0) {
-            const firstItem = order.items[0];
-            firstImage = firstItem.img || firstItem.image || firstImage;
+        // --- DISPATCH MANAGER ---
+        async function loadDispatchManager() {
+            try {
+                const res = await fetch(`${API_URL}/orders`);
+                allOrders = await res.json();
+                renderOrdersTable(allOrders);
+            } catch (e) {
+                console.error('Error loading orders:', e);
+                showToast('Failed to load orders', 'error');
+            }
         }
-        
-        // Status Colors logic
-        const statusColor = (order.status === 'Delivered' || order.status === 'Returned') ? 'bg-green-100 text-green-800' :
-                          (order.status === 'Cancelled' || order.status === 'Return Rejected' || order.status === 'Return Cancelled') ? 'bg-red-100 text-red-800' :
-                          (order.status === 'Return Approved' || order.status === 'Return Assigned') ? 'bg-purple-100 text-purple-800' :
-                          'bg-blue-100 text-blue-800';
-        
-        let actionButtons = '';
-        
-        // --- BUTTON LOGIC START ---
 
-        // 1. SPECIAL: RETURN APPROVED (Must be checked first)
-        // यह वह सेक्शन है जो आपको चाहिए (2 Buttons)
-        if (order.status === 'Return Approved') {
-            actionButtons = `
+        // --- REPLACE IN webadmin.html: renderOrdersTable ---
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById('orders-table-body');
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">No orders found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => {
+                let firstImage = 'https://via.placeholder.com/50';
+                if (order.items && order.items.length > 0) {
+                    const firstItem = order.items[0];
+                    firstImage = firstItem.img || firstItem.image || firstImage;
+                }
+
+                // Status Colors logic
+                const statusColor = (order.status === 'Delivered' || order.status === 'Returned') ? 'bg-green-100 text-green-800' :
+                    (order.status === 'Cancelled' || order.status === 'Return Rejected' || order.status === 'Return Cancelled') ? 'bg-red-100 text-red-800' :
+                        (order.status === 'Return Approved' || order.status === 'Return Assigned') ? 'bg-purple-100 text-purple-800' :
+                            'bg-blue-100 text-blue-800';
+
+                let actionButtons = '';
+
+                // --- BUTTON LOGIC START ---
+
+                // 1. SPECIAL: RETURN APPROVED (Must be checked first)
+                // यह वह सेक्शन है जो आपको चाहिए (2 Buttons)
+                if (order.status === 'Return Approved') {
+                    actionButtons = `
                 <div class="flex flex-col gap-2 mb-2">
                     <button onclick="assignOrder('${order._id || order.id}')" 
                             class="w-full px-3 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold hover:bg-purple-700 shadow-sm flex items-center justify-center gap-2">
@@ -2324,39 +2462,39 @@ function renderOrdersTable(orders) {
                     </button>
                 </div>
             `;
-        }
-       // 2. PAYMENT VERIFICATION
-else if ((order.status === 'Delivered' || order.status === 'Return Completed')) {
-    
-    // Check agar paise verify nahi huye
-    const needsVerification = (order.status === 'Delivered' && !order.isDeliveryVerified) || 
-                              (order.status === 'Return Completed' && !order.isReturnVerified);
+                }
+                // 2. PAYMENT VERIFICATION
+                else if ((order.status === 'Delivered' || order.status === 'Return Completed')) {
 
-    if(needsVerification) {
-        const btnText = order.status === 'Delivered' ? "Approve Delivery Payment" : "Approve Return Payment";
-        actionButtons = `
+                    // Check agar paise verify nahi huye
+                    const needsVerification = (order.status === 'Delivered' && !order.isDeliveryVerified) ||
+                        (order.status === 'Return Completed' && !order.isReturnVerified);
+
+                    if (needsVerification) {
+                        const btnText = order.status === 'Delivered' ? "Approve Delivery Payment" : "Approve Return Payment";
+                        actionButtons = `
             <button onclick="verifyAndPay('${order._id || order.id}')" 
                     class="w-full mb-2 px-3 py-3 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 shadow-md flex items-center justify-center gap-2">
                 <i data-lucide="wallet" class="w-4 h-4"></i> ${btnText} (₹20)
             </button>
         `;
-    } else {
-        // Already Paid
-        actionButtons = `
+                    } else {
+                        // Already Paid
+                        actionButtons = `
             <div class="mb-2 w-full px-3 py-2 bg-gray-50 text-green-700 rounded-lg text-xs font-bold border border-green-200 flex items-center justify-center gap-1">
                 <i data-lucide="check" class="w-3 h-3"></i> Payment Verified
             </div>
         `;
-    }
-}
-        // 4. STANDARD ACTIVE ORDERS (Normal Delivery)
-        else {
-    let btnLabel = order.assignedTo ? "Reassign" : "Assign";
-    let btnColor = order.assignedTo ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : "bg-blue-600 text-white hover:bg-blue-700";
-    
-    // Show Assign/Reassign/Reject only if active
-    if(order.status !== 'Cancelled' && order.status !== 'Rejected' && order.status !== 'Returned' && order.status !== 'Return Cancelled') {
-        actionButtons = `
+                    }
+                }
+                // 4. STANDARD ACTIVE ORDERS (Normal Delivery)
+                else {
+                    let btnLabel = order.assignedTo ? "Reassign" : "Assign";
+                    let btnColor = order.assignedTo ? "bg-orange-100 text-orange-700 hover:bg-orange-200" : "bg-blue-600 text-white hover:bg-blue-700";
+
+                    // Show Assign/Reassign/Reject only if active
+                    if (order.status !== 'Cancelled' && order.status !== 'Rejected' && order.status !== 'Returned' && order.status !== 'Return Cancelled') {
+                        actionButtons = `
             <div class="flex flex-col gap-2 justify-center mb-2">
                 <button onclick="assignOrder('${order._id || order.id}')" class="w-full px-3 py-2 ${btnColor} rounded-lg text-xs font-bold shadow-sm transition-colors">
                     ${btnLabel} Driver
@@ -2372,20 +2510,20 @@ else if ((order.status === 'Delivered' || order.status === 'Return Completed')) 
                 </div>
             </div>
         `;
-    } else {
-        actionButtons = `<div class="mb-2 text-center text-xs font-bold text-red-400 uppercase tracking-wide border border-red-100 bg-red-50 py-2 rounded-lg">${order.status}</div>`;
-    }
-}
+                    } else {
+                        actionButtons = `<div class="mb-2 text-center text-xs font-bold text-red-400 uppercase tracking-wide border border-red-100 bg-red-50 py-2 rounded-lg">${order.status}</div>`;
+                    }
+                }
 
-        // View Bill Button (Always Visible)
-        const billButton = `
+                // View Bill Button (Always Visible)
+                const billButton = `
             <button onclick="viewOrderBill('${order._id || order.id}')" 
                     class="w-full px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-bold hover:bg-gray-200 flex items-center justify-center gap-2">
                 <i data-lucide="file-text" class="w-3 h-3"></i> View Bill
             </button>
         `;
 
-        return `
+                return `
             <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
                 <td class="p-4">
                     <div class="flex items-center gap-3">
@@ -2416,81 +2554,81 @@ else if ((order.status === 'Delivered' || order.status === 'Return Completed')) 
                 </td>
             </tr>
         `;
-    }).join('');
-    
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-}
-    async function cancelReturnProcess(orderId) {
-        if(!confirm('Are you sure you want to Cancel this Return?')) return;
+            }).join('');
 
-        try {
-            // Status ko 'Return Cancelled' set karein
-            const res = await fetch(`${API_URL}/update-order-status`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    id: orderId, 
-                    status: 'Return Cancelled' 
-                })
-            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        async function cancelReturnProcess(orderId) {
+            if (!confirm('Are you sure you want to Cancel this Return?')) return;
 
-            if(res.ok) {
-                showToast('Return Process Cancelled', 'success');
-                loadDispatchManager(); // Table refresh
-            } else {
-                showToast('Failed to cancel return', 'error');
+            try {
+                // Status ko 'Return Cancelled' set karein
+                const res = await fetch(`${API_URL}/update-order-status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: orderId,
+                        status: 'Return Cancelled'
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Return Process Cancelled', 'success');
+                    loadDispatchManager(); // Table refresh
+                } else {
+                    showToast('Failed to cancel return', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server Error', 'error');
             }
-        } catch(e) {
-            console.error(e);
-            showToast('Server Error', 'error');
         }
-    }
-async function verifyAndPay(orderId) {
-    if(!confirm("Verify this delivery and credit ₹20 to the driver's wallet?")) return;
+        async function verifyAndPay(orderId) {
+            if (!confirm("Verify this delivery and credit ₹20 to the driver's wallet?")) return;
 
-    try {
-        const res = await fetch(`${API_URL}/admin/verify-payment`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // ✅ FIX: Token Add kiya (Zaroori hai)
-                'Authorization': `Bearer ${currentUser.token}`
-            },
-            body: JSON.stringify({ orderId: orderId })
-        });
+            try {
+                const res = await fetch(`${API_URL}/admin/verify-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // ✅ FIX: Token Add kiya (Zaroori hai)
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({ orderId: orderId })
+                });
 
-        // Response Handling
-        const textResponse = await res.text();
-        let data;
-        try {
-            data = JSON.parse(textResponse);
-        } catch(e) {
-            console.error("Server Sent Non-JSON:", textResponse);
-            showToast(`❌ Server Error: ${res.status} ${res.statusText}`, "error");
-            return;
+                // Response Handling
+                const textResponse = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(textResponse);
+                } catch (e) {
+                    console.error("Server Sent Non-JSON:", textResponse);
+                    showToast(`❌ Server Error: ${res.status} ${res.statusText}`, "error");
+                    return;
+                }
+
+                if (res.ok) {
+                    showToast("✅ Payment Successful! Driver Wallet Updated.", "success");
+                    loadDispatchManager(); // Table refresh
+                } else {
+                    showToast("❌ Error: " + (data.message || "Unknown Error"), "error");
+                }
+            } catch (e) {
+                console.error("Network Error:", e);
+                showToast("Server Connection Error. Is Server Running?", "error");
+            }
         }
+        async function viewOrderBill(orderId) {
+            try {
+                const res = await fetch(`${API_URL}/orders/${orderId}`);
+                const order = await res.json();
 
-        if(res.ok) {
-            showToast("✅ Payment Successful! Driver Wallet Updated.", "success");
-            loadDispatchManager(); // Table refresh
-        } else {
-            showToast("❌ Error: " + (data.message || "Unknown Error"), "error");
-        }
-    } catch(e) {
-        console.error("Network Error:", e);
-        showToast("Server Connection Error. Is Server Running?", "error");
-    }
-}
-    async function viewOrderBill(orderId) {
-        try {
-            const res = await fetch(`${API_URL}/orders/${orderId}`);
-            const order = await res.json();
-            
-            const billContent = document.getElementById('bill-content');
-            let itemsHtml = '';
-            
-            if(order.items && order.items.length > 0) {
-                itemsHtml = order.items.map(item => `
+                const billContent = document.getElementById('bill-content');
+                let itemsHtml = '';
+
+                if (order.items && order.items.length > 0) {
+                    itemsHtml = order.items.map(item => `
                     <div class="flex justify-between items-center border-b border-gray-200 py-3">
                         <div class="flex items-center gap-3">
                             <img src="${item.img || item.image || 'https://via.placeholder.com/60'}" 
@@ -2503,16 +2641,16 @@ async function verifyAndPay(orderId) {
                         <p class="font-bold">₹${item.price}</p>
                     </div>
                 `).join('');
-            } else {
-                itemsHtml = `
+                } else {
+                    itemsHtml = `
                     <div class="flex justify-between items-center border-b border-gray-200 py-3">
                         <p class="font-bold">${order.product || 'Unknown Product'}</p>
                         <p class="font-bold">₹${order.price}</p>
                     </div>
                 `;
-            }
-            
-            billContent.innerHTML = `
+                }
+
+                billContent.innerHTML = `
                 <div class="max-w-2xl mx-auto">
                     <div class="text-center mb-8">
                         <h1 class="text-2xl font-black">KICKS INVOICE</h1>
@@ -2561,41 +2699,41 @@ async function verifyAndPay(orderId) {
                     </div>
                 </div>
             `;
-            
-            document.getElementById('bill-modal').classList.remove('hidden');
-        } catch(e) {
-            console.error(e);
-            showToast('Failed to load order details', 'error');
+
+                document.getElementById('bill-modal').classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to load order details', 'error');
+            }
         }
-    }
 
-    async function assignOrder(orderId) {
-        const order = allOrders.find(o => o._id === orderId || o.id == orderId);
-        if(!order) return;
-        
-        try {
-            // ✅ FIX: Added Authorization Header with Token
-            const driversRes = await fetch(`${API_URL}/users`, {
-                method: 'GET',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}` 
-                }
-            });
+        async function assignOrder(orderId) {
+            const order = allOrders.find(o => o._id === orderId || o.id == orderId);
+            if (!order) return;
 
-            if (!driversRes.ok) throw new Error("Unauthorized: Failed to fetch drivers");
+            try {
+                // ✅ FIX: Added Authorization Header with Token
+                const driversRes = await fetch(`${API_URL}/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
 
-            const drivers = await driversRes.json();
-            const activeDrivers = drivers.filter(d => d.status === 'active');
-            
-            document.getElementById('modal-order-id').innerText = `#${order.id || order._id?.substr(-6)}`;
-            
-            const driversList = document.getElementById('modal-drivers-list');
-            
-            if(activeDrivers.length === 0) {
-                driversList.innerHTML = `<p class="text-center text-gray-500 py-4 text-xs">No active drivers found.</p>`;
-            } else {
-                driversList.innerHTML = activeDrivers.map(driver => `
+                if (!driversRes.ok) throw new Error("Unauthorized: Failed to fetch drivers");
+
+                const drivers = await driversRes.json();
+                const activeDrivers = drivers.filter(d => d.status === 'active');
+
+                document.getElementById('modal-order-id').innerText = `#${order.id || order._id?.substr(-6)}`;
+
+                const driversList = document.getElementById('modal-drivers-list');
+
+                if (activeDrivers.length === 0) {
+                    driversList.innerHTML = `<p class="text-center text-gray-500 py-4 text-xs">No active drivers found.</p>`;
+                } else {
+                    driversList.innerHTML = activeDrivers.map(driver => `
                     <div class="bg-gray-50 p-3 rounded-lg hover:bg-gray-100 cursor-pointer border border-gray-200"
                          onclick="selectDriverForAssignment('${driver.email}', '${orderId}')">
                         <div class="flex justify-between items-center">
@@ -2607,126 +2745,126 @@ async function verifyAndPay(orderId) {
                         </div>
                     </div>
                 `).join('');
-            }
-            
-            document.getElementById('assign-modal').classList.remove('hidden');
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-            
-        } catch(e) {
-            console.error(e);
-            showToast('Failed to load drivers: ' + e.message, 'error');
-        }
-    }
-   async function selectDriverForAssignment(driverEmail, orderId) {
-    if(!confirm(`Assign order to ${driverEmail}?`)) return;
-    
-    const cleanEmail = driverEmail.toLowerCase().trim();
-    const order = allOrders.find(o => o._id === orderId || o.id == orderId);
-    
-    // Status Logic
-    let newStatus = 'Assigned';
-    if(order.status === 'Return Approved' || order.status.includes('Return')) {
-        newStatus = 'Return Assigned';
-    }
+                }
 
-    try {
-        const res = await fetch(`${API_URL}/orders/${orderId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                // ✅ FIX: Added Token here as well
-                'Authorization': `Bearer ${currentUser.token}`
-            },
-            body: JSON.stringify({ 
-                assignedTo: cleanEmail, 
-                status: newStatus 
-            })
-        });
-        
-        if(res.ok) {
-            showToast("Driver Assigned Successfully!", "success");
+                document.getElementById('assign-modal').classList.remove('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to load drivers: ' + e.message, 'error');
+            }
+        }
+        async function selectDriverForAssignment(driverEmail, orderId) {
+            if (!confirm(`Assign order to ${driverEmail}?`)) return;
+
+            const cleanEmail = driverEmail.toLowerCase().trim();
+            const order = allOrders.find(o => o._id === orderId || o.id == orderId);
+
+            // Status Logic
+            let newStatus = 'Assigned';
+            if (order.status === 'Return Approved' || order.status.includes('Return')) {
+                newStatus = 'Return Assigned';
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // ✅ FIX: Added Token here as well
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        assignedTo: cleanEmail,
+                        status: newStatus
+                    })
+                });
+
+                if (res.ok) {
+                    showToast("Driver Assigned Successfully!", "success");
+                    document.getElementById('assign-modal').classList.add('hidden');
+                    loadDispatchManager();
+                } else {
+                    const err = await res.json();
+                    showToast("Failed to assign: " + (err.message || "Unknown error"), "error");
+                }
+            } catch (e) {
+                console.error(e);
+                showToast("Server Connection Error", "error");
+            }
+        }
+        function reassignOrder(orderId) {
+            assignOrder(orderId);
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Cancel this order? This action cannot be undone.')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/orders/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: orderId })
+                });
+
+                if (res.ok) {
+                    showToast('Order cancelled', 'success');
+                    loadDispatchManager();
+                } else {
+                    showToast('Failed to cancel order', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Error cancelling order', 'error');
+            }
+        }
+
+        function closeModal() {
             document.getElementById('assign-modal').classList.add('hidden');
-            loadDispatchManager(); 
-        } else {
-            const err = await res.json();
-            showToast("Failed to assign: " + (err.message || "Unknown error"), "error");
         }
-    } catch(e) {
-        console.error(e);
-        showToast("Server Connection Error", "error");
-    }
-}
-    function reassignOrder(orderId) {
-        assignOrder(orderId);
-    }
 
-    async function cancelOrder(orderId) {
-        if(!confirm('Cancel this order? This action cannot be undone.')) return;
-        
-        try {
-            const res = await fetch(`${API_URL}/orders/cancel`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: orderId })
-            });
-            
-            if(res.ok) {
-                showToast('Order cancelled', 'success');
-                loadDispatchManager();
-            } else {
-                showToast('Failed to cancel order', 'error');
+        // --- RETURNS MANAGEMENT ---
+        async function loadReturns() {
+            try {
+                // Returns Route is Secured in server.js, so Token is required
+                const res = await fetch(`${API_URL}/returns`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+                    }
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch returns (Auth Error)");
+
+                allReturnRequests = await res.json();
+                renderReturnsTable(allReturnRequests);
+            } catch (e) {
+                console.error('Error loading returns:', e);
+                showToast('Failed to load returns', 'error');
             }
-        } catch(e) {
-            console.error(e);
-            showToast('Error cancelling order', 'error');
         }
-    }
+        function renderReturnsTable(returns) {
+            const tbody = document.getElementById('returns-table-body');
 
-    function closeModal() {
-        document.getElementById('assign-modal').classList.add('hidden');
-    }
-
-    // --- RETURNS MANAGEMENT ---
-    async function loadReturns() {
-    try {
-        // Returns Route is Secured in server.js, so Token is required
-        const res = await fetch(`${API_URL}/returns`, {
-            method: 'GET',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
-            }
-        });
-
-        if(!res.ok) throw new Error("Failed to fetch returns (Auth Error)");
-
-        allReturnRequests = await res.json();
-        renderReturnsTable(allReturnRequests);
-    } catch(e) {
-        console.error('Error loading returns:', e);
-        showToast('Failed to load returns', 'error');
-    }
-}
-    function renderReturnsTable(returns) {
-        const tbody = document.getElementById('returns-table-body');
-        
-        if(returns.length === 0) {
-            tbody.innerHTML = `
+            if (returns.length === 0) {
+                tbody.innerHTML = `
                 <tr>
                     <td colspan="3" class="p-4 text-center text-gray-500">
                         No return requests
                     </td>
                 </tr>
             `;
-            return;
-        }
-        
-        tbody.innerHTML = returns.map(req => {
-            const statusColor = req.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                              req.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800';
-            
-            return `
+                return;
+            }
+
+            tbody.innerHTML = returns.map(req => {
+                const statusColor = req.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                    req.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800';
+
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="p-4">
                         <p class="font-bold text-sm">Order #${req.orderId}</p>
@@ -2762,65 +2900,65 @@ async function verifyAndPay(orderId) {
                     </td>
                 </tr>
             `;
-        }).join('');
-        
-        lucide.createIcons();
-    }
-async function updateReturnStatus(orderId, status) {
-    if(!confirm(`${status} this return request?`)) return;
-    
-    // Show loading toast
-    showToast(`Updating return to ${status}...`, 'info');
+            }).join('');
 
-    try {
-        // 1. Update the Return Request Entry (Admin Panel View)
-        const returnRes = await fetch(`${API_URL}/returns/${encodeURIComponent(orderId)}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                // ✅ FIX: Token Added Here
-                'Authorization': `Bearer ${currentUser.token}` 
-            },
-            body: JSON.stringify({ status })
-        });
-        
-        if(!returnRes.ok) {
-            throw new Error("Failed to update Return Request table.");
+            lucide.createIcons();
         }
+        async function updateReturnStatus(orderId, status) {
+            if (!confirm(`${status} this return request?`)) return;
 
-        // 2. Update the Actual Order Status (For Driver/Dispatch View)
-        const newOrderStatus = status === 'Approved' ? 'Return Approved' : 'Return Rejected';
+            // Show loading toast
+            showToast(`Updating return to ${status}...`, 'info');
 
-        const orderRes = await fetch(`${API_URL}/update-order-status`, { 
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                // ✅ FIX: Token Added Here Too
-                'Authorization': `Bearer ${currentUser.token}`
-            },
-            body: JSON.stringify({ 
-                id: orderId, 
-                status: newOrderStatus
-            })
-        });
+            try {
+                // 1. Update the Return Request Entry (Admin Panel View)
+                const returnRes = await fetch(`${API_URL}/returns/${encodeURIComponent(orderId)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // ✅ FIX: Token Added Here
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
 
-        if(!orderRes.ok) {
-            throw new Error("Failed to update Order Status.");
+                if (!returnRes.ok) {
+                    throw new Error("Failed to update Return Request table.");
+                }
+
+                // 2. Update the Actual Order Status (For Driver/Dispatch View)
+                const newOrderStatus = status === 'Approved' ? 'Return Approved' : 'Return Rejected';
+
+                const orderRes = await fetch(`${API_URL}/update-order-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // ✅ FIX: Token Added Here Too
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        id: orderId,
+                        status: newOrderStatus
+                    })
+                });
+
+                if (!orderRes.ok) {
+                    throw new Error("Failed to update Order Status.");
+                }
+
+                showToast(`Return ${status} Successfully!`, 'success');
+
+                // 3. Reload Tables to show changes
+                await loadReturns();
+                await loadDispatchManager();
+
+            } catch (e) {
+                console.error(e);
+                showToast(`Error: ${e.message}`, 'error');
+            }
         }
-        
-        showToast(`Return ${status} Successfully!`, 'success');
-        
-        // 3. Reload Tables to show changes
-        await loadReturns();
-        await loadDispatchManager();
-
-    } catch(e) {
-        console.error(e);
-        showToast(`Error: ${e.message}`, 'error');
-    }
-}
-    function viewReturnImage(imageData) {
-        const modalContent = `
+        function viewReturnImage(imageData) {
+            const modalContent = `
             <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div class="p-6">
@@ -2839,18 +2977,19 @@ async function updateReturnStatus(orderId, status) {
                 </div>
             </div>
         `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalContent);
-        lucide.createIcons();
-    }
-    // --- UTILITY FUNCTIONS ---
-    function filterAssignDrivers() {
-        // Implementation for filtering drivers by state/city
-        console.log('Filter drivers function');
-    }
 
-    // --- INITIALIZE ---
-    window.onload = init;
-</script>
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+            lucide.createIcons();
+        }
+        // --- UTILITY FUNCTIONS ---
+        function filterAssignDrivers() {
+            // Implementation for filtering drivers by state/city
+            console.log('Filter drivers function');
+        }
+
+        // --- INITIALIZE ---
+        window.onload = init;
+    </script>
 </body>
+
 </html>
