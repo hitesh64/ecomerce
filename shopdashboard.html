@@ -251,14 +251,14 @@
 
                 <p class="px-3 mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Add New Product
                 </p>
-<button onclick="preloadCategory('Mens Fashion')"
-    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-    <i class="fa-solid fa-user-tie w-5 text-center text-blue-500"></i> Men's Fashion
-</button>
-<button onclick="preloadCategory('Womens Fashion')"
-    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-    <i class="fa-solid fa-person-dress w-5 text-center text-pink-500"></i> Women's Fashion
-</button>
+                <button onclick="preloadCategory('Mens Fashion')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                    <i class="fa-solid fa-user-tie w-5 text-center text-blue-500"></i> Men's Fashion
+                </button>
+                <button onclick="preloadCategory('Womens Fashion')"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                    <i class="fa-solid fa-person-dress w-5 text-center text-pink-500"></i> Women's Fashion
+                </button>
                 <button onclick="preloadCategory('Fashion')"
                     class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-shirt w-5 text-center"></i> Fashion
@@ -590,67 +590,67 @@
 
     <script>
         const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000/api'
-    : '/api';
+            ? 'http://localhost:5000/api'
+            : '/api';
         const KEY_SESSION = 'kicks_vendor_session';
         let currentSessionUser = null;
         let myProductsCache = [];
 
         // --- 1. EXPANDED CATEGORY DATA (19 CATEGORIES) ---
-const categoryMap = {
-    "Mens Fashion": ["T-Shirts", "Shirts", "Jeans", "Trousers", "Jackets", "Ethnic Wear", "Winter Wear"],
-    "Womens Fashion": ["Tops", "Dresses", "Jeans", "Skirts", "Jackets", "Ethnic Wear", "Winter Wear"],
-    "Electronics": ["Audio", "Cameras", "Accessories", "Smart Home", "Printers"],
-    "Mobiles": ["Smartphones", "Feature Phones", "Refurbished", "Tablets", "Cases & Covers"],
-    "Laptops": ["Gaming Laptops", "Ultrabooks", "MacBooks", "Business Laptops", "Accessories"],
-    "Appliances": ["Televisions", "Washing Machines", "Refrigerators", "ACs", "Microwaves"],
-    "Furniture": ["Living Room", "Bedroom", "Office Furniture", "Outdoor", "Decor"],
-    "Beauty": ["Makeup", "Skincare", "Haircare", "Fragrances", "Men's Grooming"],
-    "Grocery": ["Staples", "Snacks & Beverages", "Household Care", "Personal Care", "Dairy"],
-    "Toys": ["Action Figures", "Board Games", "Dolls", "Remote Control", "Educational"],
-    "Sports": ["Cricket", "Football", "Badminton", "Gym Equipment", "Cycling"],
-    "Footwear": ["Men's Shoes", "Women's Shoes", "Kids' Shoes", "Sports Shoes", "Sandals"],
-    "Watches": ["Men's Watches", "Women's Watches", "Smartwatches", "Kids' Watches", "Luxury"],
-    "Jewellery": ["Necklaces", "Earrings", "Rings", "Bracelets", "Sets"],
-    "Bags": ["Backpacks", "Handbags", "Luggage", "Wallets", "Laptop Bags"],
-    "Kitchen": ["Cookware", "Dining", "Storage", "Tools", "Bakeware"],
-    "Baby Care": ["Diapers", "Baby Food", "Skin Care", "Gear & Strollers", "Toys"],
-    "Automotive": ["Car Accessories", "Bike Accessories", "Helmets", "Car Care", "Tools"],
-    "Books": ["Fiction", "Non-Fiction", "Academic", "Children", "Self-Help"],
-    "Stationery": ["Pens & Pencils", "Notebooks", "Art Supplies", "Office Supplies", "Calculators"]
-};
+        const categoryMap = {
+            "Mens Fashion": ["T-Shirts", "Shirts", "Jeans", "Trousers", "Jackets", "Ethnic Wear", "Winter Wear"],
+            "Womens Fashion": ["Tops", "Dresses", "Jeans", "Skirts", "Jackets", "Ethnic Wear", "Winter Wear"],
+            "Electronics": ["Audio", "Cameras", "Accessories", "Smart Home", "Printers"],
+            "Mobiles": ["Smartphones", "Feature Phones", "Refurbished", "Tablets", "Cases & Covers"],
+            "Laptops": ["Gaming Laptops", "Ultrabooks", "MacBooks", "Business Laptops", "Accessories"],
+            "Appliances": ["Televisions", "Washing Machines", "Refrigerators", "ACs", "Microwaves"],
+            "Furniture": ["Living Room", "Bedroom", "Office Furniture", "Outdoor", "Decor"],
+            "Beauty": ["Makeup", "Skincare", "Haircare", "Fragrances", "Men's Grooming"],
+            "Grocery": ["Staples", "Snacks & Beverages", "Household Care", "Personal Care", "Dairy"],
+            "Toys": ["Action Figures", "Board Games", "Dolls", "Remote Control", "Educational"],
+            "Sports": ["Cricket", "Football", "Badminton", "Gym Equipment", "Cycling"],
+            "Footwear": ["Men's Shoes", "Women's Shoes", "Kids' Shoes", "Sports Shoes", "Sandals"],
+            "Watches": ["Men's Watches", "Women's Watches", "Smartwatches", "Kids' Watches", "Luxury"],
+            "Jewellery": ["Necklaces", "Earrings", "Rings", "Bracelets", "Sets"],
+            "Bags": ["Backpacks", "Handbags", "Luggage", "Wallets", "Laptop Bags"],
+            "Kitchen": ["Cookware", "Dining", "Storage", "Tools", "Bakeware"],
+            "Baby Care": ["Diapers", "Baby Food", "Skin Care", "Gear & Strollers", "Toys"],
+            "Automotive": ["Car Accessories", "Bike Accessories", "Helmets", "Car Care", "Tools"],
+            "Books": ["Fiction", "Non-Fiction", "Academic", "Children", "Self-Help"],
+            "Stationery": ["Pens & Pencils", "Notebooks", "Art Supplies", "Office Supplies", "Calculators"]
+        };
 
-const sizeOptions = {
-    "Mens Fashion": ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
-    "Womens Fashion": ["XS", "S", "M", "L", "XL", "XXL"],
-    "Footwear": ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
-    "Mobiles": ["64GB", "128GB", "256GB", "512GB", "1TB"],
-    "Laptops": ["256GB SSD", "512GB SSD", "1TB SSD", "8GB RAM", "16GB RAM"],
-    "Default": ["Standard", "Pack of 1", "Pack of 2"]
-};
+        const sizeOptions = {
+            "Mens Fashion": ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+            "Womens Fashion": ["XS", "S", "M", "L", "XL", "XXL"],
+            "Footwear": ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+            "Mobiles": ["64GB", "128GB", "256GB", "512GB", "1TB"],
+            "Laptops": ["256GB SSD", "512GB SSD", "1TB SSD", "8GB RAM", "16GB RAM"],
+            "Default": ["Standard", "Pack of 1", "Pack of 2"]
+        };
 
-const categoryIcons = {
-    "Mens Fashion": "fa-user-tie",
-    "Womens Fashion": "fa-person-dress",
-    "Electronics": "fa-plug",
-    "Mobiles": "fa-mobile-screen",
-    "Laptops": "fa-laptop",
-    "Appliances": "fa-blender",
-    "Furniture": "fa-chair",
-    "Beauty": "fa-spray-can-sparkles",
-    "Grocery": "fa-carrot",
-    "Toys": "fa-gamepad",
-    "Sports": "fa-baseball",
-    "Footwear": "fa-shoe-prints",
-    "Watches": "fa-clock",
-    "Jewellery": "fa-gem",
-    "Bags": "fa-suitcase",
-    "Kitchen": "fa-utensils",
-    "Baby Care": "fa-baby",
-    "Automotive": "fa-car",
-    "Books": "fa-book",
-    "Stationery": "fa-pen-ruler"
-};
+        const categoryIcons = {
+            "Mens Fashion": "fa-user-tie",
+            "Womens Fashion": "fa-person-dress",
+            "Electronics": "fa-plug",
+            "Mobiles": "fa-mobile-screen",
+            "Laptops": "fa-laptop",
+            "Appliances": "fa-blender",
+            "Furniture": "fa-chair",
+            "Beauty": "fa-spray-can-sparkles",
+            "Grocery": "fa-carrot",
+            "Toys": "fa-gamepad",
+            "Sports": "fa-baseball",
+            "Footwear": "fa-shoe-prints",
+            "Watches": "fa-clock",
+            "Jewellery": "fa-gem",
+            "Bags": "fa-suitcase",
+            "Kitchen": "fa-utensils",
+            "Baby Care": "fa-baby",
+            "Automotive": "fa-car",
+            "Books": "fa-book",
+            "Stationery": "fa-pen-ruler"
+        };
         // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
@@ -970,8 +970,17 @@ const categoryIcons = {
 
         async function handleAddProduct(e) {
             e.preventDefault();
+
+            // 1. Check if User/Token exists locally first
+            if (!currentSessionUser || !currentSessionUser.token) {
+                alert("Authentication Error: You are not logged in.");
+                logout(); // Force logout to clear bad state
+                return;
+            }
+
             const btn = document.getElementById('btnPublish');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending to Admin...';
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
             btn.disabled = true;
 
             try {
@@ -979,14 +988,16 @@ const categoryIcons = {
                 const fileInput = document.getElementById('productImages');
                 const catVal = document.getElementById('mainCategory').value;
 
+                // Validation
                 if (!catVal) throw new Error("Please select a category from the sidebar first.");
                 if (fileInput.files.length < 3) throw new Error("Please select at least 3 images.");
                 if (selectedSizes.length === 0) throw new Error("Select at least one variant/size.");
 
+                // Image Compression
                 const imagePromises = Array.from(fileInput.files).map(compressImage);
                 const base64Images = await Promise.all(imagePromises);
 
-                // Construct Tag Array
+                // Tags Processing
                 const tagString = document.getElementById('productTags').value;
                 const tagsArray = tagString ? tagString.split(',').map(t => t.trim()) : [];
 
@@ -1008,22 +1019,31 @@ const categoryIcons = {
                     status: 'Pending Review'
                 };
 
+                console.log("Sending Request with Token:", currentSessionUser.token.substring(0, 10) + "...");
+
                 const res = await fetch(`${API_URL}/products`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // ✅ यह लाइन सबसे जरूरी है (Token भेजना)
-                        'Authorization': `Bearer ${currentSessionUser.token}`
+                        'Authorization': `Bearer ${currentSessionUser.token}` // Ensure "Bearer " space exists
                     },
                     body: JSON.stringify(productData)
                 });
 
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.message || errorData.error || "Server rejected request");
+                const data = await res.json();
+
+                // 2. Handle Session Expiry (401 Unauthorized)
+                if (res.status === 401) {
+                    alert("Session Expired: Please login again.");
+                    logout(); // Auto logout to fix the issue
+                    return;
                 }
 
-                alert("Product Sent to WebAdmin for Approval!");
+                if (!res.ok) {
+                    throw new Error(data.message || data.error || "Server rejected request");
+                }
+
+                alert("✅ Product Sent to WebAdmin for Approval!");
                 e.target.reset();
                 document.getElementById('uploadPreviews').classList.add('hidden');
                 document.getElementById('imagePlaceholder').classList.remove('hidden');
@@ -1032,13 +1052,13 @@ const categoryIcons = {
                 fetchProducts();
 
             } catch (error) {
-                alert(error.message);
+                console.error(error);
+                alert("Error: " + error.message);
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit for Approval';
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
-
         async function fetchProducts() {
             try {
                 const res = await fetch(`${API_URL}/my-products/${currentSessionUser.email}`);
@@ -1137,11 +1157,37 @@ const categoryIcons = {
         }
 
         async function deleteProduct(id) {
-            if (!confirm("Are you sure you want to delete this product?")) return;
+            // 1. Confirmation Step
+            if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
+
+            // 2. Token Check
+            if (!currentSessionUser || !currentSessionUser.token) {
+                alert("Authentication Error: You are not logged in.");
+                return;
+            }
+
             try {
-                const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
-                if (res.ok) fetchProducts();
-            } catch (e) { alert("Delete failed"); }
+                const res = await fetch(`${API_URL}/products/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentSessionUser.token}` // ✅ FIX: Added Token Here
+                    }
+                });
+
+                if (res.ok) {
+                    // Success
+                    alert("Product deleted successfully!");
+                    fetchProducts(); // Refresh the list
+                } else {
+                    // Error Handling (e.g., 403 Forbidden)
+                    const data = await res.json();
+                    alert("Failed to delete: " + (data.message || "Server Error"));
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Delete failed: Server connection error.");
+            }
         }
 
         function switchView(view) {
@@ -1203,7 +1249,7 @@ const categoryIcons = {
                 });
             } else { document.getElementById('imagePlaceholder').classList.remove('hidden'); container.classList.add('hidden'); }
         }
-        
+
         // 2. Function to render mobile categories
         function renderMobileMenu() {
             const container = document.getElementById('mobileCategoryContainer');
