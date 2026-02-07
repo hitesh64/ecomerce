@@ -261,7 +261,8 @@
                         <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
                             <div
                                 class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">
-                                <i data-lucide="user-plus" class="w-6 h-6"></i></div>
+                                <i data-lucide="user-plus" class="w-6 h-6"></i>
+                            </div>
                             Job Applications
                         </h2>
 
@@ -292,7 +293,8 @@
                         <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
                             <div
                                 class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
-                                <i data-lucide="users" class="w-6 h-6"></i></div>
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
                             Active Fleet Management
                         </h2>
                         <p class="text-sm text-gray-500 mb-4">Manage online status, view orders, and manage accounts.
@@ -307,7 +309,8 @@
                             <h2 class="text-3xl font-black text-gray-900 flex items-center gap-3">
                                 <div
                                     class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                                    <i data-lucide="send" class="w-6 h-6"></i></div>
+                                    <i data-lucide="send" class="w-6 h-6"></i>
+                                </div>
                                 Dispatch Manager
                             </h2>
                             <button onclick="loadData()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
@@ -336,7 +339,8 @@
                     <div id="view-returns" class="view-section hidden">
                         <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
                             <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
-                                <i data-lucide="rotate-ccw" class="w-6 h-6"></i></div>
+                                <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+                            </div>
                             Returns & Reverse Logistics
                         </h2>
                         <div class="bg-white border border-red-100 rounded-xl overflow-hidden shadow-sm">
@@ -1321,27 +1325,24 @@
         }
 
         // --- VENDORS MANAGEMENT ---
-        // webadmin.html mein loadVendors function dhoondhein
         async function loadVendors() {
             try {
+                console.log("Fetching Vendors...");
                 const res = await fetch(`${API_URL}/vendors`, {
-                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIXED: Token Added
+                    }
                 });
 
-                if (!res.ok) {
-                    // Ye line add karein debug ke liye
-                    alert(`Error Status: ${res.status}`);
-                    // 401 = Token Expired/Invalid (Re-login karein)
-                    // 500 = Server/Database Error (MongoDB IP check karein)
-                    // 404 = API URL Galat hai
-                    return;
-                }
+                if (!res.ok) throw new Error(`Server Error: ${res.status}`);
 
                 allVendors = await res.json();
                 renderVendors(allVendors);
             } catch (e) {
                 console.error('Error loading vendors:', e);
-                showToast('Failed to load vendors', 'error');
+                showToast('Failed to load vendors (Auth Error)', 'error');
             }
         }
         function renderVendors(vendors) {
@@ -1654,13 +1655,22 @@
         // --- JOB APPLICATIONS (DEBUGGED VERSION) ---
         async function loadJobApplications() {
             try {
-                // /api/users route ab ADMIN ONLY hai, token chahiye
+                console.log("Fetching Job Applications...");
+                // ✅ FIXED: Token Added
                 const res = await fetch(`${API_URL}/users`, {
-                    headers: { 'Authorization': `Bearer ${currentUser.token}` } // Token Added
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
                 });
+
+                if (!res.ok) throw new Error(`Server Error: ${res.status}`);
+
                 const drivers = await res.json();
                 allDrivers = drivers;
 
+                // Filter Pending vs History
                 const pendingApps = drivers.filter(d => (d.status || "").toLowerCase().trim() === 'pending');
                 renderDeliveryApplications(pendingApps);
 
@@ -1899,16 +1909,18 @@
 
         async function loadActiveFleet() {
             try {
+                console.log("Fetching Fleet Data...");
+
                 // 1. Fetch Users (SECURE - Needs Token) & Orders (Public)
                 const [usersRes, ordersRes] = await Promise.all([
                     fetch(`${API_URL}/users`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+                            'Authorization': `Bearer ${currentUser.token}` // ✅ FIXED: Token Added
                         }
                     }),
-                    fetch(`${API_URL}/orders`) // Orders route public hai server.js mein
+                    fetch(`${API_URL}/orders`) // Orders is public
                 ]);
 
                 if (!usersRes.ok) throw new Error("Failed to fetch drivers (Auth Error)");
@@ -2827,12 +2839,13 @@
         // --- RETURNS MANAGEMENT ---
         async function loadReturns() {
             try {
-                // Returns Route is Secured in server.js, so Token is required
+                console.log("Fetching Returns...");
+                // ✅ FIXED: Token Added
                 const res = await fetch(`${API_URL}/returns`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentUser.token}` // <--- Token Added Here
+                        'Authorization': `Bearer ${currentUser.token}`
                     }
                 });
 
