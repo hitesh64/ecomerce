@@ -18,18 +18,21 @@ const hpp = require('hpp');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'HITESH_SECURE_KEY_FULL_ACCESS'; 
+const JWT_SECRET = process.env.JWT_SECRET || 'HITESH_SECURE_KEY_FULL_ACCESS';
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://kunal:KdVygwFo0Anau8uX@hitesh.cqczgkd.mongodb.net/kicksdb';
 
 // ==========================================
 // 1. SECURITY & MIDDLEWARE
 // ==========================================
-
 app.use(cors({
-    origin: '*',
+    origin: '*', // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true
 }));
+
+// Handle Pre-flight requests explicitly
+app.options('*', cors());
 
 app.use(helmet());
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -37,31 +40,31 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
-// REPLACE verifyToken FUNCTION IN server.js
+
+// IMPROVED VERIFY TOKEN FUNCTION
 const verifyToken = (roles = []) => {
     return (req, res, next) => {
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1]; 
+        // Handle Case Insensitive Header
+        const authHeader = req.headers['authorization'] || req.headers['Authorization'];
 
-        if (!token) {
-            console.log("❌ Blocked: No Token Provided");
-            return res.status(403).json({ message: "Login Required (No Token)" });
+        if (!authHeader) {
+            console.log(`❌ Blocked: No Token. Path: ${req.path}`);
+            return res.status(403).json({ message: "Login Required (No Token Provided)" });
         }
+
+        const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
 
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
-                console.log("❌ Blocked: Invalid/Expired Token Error:", err.message); // Log exact error
-                return res.status(401).json({ message: "Session Expired" });
+                console.log("❌ Blocked: Invalid Token:", err.message);
+                return res.status(401).json({ message: "Session Expired. Please Login Again." });
             }
-            
-            // --- DEBUG LOG ---
-            // console.log(`User: ${decoded.id}, Role: ${decoded.role}, Required: ${roles}`);
 
             if (roles.length > 0 && !roles.includes(decoded.role)) {
-                console.log(`⛔ Access Denied! User Role: '${decoded.role}' | Required: '${roles}'`);
-                return res.status(403).json({ message: `Access Denied. You are a '${decoded.role}', but '${roles}' is required.` });
+                console.log(`⛔ Access Denied! User Role: '${decoded.role}'`);
+                return res.status(403).json({ message: "Access Denied: You are not an Admin." });
             }
-            
+
             req.user = decoded;
             next();
         });
@@ -94,7 +97,7 @@ app.use(async (req, res, next) => {
 app.get('/api/make-me-vendor/:email', async (req, res) => {
     try {
         const email = req.params.email;
-        
+
         // 1. Find and Update User
         const user = await User.findOneAndUpdate(
             { email: email },
@@ -107,11 +110,11 @@ app.get('/api/make-me-vendor/:email', async (req, res) => {
         // 2. Ensure Vendor Entry Exists
         await Vendor.findOneAndUpdate(
             { email: email },
-            { 
-                shopName: user.shopName, 
-                ownerName: user.name, 
-                email: user.email, 
-                joined: new Date().toLocaleDateString() 
+            {
+                shopName: user.shopName,
+                ownerName: user.name,
+                email: user.email,
+                joined: new Date().toLocaleDateString()
             },
             { upsert: true }
         );
@@ -143,11 +146,11 @@ app.post('/api/user/sync', async (req, res) => {
         // Find user by email and update cart & wishlist
         const user = await User.findOneAndUpdate(
             { email: email },
-            { 
-                $set: { 
-                    cart: cart, 
-                    wishlist: wishlist 
-                } 
+            {
+                $set: {
+                    cart: cart,
+                    wishlist: wishlist
+                }
             },
             { new: true } // Return the updated document
         );
@@ -166,11 +169,11 @@ app.post('/api/user/sync', async (req, res) => {
 app.get('/api/upgrade-me/:email', async (req, res) => {
     try {
         const email = req.params.email;
-        
+
         // 1. Role update karke Vendor set karein
         const user = await User.findOneAndUpdate(
             { email: email },
-            { $set: { role: 'vendor', shopName: 'My Kicks Shop' } }, 
+            { $set: { role: 'vendor', shopName: 'My Kicks Shop' } },
             { new: true }
         );
 
@@ -179,11 +182,11 @@ app.get('/api/upgrade-me/:email', async (req, res) => {
         // 2. Vendor Table mein bhi entry pakki karein
         await Vendor.findOneAndUpdate(
             { email: email },
-            { 
-                shopName: user.shopName, 
-                ownerName: user.name, 
-                email: user.email, 
-                joined: new Date().toLocaleDateString() 
+            {
+                shopName: user.shopName,
+                ownerName: user.name,
+                email: user.email,
+                joined: new Date().toLocaleDateString()
             },
             { upsert: true }
         );
@@ -246,12 +249,12 @@ const UserSchema = new mongoose.Schema({
     name: String,
     email: { type: String, unique: true },
     password: { type: String },
-    shopName: String,        
+    shopName: String,
     mobile: String,
-    address: String,      
-    city: String,         
-    state: String,        
-    pincode: String,      
+    address: String,
+    city: String,
+    state: String,
+    pincode: String,
     role: { type: String, default: 'customer' },
     picture: String,
     isGoogle: { type: Boolean, default: false },
@@ -261,20 +264,20 @@ const UserSchema = new mongoose.Schema({
 });
 
 const ProductSchema = new mongoose.Schema({
-    id: Number,              
+    id: Number,
     name: String,
     price: Number,
     brand: String,
-    category: String,       
-    subCategory: String,    
-    tags: [String],         
-    image: String,           
-    images: [String],        
+    category: String,
+    subCategory: String,
+    tags: [String],
+    image: String,
+    images: [String],
     description: String,
-    sizes: [String],        
+    sizes: [String],
     stock: { type: Number, default: 0 }, // Ensure default
     status: { type: String, default: 'Pending Review' },
-    vendorEmail: String,     
+    vendorEmail: String,
     shopName: String,
     createdAt: { type: Date, default: Date.now }
 });
@@ -287,15 +290,15 @@ const OrderSchema = new mongoose.Schema({
     phone: String,
     address: String,
     date: String,
-    items: Array,            
-    total: Number,           
-    price: Number,           
-    payment: String,         
-    status: { type: String, default: 'Pending' }, 
-    secretOtp: String,       
-    assignedTo: String,      
-    isDeliveryVerified: { type: Boolean, default: false }, 
-    isReturnVerified: { type: Boolean, default: false }, 
+    items: Array,
+    total: Number,
+    price: Number,
+    payment: String,
+    status: { type: String, default: 'Pending' },
+    secretOtp: String,
+    assignedTo: String,
+    isDeliveryVerified: { type: Boolean, default: false },
+    isReturnVerified: { type: Boolean, default: false },
     returnReason: String,
     returnImage: String,
     timestamp: { type: Date, default: Date.now }
@@ -303,8 +306,8 @@ const OrderSchema = new mongoose.Schema({
 
 const ReviewSchema = new mongoose.Schema({
     productId: Number,
-    user: String,      
-    email: String,     
+    user: String,
+    email: String,
     rating: Number,
     text: String,
     image: String,
@@ -316,7 +319,7 @@ const ReturnRequestSchema = new mongoose.Schema({
     orderId: String,
     reason: String,
     imageData: String,
-    image: String, 
+    image: String,
     hasImage: Boolean,
     status: { type: String, default: 'Requested' },
     date: String
@@ -364,7 +367,7 @@ app.post('/api/admin/login', async (req, res) => {
         } else {
             res.status(401).json({ message: "Invalid credentials" });
         }
-    } catch(e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/register', async (req, res) => {
@@ -375,7 +378,7 @@ app.post('/api/admin/register', async (req, res) => {
         const newAdmin = new Admin({ name, email, pass: hashedPassword });
         await newAdmin.save();
         res.json(newAdmin);
-    } catch(e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/google', async (req, res) => {
@@ -398,18 +401,18 @@ app.post('/api/auth/register', async (req, res) => {
         const { name, email, password, shopName, role } = req.body;
         const cleanEmail = email.toLowerCase().trim();
         const exists = await User.findOne({ email: cleanEmail });
-        
+
         if (exists) return res.status(400).json({ error: "Email already taken" });
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = new User({ 
-            name, email: cleanEmail, password: hashedPassword, shopName: shopName || '', role: role || 'customer' 
+        const newUser = new User({
+            name, email: cleanEmail, password: hashedPassword, shopName: shopName || '', role: role || 'customer'
         });
         await newUser.save();
-        
-        if(role === 'vendor') {
+
+        if (role === 'vendor') {
             await Vendor.findOneAndUpdate(
                 { email: cleanEmail },
                 { shopName, ownerName: name, email: cleanEmail, joined: new Date().toLocaleDateString() },
@@ -425,9 +428,9 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password, role } = req.body;
         const cleanEmail = email.toLowerCase().trim();
-        
+
         const user = await User.findOne({ email: cleanEmail });
-        
+
         if (!user) return res.status(400).json({ error: "User not found. Please Register first." });
 
         // --- NEW LOGIC: Auto-Set Password for Google Users ---
@@ -453,12 +456,12 @@ app.post('/api/auth/login', async (req, res) => {
             }
             await Vendor.findOneAndUpdate(
                 { email: cleanEmail },
-                { 
-                    shopName: user.shopName || "My Shop", 
-                    ownerName: user.name, 
+                {
+                    shopName: user.shopName || "My Shop",
+                    ownerName: user.name,
                     email: cleanEmail,
                     mobile: user.mobile,
-                    joined: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : new Date().toLocaleDateString() 
+                    joined: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
                 },
                 { upsert: true, new: true }
             );
@@ -467,15 +470,15 @@ app.post('/api/auth/login', async (req, res) => {
         const userObj = user.toObject(); delete userObj.password;
         res.json({ ...userObj, token: generateToken(user._id, user.role) });
 
-    } catch (e) { 
+    } catch (e) {
         console.error(e);
-        res.status(500).json({ error: e.message }); 
+        res.status(500).json({ error: e.message });
     }
 });
 app.post('/api/auth/google', async (req, res) => {
     try {
         const { name, email, picture, token, role } = req.body;
-        
+
         let userEmail = email;
         let userName = name;
         let userPicture = picture;
@@ -488,7 +491,7 @@ app.post('/api/auth/google', async (req, res) => {
                 userEmail = payload.email;
                 userName = payload.name;
                 userPicture = payload.picture;
-            } catch (err) {}
+            } catch (err) { }
         }
 
         if (!userEmail) return res.status(400).json({ error: "No email provided" });
@@ -497,8 +500,8 @@ app.post('/api/auth/google', async (req, res) => {
 
         if (user) {
             // Existing User Update
-            user.picture = userPicture; 
-            if (!user.isGoogle) user.isGoogle = true; 
+            user.picture = userPicture;
+            if (!user.isGoogle) user.isGoogle = true;
 
             if (role === 'vendor' && user.role !== 'vendor') {
                 user.role = 'vendor';
@@ -508,28 +511,28 @@ app.post('/api/auth/google', async (req, res) => {
             // Create New User
             // ✅ FIX: Password ko NULL rakhein (Dummy Hash mat dalein)
             // Isse Manual Login route isse pakad lega aur naya password set kar dega.
-            
+
             const userRole = role || 'customer';
-            
-            user = new User({ 
-                name: userName || 'User', 
-                email: userEmail, 
-                picture: userPicture || '', 
+
+            user = new User({
+                name: userName || 'User',
+                email: userEmail,
+                picture: userPicture || '',
                 password: null, // ✅ CHANGE HERE: No Dummy Password
-                isGoogle: true, 
+                isGoogle: true,
                 role: userRole,
-                shopName: '' 
+                shopName: ''
             });
             await user.save();
 
             if (userRole === 'vendor') {
                 await Vendor.findOneAndUpdate(
                     { email: userEmail },
-                    { 
-                        shopName: '', 
-                        ownerName: userName, 
-                        email: userEmail, 
-                        joined: new Date().toLocaleDateString() 
+                    {
+                        shopName: '',
+                        ownerName: userName,
+                        email: userEmail,
+                        joined: new Date().toLocaleDateString()
                     },
                     { upsert: true }
                 );
@@ -563,7 +566,7 @@ app.post('/api/driver/google', async (req, res) => {
 app.get('/api/config/sunday-status', (req, res) => {
     const now = new Date();
     // Convert to IST
-    const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+    const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const isSunday = istTime.getDay() === 0;
     res.json({ isSunday });
 });
@@ -582,22 +585,22 @@ app.get('/api/fix-role/:email', async (req, res) => {
             { new: true }
         );
 
-        if(!user) return res.send("❌ User not found");
+        if (!user) return res.send("❌ User not found");
 
         // 2. Vendor Table Update
         await Vendor.findOneAndUpdate(
             { email: email },
-            { 
-                shopName: user.shopName, 
-                ownerName: user.name, 
-                email: user.email, 
-                joined: new Date().toLocaleDateString() 
+            {
+                shopName: user.shopName,
+                ownerName: user.name,
+                email: user.email,
+                joined: new Date().toLocaleDateString()
             },
             { upsert: true }
         );
 
         res.send(`✅ SUCCESS: ${email} is now a VENDOR. Please Logout & Login again.`);
-    } catch(e) {
+    } catch (e) {
         res.send("❌ Error: " + e.message);
     }
 });
@@ -633,10 +636,10 @@ app.post('/api/user/update', async (req, res) => {
     try {
         const { email, ...updates } = req.body;
         const cleanEmail = email.toLowerCase().trim();
-        
+
         // 1. User Table Update
         const user = await User.findOneAndUpdate({ email: cleanEmail }, updates, { new: true });
-        
+
         // 2. Vendor Table Sync (Agar user vendor hai)
         if (user && (user.role === 'vendor' || updates.shopName)) {
             await Vendor.findOneAndUpdate({ email: cleanEmail }, {
@@ -700,14 +703,14 @@ app.post('/api/driver/register', async (req, res) => {
 app.post('/api/driver/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        
+
         if (!email || !password) {
             return res.status(400).json({ message: "Email and Password are required" });
         }
 
         const cleanEmail = email.toLowerCase().trim();
         const driver = await DeliveryUser.findOne({ email: cleanEmail });
-        
+
         if (!driver) return res.status(404).json({ message: "Driver not found" });
 
         // --- NEW LOGIC: Auto-Set Password for Google Driver ---
@@ -727,7 +730,7 @@ app.post('/api/driver/login', async (req, res) => {
         // Success
         const driverObj = driver.toObject();
         delete driverObj.password;
-        
+
         res.json({ ...driverObj, token: generateToken(driver._id, 'driver') });
 
     } catch (e) {
@@ -738,19 +741,19 @@ app.post('/api/driver/login', async (req, res) => {
 // Vendors
 app.get('/api/vendors', verifyToken(['admin']), async (req, res) => res.json(await Vendor.find()));
 
-app.post('/api/vendors', verifyToken(['admin']), async (req, res) => { 
-    try { await new Vendor(req.body).save(); res.json({success:true}); } 
-    catch(e){ res.status(500).json(e); } 
+app.post('/api/vendors', verifyToken(['admin']), async (req, res) => {
+    try { await new Vendor(req.body).save(); res.json({ success: true }); }
+    catch (e) { res.status(500).json(e); }
 });
 
-app.put('/api/vendors/:id', verifyToken(['admin']), async (req, res) => { 
-    try { await Vendor.findByIdAndUpdate(req.params.id, req.body); res.json({success:true}); } 
-    catch(e){ res.status(500).json(e); } 
+app.put('/api/vendors/:id', verifyToken(['admin']), async (req, res) => {
+    try { await Vendor.findByIdAndUpdate(req.params.id, req.body); res.json({ success: true }); }
+    catch (e) { res.status(500).json(e); }
 });
 
-app.delete('/api/vendors/:id', verifyToken(['admin']), async (req, res) => { 
-    try { await Vendor.findByIdAndDelete(req.params.id); res.json({success:true}); } 
-    catch(e){ res.status(500).json(e); } 
+app.delete('/api/vendors/:id', verifyToken(['admin']), async (req, res) => {
+    try { await Vendor.findByIdAndDelete(req.params.id); res.json({ success: true }); }
+    catch (e) { res.status(500).json(e); }
 });
 
 // ==========================================
@@ -760,7 +763,7 @@ app.delete('/api/vendors/:id', verifyToken(['admin']), async (req, res) => {
 app.get('/api/products', async (req, res) => {
     try {
         const filter = req.query.type === 'public' ? { status: 'Approved' } : {};
-        
+
         // --- SCALABILITY FIX: PAGINATION ---
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50; // Load 50 at a time
@@ -770,23 +773,23 @@ app.get('/api/products', async (req, res) => {
             .sort({ _id: -1 })
             .skip(skip)
             .limit(limit);
-            
+
         res.json(products);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/my-products/:email', async (req, res) => {
-    try { 
-        const products = await Product.find({ vendorEmail: req.params.email }).sort({ _id: -1 }); 
-        res.json(products); 
+    try {
+        const products = await Product.find({ vendorEmail: req.params.email }).sort({ _id: -1 });
+        res.json(products);
     } catch (e) { res.status(500).json(e); }
 });
 
 app.post('/api/products', verifyToken(['vendor', 'admin']), async (req, res) => {
-    try { 
-        const newProduct = new Product(req.body); 
-        await newProduct.save(); 
-        res.json({ success: true }); 
+    try {
+        const newProduct = new Product(req.body);
+        await newProduct.save();
+        res.json({ success: true });
     } catch (e) { res.status(500).json(e); }
 });
 
@@ -812,20 +815,20 @@ app.delete('/api/products/:id', verifyToken(['vendor', 'admin']), async (req, re
 // 8. ORDER MANAGEMENT (ATOMIC STOCK UPDATE)
 // ==========================================
 
-app.get('/api/orders', async (req, res) => { 
-    try { const orders = await Order.find().sort({_id: -1}).limit(100); res.json(orders); } 
-    catch (e) { res.status(500).json(e); } 
+app.get('/api/orders', async (req, res) => {
+    try { const orders = await Order.find().sort({ _id: -1 }).limit(100); res.json(orders); }
+    catch (e) { res.status(500).json(e); }
 });
 
 app.get('/api/orders/:email', async (req, res) => {
     try {
-        if(req.params.email.includes('@')) { 
-            const orders = await Order.find({ email: req.params.email }).sort({ _id: -1 }); 
-            res.json(orders); 
-        } else { 
+        if (req.params.email.includes('@')) {
+            const orders = await Order.find({ email: req.params.email }).sort({ _id: -1 });
+            res.json(orders);
+        } else {
             const query = mongoose.Types.ObjectId.isValid(req.params.email) ? { _id: req.params.email } : { id: req.params.email };
-            const order = await Order.findOne(query); 
-            res.json(order); 
+            const order = await Order.findOne(query);
+            res.json(order);
         }
     } catch (e) { res.status(500).json(e); }
 });
@@ -835,14 +838,14 @@ app.post('/api/orders', async (req, res) => {
     try {
         let orderData = req.body;
         orderData.secretOtp = Math.floor(1000 + Math.random() * 9000).toString();
-        
+
         let verifiedTotal = 0;
         let verifiedItems = [];
-        
+
         // --- STOCK RACE CONDITION FIX (ATOMIC UPDATE) ---
-        if(orderData.items && orderData.items.length > 0) {
+        if (orderData.items && orderData.items.length > 0) {
             for (const item of orderData.items) {
-                
+
                 // Try to find AND decrement stock in one go
                 // Only if stock is >= 1
                 const updatedProduct = await Product.findOneAndUpdate(
@@ -863,10 +866,10 @@ app.post('/api/orders', async (req, res) => {
                 // Calculate price logic
                 const realPrice = updatedProduct.price + 25; // Fee logic
                 verifiedTotal += realPrice;
-                verifiedItems.push({ 
-                    ...item, 
+                verifiedItems.push({
+                    ...item,
                     price: realPrice,
-                    vendorEmail: updatedProduct.vendorEmail 
+                    vendorEmail: updatedProduct.vendorEmail
                 });
             }
 
@@ -879,9 +882,9 @@ app.post('/api/orders', async (req, res) => {
         await newOrder.save();
         res.json({ success: true, order: newOrder });
 
-    } catch (e) { 
+    } catch (e) {
         console.error("Order Error:", e);
-        res.status(500).json({ error: e.message }); 
+        res.status(500).json({ error: e.message });
     }
 });
 
@@ -890,12 +893,12 @@ app.put('/api/orders/:id', verifyToken(['admin', 'driver']), async (req, res) =>
     try {
         const id = req.params.id;
         let updateData = req.body;
-        if(updateData.assignedTo) updateData.assignedTo = updateData.assignedTo.toLowerCase().trim();
+        if (updateData.assignedTo) updateData.assignedTo = updateData.assignedTo.toLowerCase().trim();
 
         const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { id: id };
         const order = await Order.findOneAndUpdate(query, updateData, { new: true });
-        
-        if(order) res.json({ success: true, order });
+
+        if (order) res.json({ success: true, order });
         else res.status(404).json({ error: "Order not found" });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -933,20 +936,20 @@ app.post('/api/orders/cancel', async (req, res) => {
         const newStatus = status || 'Cancelled'; // Default Cancelled rahega
 
         const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { id: id };
-        
+
         // Find order to restock
         const order = await Order.findOne(query);
-        
+
         // Sirf tab restock karein agar pehle se Cancelled/Rejected nahi hai
-        if(order && order.status !== 'Cancelled' && order.status !== 'Rejected') {
-            
+        if (order && order.status !== 'Cancelled' && order.status !== 'Rejected') {
+
             // Restock Logic (Critical Fix: parseInt use karein)
-            for(const item of order.items) {
+            for (const item of order.items) {
                 const prodId = parseInt(item.id); // ID ko number banayein
-                
+
                 // Stock +1 karein
                 await Product.updateOne(
-                    { id: prodId }, 
+                    { id: prodId },
                     { $inc: { stock: 1 } }
                 );
             }
@@ -957,9 +960,9 @@ app.post('/api/orders/cancel', async (req, res) => {
         } else {
             res.status(400).json({ error: "Order already cancelled or not found" });
         }
-    } catch (e) { 
+    } catch (e) {
         console.error("Cancel Error:", e);
-        res.status(500).json({ error: e.message }); 
+        res.status(500).json({ error: e.message });
     }
 });
 app.delete('/api/orders/:id', verifyToken(['admin']), async (req, res) => {
@@ -995,7 +998,7 @@ app.post('/api/admin/verify-payment', verifyToken(['admin']), async (req, res) =
         const returnDone = ['Return Completed', 'Returned'];
         if (returnDone.includes(order.status) && !order.isReturnVerified) {
             order.isReturnVerified = true;
-            order.status = 'Returned'; 
+            order.status = 'Returned';
             amountToAdd += 20;
             isUpdated = true;
         }
@@ -1052,27 +1055,27 @@ app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore.set(email, { otp, expiry: Date.now() + 600000 }); // 10 mins
-    console.log(`🔐 OTP for ${email}: ${otp}`); 
+    console.log(`🔐 OTP for ${email}: ${otp}`);
     res.json({ success: true, otp: otp });
 });
 
 app.post('/api/reset-password', async (req, res) => {
     const { email, otp, newPassword, role } = req.body;
     const stored = otpStore.get(email);
-    
-    if(!stored || stored.otp !== otp || Date.now() > stored.expiry) {
+
+    if (!stored || stored.otp !== otp || Date.now() > stored.expiry) {
         return res.status(400).json({ message: "Invalid/Expired OTP" });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(newPassword, salt);
-    
+
     let Model = (role === 'admin') ? Admin : (role === 'driver') ? DeliveryUser : User;
     let passField = (role === 'admin') ? 'pass' : 'password';
-    
+
     const update = {}; update[passField] = hash;
     await Model.findOneAndUpdate({ email }, update);
-    
+
     otpStore.delete(email);
     res.json({ success: true });
 });

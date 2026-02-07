@@ -1327,22 +1327,30 @@
         // --- VENDORS MANAGEMENT ---
         async function loadVendors() {
             try {
-                console.log("Fetching Vendors...");
+                // Token Check
+                if (!currentUser || !currentUser.token) {
+                    showToast("Please Login First", "error");
+                    return;
+                }
+
                 const res = await fetch(`${API_URL}/vendors`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentUser.token}` // ✅ FIXED: Token Added
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ Token Added
                     }
                 });
 
-                if (!res.ok) throw new Error(`Server Error: ${res.status}`);
+                if (res.status === 401 || res.status === 403) {
+                    handleLogout(); // Token expire ho gaya to logout karo
+                    return;
+                }
 
                 allVendors = await res.json();
                 renderVendors(allVendors);
             } catch (e) {
                 console.error('Error loading vendors:', e);
-                showToast('Failed to load vendors (Auth Error)', 'error');
+                showToast('Failed to load vendors', 'error');
             }
         }
         function renderVendors(vendors) {
@@ -1655,22 +1663,21 @@
         // --- JOB APPLICATIONS (DEBUGGED VERSION) ---
         async function loadJobApplications() {
             try {
-                console.log("Fetching Job Applications...");
-                // ✅ FIXED: Token Added
+                if (!currentUser || !currentUser.token) return;
+
                 const res = await fetch(`${API_URL}/users`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentUser.token}`
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ Token Added
                     }
                 });
 
-                if (!res.ok) throw new Error(`Server Error: ${res.status}`);
+                if (!res.ok) throw new Error("Auth Failed");
 
                 const drivers = await res.json();
                 allDrivers = drivers;
 
-                // Filter Pending vs History
                 const pendingApps = drivers.filter(d => (d.status || "").toLowerCase().trim() === 'pending');
                 renderDeliveryApplications(pendingApps);
 
@@ -1909,29 +1916,26 @@
 
         async function loadActiveFleet() {
             try {
-                console.log("Fetching Fleet Data...");
+                if (!currentUser || !currentUser.token) return;
 
-                // 1. Fetch Users (SECURE - Needs Token) & Orders (Public)
+                // Users route protected hai, Orders public hai
                 const [usersRes, ordersRes] = await Promise.all([
                     fetch(`${API_URL}/users`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${currentUser.token}` // ✅ FIXED: Token Added
+                            'Authorization': `Bearer ${currentUser.token}` // ✅ Token Added
                         }
                     }),
-                    fetch(`${API_URL}/orders`) // Orders is public
+                    fetch(`${API_URL}/orders`)
                 ]);
 
-                if (!usersRes.ok) throw new Error("Failed to fetch drivers (Auth Error)");
+                if (!usersRes.ok) throw new Error("Auth Failed");
 
                 const drivers = await usersRes.json();
                 const orders = await ordersRes.json();
 
-                // 2. Update Global Variables
                 allOrders = orders;
-
-                // 3. Filter Active Drivers
                 const activeDrivers = drivers.filter(d => d.status === 'active');
 
                 renderActiveFleet(activeDrivers);
@@ -2839,17 +2843,17 @@
         // --- RETURNS MANAGEMENT ---
         async function loadReturns() {
             try {
-                console.log("Fetching Returns...");
-                // ✅ FIXED: Token Added
+                if (!currentUser || !currentUser.token) return;
+
                 const res = await fetch(`${API_URL}/returns`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentUser.token}`
+                        'Authorization': `Bearer ${currentUser.token}` // ✅ Token Added
                     }
                 });
 
-                if (!res.ok) throw new Error("Failed to fetch returns (Auth Error)");
+                if (!res.ok) throw new Error("Auth Failed");
 
                 allReturnRequests = await res.json();
                 renderReturnsTable(allReturnRequests);
