@@ -1149,66 +1149,69 @@
             }
         }
 
+        // --- STEP 2: REPLACE THIS FUNCTION IN SHOPDASHBOARD.HTML ---
+
         async function deleteProduct(id) {
             // 1. Confirmation
             if (!confirm("Are you sure you want to delete this product?")) return;
 
             // 2. Auth Check
             if (!currentSessionUser || !currentSessionUser.token) {
-                alert("Login required");
+                alert("Authentication Error: Please Login.");
                 return;
             }
 
-            // 3. UI Feedback (Spinner on specific button)
+            // 3. UI Feedback (Button ko spinner bana do)
             const btn = document.querySelector(`button[onclick="deleteProduct(${id})"]`);
-            const originalIcon = btn ? btn.innerHTML : ''; // Save icon to restore if fails
+            const originalContent = btn ? btn.innerHTML : '';
             if (btn) {
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
                 btn.disabled = true;
             }
 
             try {
-                const res = await fetch(`${API_URL}/products/${id}`, {
-                    method: 'DELETE',
+                // ✅ CHANGE: Hum ab 'DELETE' ki jagah 'POST' use kar rahe hain
+                // Vercel POST requests ko block nahi karta.
+                const res = await fetch(`${API_URL}/products/delete-secure`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${currentSessionUser.token}`
-                    }
+                    },
+                    body: JSON.stringify({ id: id }) // ID ko body mein bhej rahe hain
                 });
 
+                const data = await res.json();
+
                 if (res.ok) {
-                    // ✅ FAST VISUAL REMOVAL:
-                    // Server response aate hi row ko gayab kar do.
+                    // ✅ SUCCESS: Row ko turant gayab kar do (Fast Feel)
                     if (btn) {
                         const row = btn.closest('tr');
                         if (row) {
-                            row.style.transition = "opacity 0.3s";
+                            row.style.transition = "all 0.3s";
                             row.style.opacity = "0";
                             setTimeout(() => row.remove(), 300);
                         }
                     }
-
-                    // Item count update (Optional visual fix)
+                    // Count kam kar do
                     const countEl = document.getElementById('itemCount');
                     if (countEl) {
                         let count = parseInt(countEl.innerText) || 0;
                         if (count > 0) countEl.innerText = `${count - 1} Items`;
                     }
-
+                    console.log("Deleted via Secure POST");
                 } else {
-                    // Agar fail hua to error dikhao aur icon wapas lao
-                    const data = await res.json();
                     alert("Failed: " + (data.message || "Server Error"));
                     if (btn) {
-                        btn.innerHTML = originalIcon;
+                        btn.innerHTML = originalContent; // Reset button
                         btn.disabled = false;
                     }
                 }
             } catch (e) {
                 console.error(e);
-                alert("Connection error");
+                alert("Connection Error. Check Internet.");
                 if (btn) {
-                    btn.innerHTML = originalIcon;
+                    btn.innerHTML = originalContent;
                     btn.disabled = false;
                 }
             }

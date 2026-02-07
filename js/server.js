@@ -802,13 +802,23 @@ app.put('/api/products/:id', verifyToken(['vendor', 'admin']), async (req, res) 
     } catch (e) { res.status(500).json(e); }
 });
 
-app.delete('/api/products/:id', verifyToken(['vendor', 'admin']), async (req, res) => {
+app.post('/api/products/delete-secure', verifyToken(['vendor', 'admin']), async (req, res) => {
     try {
-        const id = req.params.id;
+        const { id } = req.body; // ID ab body se aayega
+
+        // Check both Number ID and MongoDB _id
         const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { id: id };
-        await Product.findOneAndDelete(query);
-        res.json({ success: true });
-    } catch (e) { res.status(500).json(e); }
+
+        const deleted = await Product.findOneAndDelete(query);
+
+        if (deleted) {
+            res.json({ success: true, message: "Deleted successfully via POST" });
+        } else {
+            res.status(404).json({ message: "Product not found" });
+        }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // ==========================================
