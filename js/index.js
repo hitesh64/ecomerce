@@ -60,21 +60,21 @@ const bannerConfig = {
         ]
     },
     'Mens Fashion': {
-    title: "Men's Edit",
-    desc: "Urban essentials and winter wear for him.",
-    images: [
-        "https://images.unsplash.com/photo-1490735891913-40897cdaafd1?w=800",
-        "https://images.unsplash.com/photo-1550246140-5119ae4790b8?w=800"
-    ]
-},
-'Womens Fashion': {
-    title: "Women's Luxe",
-    desc: "Trending styles and winter favorites for her.",
-    images: [
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800",
-        "https://images.unsplash.com/photo-1534774592507-488885376ad3?w=800"
-    ]
-},
+        title: "Men's Edit",
+        desc: "Urban essentials and winter wear for him.",
+        images: [
+            "https://images.unsplash.com/photo-1490735891913-40897cdaafd1?w=800",
+            "https://images.unsplash.com/photo-1550246140-5119ae4790b8?w=800"
+        ]
+    },
+    'Womens Fashion': {
+        title: "Women's Luxe",
+        desc: "Trending styles and winter favorites for her.",
+        images: [
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800",
+            "https://images.unsplash.com/photo-1534774592507-488885376ad3?w=800"
+        ]
+    },
     'Fashion': {
         title: "Trend Setter",
         desc: "Style that speaks without words.",
@@ -346,7 +346,7 @@ const saveState = async () => {
         // Update the user object in state with current cart/wishlist
         state.user.cart = state.cart;
         state.user.wishlist = state.wishlist;
-        
+
         localStorage.setItem('kicks_user_session', JSON.stringify(state.user));
 
         // 2. Sync to MongoDB (Background Process)
@@ -360,13 +360,13 @@ const saveState = async () => {
                     wishlist: state.wishlist
                 })
             });
-            
+
             // Optional: Log success
             // const data = await res.json();
             // console.log("DB Sync Status:", data);
 
-        } catch (e) { 
-            console.error("Sync failed to server", e); 
+        } catch (e) {
+            console.error("Sync failed to server", e);
         }
     }
 };
@@ -976,25 +976,42 @@ function renderListingGrid() {
     grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full text-center py-12 text-gray-400">No products found.</div>` : filtered.map(p => {
         const isWish = state.wishlist.includes(p.id);
         return `
-        <div onclick="openProductPage(${p.id})" class="bg-white p-4 rounded-3xl border border-gray-100 product-card group cursor-pointer relative overflow-hidden">
-            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-4 right-4 z-30 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm hover:scale-110 transition">
-                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>
+        <div onclick="openProductPage(${p.id})" data-aos="fade-up" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1" class="bg-white p-5 rounded-[2rem] border border-gray-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(147,51,234,0.1)] transition-all duration-500 group cursor-pointer relative">
+            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-8 right-8 z-30 bg-white/90 backdrop-blur-md p-2.5 rounded-full shadow-sm hover:scale-110 hover:shadow-md transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-gray-400'}"></i>
             </button>
             
-            <div class="aspect-square bg-gray-50 rounded-2xl mb-4 overflow-hidden relative">
-                <img src="${p.img}" class="w-full h-full object-cover">
-            </div>
-            <div>
-                <div class="flex justify-between items-start">
-                    <p class="text-[10px] font-bold text-purple-600 uppercase mb-1 tracking-wider">${p.brand}</p>
-                    <p class="text-[10px] text-gray-400 uppercase">${p.subCategory || p.category || ''}</p>
+            <div class="aspect-[4/5] bg-gray-50 rounded-[1.5rem] mb-5 overflow-hidden relative">
+                <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition duration-500 z-10"></div>
+                <img src="${p.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 ease-out">
+                
+                <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition duration-500 z-20 flex justify-between items-center">
+                    <span class="text-white text-[10px] font-black tracking-[0.2em] uppercase">Quick View</span>
+                    <i data-lucide="eye" class="w-4 h-4 text-white"></i>
                 </div>
-                <h3 class="font-bold text-lg leading-tight mb-2 text-gray-900 truncate">${p.name}</h3>
-                <span class="font-bold text-lg text-gray-500">${formatMoney(p.price)}</span>
+            </div>
+            <div class="px-2">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] bg-purple-50 px-2 py-1 rounded-md">${p.brand}</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">${p.subCategory || p.category || ''}</p>
+                </div>
+                <h3 class="font-bold text-lg leading-tight mb-3 text-gray-900 line-clamp-1 group-hover:text-purple-600 transition duration-300">${p.name}</h3>
+                <div class="flex items-center justify-between">
+                    <span class="font-black text-xl text-gray-900">${formatMoney(p.price)}</span>
+                    <div class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-purple-600 group-hover:border-purple-600 transition duration-300">
+                        <i data-lucide="shopping-bag" class="w-3 h-3 text-gray-400 group-hover:text-white transition duration-300"></i>
+                    </div>
+                </div>
             </div>
         </div>
     `}).join('');
     if (window.lucide) lucide.createIcons();
+    if (window.VanillaTilt) {
+        VanillaTilt.init(document.querySelectorAll("[data-tilt]"));
+    }
+    if (window.AOS) {
+        setTimeout(() => AOS.refresh(), 100);
+    }
 }
 
 function renderProducts() {
@@ -1005,21 +1022,39 @@ function renderProducts() {
     grid.innerHTML = products.slice(0, 4).map((p, i) => {
         const isWish = state.wishlist.includes(p.id);
         return `
-        <div onclick="openProductPage(${p.id})" class="bg-white p-4 rounded-3xl border border-gray-100 product-card group cursor-pointer relative overflow-hidden" style="animation-delay: ${i * 100}ms">
-            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-4 right-4 z-30 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm">
-                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>
+        <div onclick="openProductPage(${p.id})" data-aos="fade-up" data-aos-delay="${i * 150}" data-tilt data-tilt-max="8" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3" data-tilt-scale="1.03" class="backdrop-blur-xl bg-white/10 border border-white/20 hover:border-purple-400/50 p-5 rounded-3xl transition-all duration-500 group cursor-pointer relative shadow-2xl">
+            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-6 right-6 z-30 bg-black/40 backdrop-blur-md p-2.5 rounded-full hover:scale-110 hover:bg-black/60 transition shadow-lg">
+                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-white'}"></i>
             </button>
-            <div class="aspect-square bg-gray-50 rounded-2xl mb-4 overflow-hidden">
-                <img src="${p.img}" class="w-full h-full object-cover">
+            <div class="aspect-square bg-black/20 rounded-2xl mb-6 overflow-hidden relative">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                <img src="${p.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                
+                <div class="absolute bottom-4 left-4 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-500">
+                    <span class="bg-purple-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Bought</span>
+                </div>
             </div>
-            <div>
-                <p class="text-xs font-bold text-purple-600 uppercase mb-1 tracking-wider">${p.brand}</p>
-                <h3 class="font-bold text-lg leading-tight mb-2 text-gray-900">${p.name}</h3>
-                <span class="font-bold text-lg text-gray-500">${formatMoney(p.price)}</span>
+            <div class="px-1">
+                <p class="text-[10px] font-black text-purple-300 uppercase mb-2 tracking-[0.2em]">${p.brand}</p>
+                <h3 class="font-bold text-xl leading-tight mb-3 text-white line-clamp-1 group-hover:text-purple-200 transition">${p.name}</h3>
+                <div class="flex items-center justify-between mt-4">
+                    <span class="font-black text-2xl text-white drop-shadow-md">${formatMoney(p.price)}</span>
+                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-purple-600 transition duration-300">
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-white"></i>
+                    </div>
+                </div>
             </div>
         </div>
     `}).join('');
     if (window.lucide) lucide.createIcons();
+    // Re-initialize VanillaTilt for newly added DOM elements
+    if (window.VanillaTilt) {
+        VanillaTilt.init(document.querySelectorAll("[data-tilt]"));
+    }
+    // Refresh AOS
+    if (window.AOS) {
+        setTimeout(() => AOS.refresh(), 100);
+    }
 }
 
 // --- 11. PRODUCT DETAILS (PDP) ---
@@ -1071,10 +1106,10 @@ function openProductPage(id) {
         btnBuy.disabled = true; btnBuy.classList.add('opacity-50', 'cursor-not-allowed');
     }
 
-const isWish = state.wishlist.includes(id);
-const wishlistBtn = document.getElementById('pdp-wishlist-btn');
-wishlistBtn.setAttribute('onclick', `toggleWishlist(${id})`); // Yeh line click function add karegi
-wishlistBtn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
+    const isWish = state.wishlist.includes(id);
+    const wishlistBtn = document.getElementById('pdp-wishlist-btn');
+    wishlistBtn.setAttribute('onclick', `toggleWishlist(${id})`); // Yeh line click function add karegi
+    wishlistBtn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 ${isWish ? 'fill-red-500 text-red-500' : 'text-gray-400'}"></i>`;
 
     const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['Standard'];
     const sizeContainer = document.getElementById('pdp-sizes');
@@ -1186,9 +1221,9 @@ async function renderReviews(productId) {
     const hasDeliveredOrder = state.user && state.orders.some(order => {
         const isDelivered = (order.status === 'Delivered' || order.status === 'Return Completed');
         const hasItem = order.items.some(item => item.id == productId);
-        
+
         // 7 Days Logic
-        const orderDate = parseDate(order.date); 
+        const orderDate = parseDate(order.date);
         const today = new Date();
         const diffTime = Math.abs(today - orderDate);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -1237,14 +1272,14 @@ async function renderReviews(productId) {
         const reviews = await res.json();
 
         // Reset stats if empty
-        if(topAvgEl) topAvgEl.innerText = "0.0";
-        if(topCountEl) topCountEl.innerText = "(0)";
+        if (topAvgEl) topAvgEl.innerText = "0.0";
+        if (topCountEl) topCountEl.innerText = "(0)";
         const avgValBig = document.getElementById('avg-rating-val');
-        if(avgValBig) avgValBig.innerText = "0.0";
+        if (avgValBig) avgValBig.innerText = "0.0";
         const totalRatingsCountEl = document.getElementById('total-ratings-count');
-        if(totalRatingsCountEl) totalRatingsCountEl.innerText = "0 Ratings";
+        if (totalRatingsCountEl) totalRatingsCountEl.innerText = "0 Ratings";
         const totalReviewsCountEl = document.getElementById('total-reviews-count');
-        if(totalReviewsCountEl) totalReviewsCountEl.innerText = "0";
+        if (totalReviewsCountEl) totalReviewsCountEl.innerText = "0";
 
         if (!reviews || reviews.length === 0) {
             list.innerHTML = `
@@ -1271,11 +1306,11 @@ async function renderReviews(productId) {
         const actualCount = reviews.length;
         const avg = (totalRating / actualCount).toFixed(1);
 
-        if(topAvgEl) topAvgEl.innerText = avg;
-        if(topCountEl) topCountEl.innerText = `(${actualCount})`;
-        if(avgValBig) avgValBig.innerText = avg;
-        if(totalRatingsCountEl) totalRatingsCountEl.innerText = `${actualCount} Ratings`;
-        if(totalReviewsCountEl) totalReviewsCountEl.innerText = `${actualCount}`;
+        if (topAvgEl) topAvgEl.innerText = avg;
+        if (topCountEl) topCountEl.innerText = `(${actualCount})`;
+        if (avgValBig) avgValBig.innerText = avg;
+        if (totalRatingsCountEl) totalRatingsCountEl.innerText = `${actualCount} Ratings`;
+        if (totalReviewsCountEl) totalReviewsCountEl.innerText = `${actualCount}`;
 
         // --- 4. Render Bars ---
         barsContainer.innerHTML = [5, 4, 3, 2, 1].map(num => {
@@ -1335,8 +1370,8 @@ async function renderReviews(productId) {
 
         if (window.lucide) lucide.createIcons();
 
-    } catch (e) { 
-        console.error("Error fetching reviews:", e); 
+    } catch (e) {
+        console.error("Error fetching reviews:", e);
         list.innerHTML = '<p class="text-red-500 text-center text-sm">Failed to load reviews. Check server connection.</p>';
     }
 }
@@ -1347,7 +1382,7 @@ function viewUserBill(orderId) {
 
     const modal = document.getElementById('user-bill-modal');
     const content = document.getElementById('user-bill-content');
-    
+
     // Status Badge Logic
     const statusColor = (order.status === 'Delivered') ? 'text-green-600 border-green-200 bg-green-50' : 'text-purple-600 border-purple-200 bg-purple-50';
 
@@ -1419,13 +1454,13 @@ function viewUserBill(orderId) {
     `;
 
     modal.classList.remove('hidden');
-    if(window.lucide) lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 // --- Image Viewer Modal Logic ---
 function openImageViewer(src) {
     // 1. Check agar modal pehle se bana hai
     let modal = document.getElementById('image-viewer-modal');
-    
+
     // 2. Agar nahi hai, toh dynamic HTML create karo
     if (!modal) {
         document.body.insertAdjacentHTML('beforeend', `
@@ -1440,11 +1475,11 @@ function openImageViewer(src) {
         `);
         modal = document.getElementById('image-viewer-modal');
     }
-    
+
     // 3. Image Src Set karo
     const img = document.getElementById('image-viewer-img');
     img.src = src;
-    
+
     // 4. Modal Show karo (Animation ke saath)
     modal.classList.remove('hidden');
     // Thoda delay taaki opacity transition kaam kare
@@ -1458,7 +1493,7 @@ function openImageViewer(src) {
 function closeImageViewer() {
     const modal = document.getElementById('image-viewer-modal');
     const img = document.getElementById('image-viewer-img');
-    
+
     if (modal) {
         // Animation reverse karo
         modal.classList.add('opacity-0');
@@ -1466,7 +1501,7 @@ function closeImageViewer() {
             img.classList.remove('scale-100');
             img.classList.add('scale-95');
         }
-        
+
         // Animation khatam hone ke baad hidden karo
         setTimeout(() => {
             modal.classList.add('hidden');
@@ -1492,12 +1527,12 @@ function speakGuide(text) {
     msg.text = text;
     msg.rate = 0.9; // Normal speed
     msg.pitch = 1.1; // Slightly feminine
-    
+
     // Female voice select karne ka try karein
     const voices = window.speechSynthesis.getVoices();
     const femaleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Female'));
     if (femaleVoice) msg.voice = femaleVoice;
-    
+
     window.speechSynthesis.speak(msg);
 }
 
@@ -1598,13 +1633,13 @@ async function openProductPage(id) {
     if (inStock) {
         stockBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 uppercase";
         stockBadge.innerText = "In Stock";
-        if(stockOverlay) stockOverlay.classList.add('hidden');
+        if (stockOverlay) stockOverlay.classList.add('hidden');
         btnAdd.disabled = false; btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
         btnBuy.disabled = false; btnBuy.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {
         stockBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-500 border border-red-200 uppercase";
         stockBadge.innerText = "Out of Stock";
-        if(stockOverlay) stockOverlay.classList.remove('hidden');
+        if (stockOverlay) stockOverlay.classList.remove('hidden');
         btnAdd.disabled = true; btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
         btnBuy.disabled = true; btnBuy.classList.add('opacity-50', 'cursor-not-allowed');
     }
@@ -1938,23 +1973,23 @@ async function buyNow() {
     openCheckout();
 }
 function toggleWishlist(id) {
-    if (!state.user) { 
-        openAuth('login'); 
-        return; 
+    if (!state.user) {
+        openAuth('login');
+        return;
     }
-    
+
     // Convert ID to number to avoid mismatch
     const prodId = Number(id);
     const index = state.wishlist.indexOf(prodId);
-    
-    if (index === -1) { 
-        state.wishlist.push(prodId); 
-        showToast("Added to Wishlist"); 
-    } else { 
-        state.wishlist.splice(index, 1); 
-        showToast("Removed from Wishlist"); 
+
+    if (index === -1) {
+        state.wishlist.push(prodId);
+        showToast("Added to Wishlist");
+    } else {
+        state.wishlist.splice(index, 1);
+        showToast("Removed from Wishlist");
     }
-    
+
     saveState();
     updateAllUI();
 
@@ -2893,15 +2928,38 @@ function renderRecentSection() {
     }
 
     section.classList.remove('hidden');
-    container.innerHTML = recent.map(item => `
-        <div onclick="openProductPage(${item.id})" class="min-w-[120px] bg-white rounded-xl p-2 cursor-pointer shadow-sm hover:scale-105 transition-transform">
-            <div class="h-28 w-full bg-gray-50 rounded-lg mb-2 overflow-hidden">
-                <img src="${item.img}" class="w-full h-full object-cover">
+    container.innerHTML = recent.map((item, index) => `
+        <div onclick="openProductPage(${item.id})" class="recent-card snap-start min-w-[120px] md:min-w-[160px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl md:rounded-[1.5rem] p-2 md:p-3 cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:bg-white/20 hover:-translate-y-2 transition-all duration-300 group">
+            <div class="h-28 md:h-36 w-full bg-black/20 rounded-xl mb-2 md:mb-3 overflow-hidden relative">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                <img src="${item.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                <div class="absolute top-2 right-2 z-20 bg-black/40 backdrop-blur-md rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+                    <i data-lucide="eye" class="w-3 h-3 text-white"></i>
+                </div>
             </div>
-            <p class="text-xs font-bold text-gray-800 truncate">${item.name}</p>
-            <p class="text-xs text-[#c20069] font-black mt-1">₹${item.price}</p>
+            <div class="px-1 pb-1">
+                <p class="text-[10px] md:text-[11px] font-black text-white line-clamp-1 mb-1 tracking-wide">${item.name}</p>
+                <div class="flex items-center justify-between">
+                    <p class="text-xs md:text-sm text-pink-300 font-black">${formatMoney(item.price)}</p>
+                    <i data-lucide="arrow-up-right" class="w-3 h-3 text-white/50 group-hover:text-white transition"></i>
+                </div>
+            </div>
         </div>
     `).join('');
+
+    if (window.lucide) lucide.createIcons();
+
+    // GSAP Animation execution
+    if (window.gsap) {
+        gsap.fromTo('.recent-card',
+            { opacity: 0, x: 80, scale: 0.9 },
+            { opacity: 1, x: 0, scale: 1, duration: 0.8, stagger: 0.1, ease: 'back.out(1.5)', delay: 0.2 }
+        );
+        gsap.fromTo('#recent-header-anim',
+            { opacity: 0, y: -20 },
+            { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
+        );
+    }
 }
 // --- D. AUTO RUN ON LOAD ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -3098,11 +3156,34 @@ function initHomeSlideshowLogic() {
     }
 
     // 3. Generate HTML for Images
-    slidesContainer.innerHTML = imagesToShow.map((img, i) => `
-        <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${i === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}" id="home-slide-${i}">
-            <img src="${img}" class="w-full h-full object-cover" alt="Slide ${i + 1}">
-        </div>
-    `).join('') + '<div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-20 pointer-events-none"></div>';
+    let existingSlide0 = document.getElementById('home-slide-0');
+    let existingImg = existingSlide0 ? existingSlide0.querySelector('img') : null;
+
+    if (existingSlide0 && existingImg && existingImg.src === imagesToShow[0]) {
+        // PRESERVE LCP Element: Do not destroy home-slide-0
+        Array.from(slidesContainer.children).forEach(child => {
+            if (child.id !== 'home-slide-0') child.remove();
+        });
+        existingSlide0.className = "absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out opacity-100 z-10";
+
+        let newHtml = '';
+        for (let i = 1; i < imagesToShow.length; i++) {
+            newHtml += `
+            <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out opacity-0 z-0" id="home-slide-${i}">
+                <img src="${imagesToShow[i]}" class="w-full h-full object-cover" alt="Slide ${i + 1}" loading="lazy">
+            </div>
+            `;
+        }
+        newHtml += '<div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-20 pointer-events-none"></div>';
+        slidesContainer.insertAdjacentHTML('beforeend', newHtml);
+    } else {
+        // Fallback: overwrite all
+        slidesContainer.innerHTML = imagesToShow.map((img, i) => `
+            <div class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${i === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}" id="home-slide-${i}">
+                <img src="${img}" class="w-full h-full object-cover" alt="Slide ${i + 1}" ${i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'}>
+            </div>
+        `).join('') + '<div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-20 pointer-events-none"></div>';
+    }
 
     // 4. Generate HTML for Indicators (Flat Lines Style)
     indicatorsContainer.innerHTML = imagesToShow.map((_, i) => `
