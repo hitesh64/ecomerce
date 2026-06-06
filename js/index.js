@@ -623,6 +623,11 @@ function updateAllUI() {
         sidebarWish.innerText = wishCount;
         sidebarWish.classList.toggle('hidden', wishCount === 0);
     }
+
+    // Refresh recent section to update user name
+    if (typeof renderRecentSection === 'function') {
+        renderRecentSection();
+    }
 }
 // Update navigate/switchView to handle active tab color
 function updateBottomNav(viewName) {

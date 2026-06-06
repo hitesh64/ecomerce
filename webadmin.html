@@ -818,6 +818,7 @@
         }
 
         function handleLogout() {
+            document.body.innerHTML = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;font-weight:bold;color:#4b5563;"><svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>SIGNING OUT...</div>';
             localStorage.removeItem(DB_SESSION);
             location.reload();
         }
@@ -1333,6 +1334,9 @@
                     return;
                 }
 
+                document.getElementById('vendor-list-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Vendors...</p></td></tr>`;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+
                 const res = await fetch(`${API_URL}/vendors`, {
                     method: 'GET',
                     headers: {
@@ -1665,6 +1669,9 @@
             try {
                 if (!currentUser || !currentUser.token) return;
 
+                document.getElementById('delivery-apps-container').innerHTML = `<div class="p-8 text-center col-span-full w-full"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Applications...</p></div>`;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+
                 const res = await fetch(`${API_URL}/users`, {
                     method: 'GET',
                     headers: {
@@ -1917,6 +1924,9 @@
         async function loadActiveFleet() {
             try {
                 if (!currentUser || !currentUser.token) return;
+
+                document.getElementById('active-drivers-list').innerHTML = `<div class="p-8 text-center col-span-full w-full"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Fleet...</p></div>`;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
 
                 // Users route protected hai, Orders public hai
                 const [usersRes, ordersRes] = await Promise.all([
@@ -2844,6 +2854,9 @@
         async function loadReturns() {
             try {
                 if (!currentUser || !currentUser.token) return;
+
+                document.getElementById('returns-table-body').innerHTML = `<tr><td colspan="4" class="p-8 text-center"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Returns...</p></td></tr>`;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
 
                 const res = await fetch(`${API_URL}/returns`, {
                     method: 'GET',
