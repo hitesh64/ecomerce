@@ -313,7 +313,7 @@
                                 </div>
                                 Dispatch Manager
                             </h2>
-                            <button onclick="loadData()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
+                            <button onclick="loadDispatchManager()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
                                 <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
                             </button>
                         </div>
@@ -337,12 +337,17 @@
                     </div>
 
                     <div id="view-returns" class="view-section hidden">
-                        <h2 class="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
-                                <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
-                            </div>
-                            Returns & Reverse Logistics
-                        </h2>
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-black text-gray-900 flex items-center gap-3">
+                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                                    <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+                                </div>
+                                Returns & Reverse Logistics
+                            </h2>
+                            <button onclick="loadReturns()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                            </button>
+                        </div>
                         <div class="bg-white border border-red-100 rounded-xl overflow-hidden shadow-sm">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left whitespace-nowrap min-w-[1000px]">
@@ -2973,14 +2978,15 @@
                 });
 
                 if (!orderRes.ok) {
-                    throw new Error("Failed to update Order Status.");
+                    console.warn("Failed to update Order Status. Order might have been deleted.");
+                    // We don't throw an error here, because the Return Request was already updated successfully!
                 }
 
                 showToast(`Return ${status} Successfully!`, 'success');
 
                 // 3. Reload Tables to show changes
                 await loadReturns();
-                await loadDispatchManager();
+                // Optionally reload dispatch if you want: await loadDispatchManager();
 
             } catch (e) {
                 console.error(e);
