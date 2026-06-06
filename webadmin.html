@@ -720,7 +720,7 @@
                     currentUser = adminData;
                     routeUser(currentUser);
                 } else {
-                    alert("Login Failed: " + (adminData.message || "Unauthorized Email"));
+                    alert("Login Failed: " + (adminData.message || adminData.error || "Unauthorized Email"));
                 }
             } catch (err) {
                 console.error(err);

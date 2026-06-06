@@ -74,19 +74,21 @@ const verifyToken = (roles = []) => {
 let isConnected = false;
 
 const connectDB = async () => {
-    if (isConnected) {
+    if (isConnected || mongoose.connection.readyState >= 1) {
+        isConnected = true;
         return;
     }
     try {
-        const db = await mongoose.connect(MONGO_URI, {
-            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 10s
-        });
-        isConnected = db.connections[0].readyState;
-        console.log("✅ MongoDB Connected via Serverless");
+        await mongoose.connect(MONGO_URI);
+        isConnected = true;
+        console.log("✅ MongoDB Connected");
     } catch (error) {
         console.log("❌ MongoDB Connection Error:", error);
     }
 };
+
+// Start connection immediately for local dev
+connectDB();
 
 // Middleware to ensure DB is connected before handling requests
 app.use(async (req, res, next) => {
@@ -199,9 +201,7 @@ app.get('/api/upgrade-me/:email', async (req, res) => {
 // ==========================================
 // 2. MONGODB CONNECTION
 // ==========================================
-mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ MongoDB Connected: Secure Mode'))
-    .catch(err => console.log('❌ MongoDB Connection Error:', err));
+
 
 // ==========================================
 // 3. SCHEMAS & MODELS
