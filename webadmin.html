@@ -95,9 +95,7 @@
             <div id="login-form" class="space-y-6">
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
                     data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
-<button type="button" id="median-google-btn-admin" onclick="triggerNativeGoogleLogin()" class="w-full py-4 mt-4 mb-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 hidden">
-    <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" class="w-5 h-5"> Continue with Google
-</button>
+
                 <div class="relative flex py-2 items-center">
                     <div class="flex-grow border-t border-gray-200"></div>
                     <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or Login</span>
@@ -611,9 +609,9 @@
         }
     </style>
     <script>
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000/api'
-    : '/api';
+        const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:5000/api'
+            : '/api';
         const DB_SESSION = 'kicks_admin_session';
 
         let currentUser = null;
@@ -3000,28 +2998,6 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
             document.body.insertAdjacentHTML('beforeend', modalContent);
             lucide.createIcons();
         }
-        // Check if running inside Median App
-window.addEventListener('DOMContentLoaded', () => {
-    if (window.median) {
-        // Standard web buttons ko force hide karo
-        const webGoogleBtns = document.querySelectorAll('.g_id_signin');
-        webGoogleBtns.forEach(btn => btn.style.display = 'none');
-        
-        // Apna custom Median button show kardo
-        const medianBtn = document.getElementById('median-google-btn-admin');
-        if(medianBtn) medianBtn.classList.remove('hidden');
-    }
-});
-
-// Jab user naye button par tap karega
-function triggerNativeGoogleLogin() {
-    if (window.median) {
-        // Median Native Plugin trigger karo
-        window.median.socialLogin.google();
-    } else {
-        console.log("Running in standard browser");
-    }
-}
         // --- UTILITY FUNCTIONS ---
         function filterAssignDrivers() {
             // Implementation for filtering drivers by state/city
