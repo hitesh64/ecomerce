@@ -2143,7 +2143,10 @@
             try {
                 const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(email)}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
                     body: JSON.stringify({ shift: { type, hours } })
                 });
 
@@ -2596,7 +2599,10 @@
                 // Status ko 'Return Cancelled' set karein
                 const res = await fetch(`${API_URL}/update-order-status`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
                     body: JSON.stringify({
                         id: orderId,
                         status: 'Return Cancelled'
