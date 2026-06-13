@@ -103,7 +103,7 @@ app.get('/api/make-me-vendor/:email', async (req, res) => {
         // 1. Find and Update User
         const user = await User.findOneAndUpdate(
             { email: email },
-            { $set: { role: 'vendor', shopName: 'My Kicks Shop' } }, // Role force update
+            { $set: { role: 'vendor', shopName: 'My QUICKSHOPPY Shop' } }, // Role force update
             { new: true }
         );
 
@@ -175,7 +175,7 @@ app.get('/api/upgrade-me/:email', async (req, res) => {
         // 1. Role update karke Vendor set karein
         const user = await User.findOneAndUpdate(
             { email: email },
-            { $set: { role: 'vendor', shopName: 'My Kicks Shop' } },
+            { $set: { role: 'vendor', shopName: 'My QUICKSHOPPY Shop' } },
             { new: true }
         );
 
@@ -333,6 +333,129 @@ const Product = mongoose.model('Product', ProductSchema);
 const Order = mongoose.model('Order', OrderSchema);
 const Review = mongoose.model('Review', ReviewSchema);
 const ReturnRequest = mongoose.model('ReturnRequest', ReturnRequestSchema);
+
+// ==========================================
+// COUPON SYSTEM
+// ==========================================
+const CouponSchema = new mongoose.Schema({
+    code: { type: String, unique: true, uppercase: true, trim: true },
+    discountPercent: { type: Number, required: true },   // e.g. 20 = 20% off
+    maxDiscount: { type: Number, default: 500 },          // Max discount cap ₹500
+    minOrderAmount: { type: Number, default: 0 },         // Min cart value to apply
+    maxUses: { type: Number, default: 100 },              // Total how many times usable
+    usedBy: [{ type: String }],                           // Array of user emails who used it
+    expiryDate: { type: Date, required: true },
+    isActive: { type: Boolean, default: true },
+    createdAt: { type: Date, default: Date.now }
+});
+const Coupon = mongoose.model('Coupon', CouponSchema);
+
+// --- COUPON ROUTES ---
+
+// 1. Admin: Create Coupon
+app.post('/api/coupons', verifyToken(['admin']), async (req, res) => {
+    try {
+        const { code, discountPercent, maxDiscount, minOrderAmount, maxUses, expiryDate } = req.body;
+        const existing = await Coupon.findOne({ code: code.toUpperCase() });
+        if (existing) return res.status(400).json({ error: 'Coupon code already exists' });
+        const coupon = new Coupon({ code: code.toUpperCase(), discountPercent, maxDiscount, minOrderAmount, maxUses, expiryDate });
+        await coupon.save();
+        res.json({ success: true, coupon });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 2. Admin: Get All Coupons
+app.get('/api/coupons', verifyToken(['admin']), async (req, res) => {
+    try {
+        const coupons = await Coupon.find().sort({ createdAt: -1 });
+        res.json(coupons);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 3. Admin: Delete Coupon
+app.delete('/api/coupons/:id', verifyToken(['admin']), async (req, res) => {
+    try {
+        await Coupon.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 4. Admin: Toggle Active Status
+app.put('/api/coupons/:id', verifyToken(['admin']), async (req, res) => {
+    try {
+        const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(coupon);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 5. Public: Get Available Coupons for User & Cart Total
+app.post('/api/coupons/available', async (req, res) => {
+    try {
+        const { cartTotal, userEmail } = req.body;
+        if (cartTotal === undefined) return res.status(400).json({ error: 'cartTotal required' });
+
+        const now = new Date();
+        const availableCoupons = await Coupon.find({
+            isActive: true,
+            expiryDate: { $gt: now }
+        }).sort({ minOrderAmount: -1 }); // Highest min order first
+
+        // Filter coupons based on cart total and usage limit
+        const validCoupons = availableCoupons.filter(c => {
+            if (c.usedBy.length >= c.maxUses) return false;
+            if (cartTotal < c.minOrderAmount) return false;
+            if (userEmail && c.usedBy.includes(userEmail)) return false;
+            return true;
+        });
+
+        res.json(validCoupons);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 6. Public: Apply Coupon (called from checkout)
+app.post('/api/coupon/apply', async (req, res) => {
+    try {
+        const { code, cartTotal, userEmail } = req.body;
+
+        if (!code || !cartTotal) return res.status(400).json({ error: 'Code and cart total required' });
+
+        const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
+
+        // Validate
+        if (!coupon) return res.status(404).json({ error: 'Invalid coupon code' });
+        if (!coupon.isActive) return res.status(400).json({ error: 'This coupon is no longer active' });
+        if (new Date() > new Date(coupon.expiryDate)) return res.status(400).json({ error: 'Coupon has expired' });
+        if (coupon.usedBy.length >= coupon.maxUses) return res.status(400).json({ error: 'Coupon usage limit reached' });
+        if (cartTotal < coupon.minOrderAmount) return res.status(400).json({ error: `Minimum order ₹${coupon.minOrderAmount} required` });
+        if (userEmail && coupon.usedBy.includes(userEmail)) return res.status(400).json({ error: 'You have already used this coupon' });
+
+        // Calculate Discount
+        let discount = Math.round((cartTotal * coupon.discountPercent) / 100);
+        if (coupon.maxDiscount && discount > coupon.maxDiscount) discount = coupon.maxDiscount;
+        const finalTotal = cartTotal - discount;
+
+        res.json({
+            success: true,
+            couponCode: coupon.code,
+            discountPercent: coupon.discountPercent,
+            discountAmount: discount,
+            finalTotal,
+            message: `${coupon.discountPercent}% off! You saved ₹${discount}`
+        });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 6. Mark coupon as used after successful order
+app.post('/api/coupon/mark-used', async (req, res) => {
+    try {
+        const { code, userEmail } = req.body;
+        await Coupon.findOneAndUpdate(
+            { code: code.toUpperCase() },
+            { $addToSet: { usedBy: userEmail } }
+        );
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // Helper
 const generateToken = (id, role) => {
@@ -1102,7 +1225,7 @@ app.get('/api/fix-admin-pass/:email/:newpass', verifyToken(['admin']), async (re
 });
 
 if (require.main === module) {
-    app.listen(PORT, () => console.log(`🚀 Secure Kicks Server running on port ${PORT}`));
+    app.listen(PORT, () => console.log(`🚀 Secure QUICKSHOPPY Server running on port ${PORT}`));
 }
 
 // Export the app so Vercel can run it as a serverless function

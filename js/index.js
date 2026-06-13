@@ -304,7 +304,7 @@ async function loadAllProducts() {
             description: item.description,
             sizes: item.sizes,
             stock: parseInt(item.stock || 0), // <--- YAHAN COMMA (,) HONA ZAROORI HAI
-            shopName: item.shopName || "KICKS OFFICIAL STORE" // Database se asli naam aayega
+            shopName: item.shopName || "QUICKSHOPPY OFFICIAL STORE" // Database se asli naam aayega
         }));
     } catch (error) {
         console.warn("Failed to load products", error);
@@ -347,7 +347,7 @@ const saveState = async () => {
         state.user.cart = state.cart;
         state.user.wishlist = state.wishlist;
 
-        localStorage.setItem('kicks_user_session', JSON.stringify(state.user));
+        localStorage.setItem('quickshoppy_user_session', JSON.stringify(state.user));
 
         // 2. Sync to MongoDB (Background Process)
         try {
@@ -372,7 +372,7 @@ const saveState = async () => {
 };
 
 const loadState = () => {
-    const session = localStorage.getItem('kicks_user_session');
+    const session = localStorage.getItem('quickshoppy_user_session');
     if (session) {
         state.user = JSON.parse(session);
         state.cart = state.user.cart || [];
@@ -420,6 +420,12 @@ function switchView(viewName) {
         viewName === 'home' ? topHeader.classList.remove('hidden') : topHeader.classList.add('hidden');
     }
 
+    // 3.5. फुटर छुपाएं/दिखाएं (सिर्फ होम पेज पर दिखाएं)
+    const mainFooter = document.getElementById('main-footer');
+    if (mainFooter) {
+        viewName === 'home' ? mainFooter.classList.remove('hidden') : mainFooter.classList.add('hidden');
+    }
+
     // 4. सभी पुराने सेक्शन्स को छुपाएं
     const allViews = document.querySelectorAll('.section-view');
     allViews.forEach(el => {
@@ -432,6 +438,7 @@ function switchView(viewName) {
     if (viewName === 'wishlist') renderWishlist();
     if (viewName === 'orders') { fetchUserOrders(); renderOrders(); }
     if (viewName === 'profile') renderProfile();
+    if (viewName === 'categories') loadCategoryInView('Electronics');
 
     // 6. टारगेट सेक्शन को दिखाएं
     const target = document.getElementById(`view-${viewName}`);
@@ -546,7 +553,7 @@ async function handleLogin(e) {
 
 function logout() {
     state.user = null; state.cart = []; state.wishlist = []; state.orders = [];
-    localStorage.removeItem('kicks_user_session');
+    localStorage.removeItem('quickshoppy_user_session');
     toggleSidebar();
     updateAllUI();
     switchView('home');
@@ -950,6 +957,66 @@ function startCategoryBanner(category) {
     }, 3000);
 }
 
+function loadCategoryInView(category) {
+    const allItems = document.querySelectorAll('#view-categories .group');
+    allItems.forEach(item => {
+        item.classList.remove('bg-purple-50', 'border-r-4', 'border-purple-600');
+        const imgContainer = item.querySelector('div');
+        if (imgContainer) imgContainer.classList.remove('border-purple-500', 'border-2');
+        const textSpan = item.querySelector('span');
+        if (textSpan) textSpan.classList.remove('text-purple-600', 'font-bold');
+        
+        if (textSpan && textSpan.innerText.trim().toLowerCase() === category.toLowerCase()) {
+            item.classList.add('bg-purple-50', 'border-r-4', 'border-purple-600');
+            if (imgContainer) imgContainer.classList.add('border-purple-500', 'border-2');
+            textSpan.classList.add('text-purple-600', 'font-bold');
+        }
+    });
+
+    const catProducts = products.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    const rightContent = document.getElementById('category-right-content');
+    if (!rightContent) return;
+
+    if (catProducts.length === 0) {
+        rightContent.innerHTML = `
+            <div class="flex flex-col h-full items-center justify-center text-center p-8">
+                <i data-lucide="package-x" class="w-16 h-16 text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">No Products Yet</h3>
+                <p class="text-sm text-gray-500">We're adding new items to ${category} soon!</p>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
+    rightContent.innerHTML = `
+        <div class="mb-6 flex justify-between items-end">
+            <h3 class="text-2xl font-black text-gray-900">${category}</h3>
+            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">${catProducts.length} Items</span>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 pb-20">
+            ${catProducts.map(p => `
+                <div onclick="openProductPage('${p.id || p._id}')" class="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all cursor-pointer group overflow-hidden">
+                    <div class="aspect-square bg-gray-50 relative overflow-hidden">
+                        <img src="${p.img || (p.images && p.images[0]) || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    </div>
+                    <div class="p-3">
+                        <p class="text-[10px] font-bold text-purple-600 uppercase mb-1 truncate">${p.brand}</p>
+                        <h4 class="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-purple-600 transition">${p.name}</h4>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="font-black text-gray-900">${formatMoney(p.price)}</span>
+                            <div class="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center group-hover:bg-purple-600 transition">
+                                <i data-lucide="arrow-right" class="w-3 h-3 text-purple-600 group-hover:text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+}
+
 function getFilteredProducts(ignoreSidebars = false) {
     return products.filter(p => {
         const matchMain = !activeFilters.mainCat || p.category === activeFilters.mainCat;
@@ -977,41 +1044,97 @@ function renderListingGrid() {
 
     document.getElementById('listing-count').innerText = `${filtered.length} ITEMS`;
     const grid = document.getElementById('listing-grid');
+    const isSearch = activeFilters.search !== "" && activeFilters.search !== null;
+
+    if (isSearch) {
+        grid.className = "flex flex-col gap-4"; // Flipkart-style list
+    } else {
+        grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"; // Regular grid
+    }
 
     grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full text-center py-12 text-gray-400">No products found.</div>` : filtered.map(p => {
         const isWish = state.wishlist.includes(p.id);
-        return `
-        <div onclick="openProductPage(${p.id})" data-aos="fade-up" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1" class="bg-white p-5 rounded-[2rem] border border-gray-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(147,51,234,0.1)] transition-all duration-500 group cursor-pointer relative">
-            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-8 right-8 z-30 bg-white/90 backdrop-blur-md p-2.5 rounded-full shadow-sm hover:scale-110 hover:shadow-md transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-gray-400'}"></i>
-            </button>
-            
-            <div class="aspect-[4/5] bg-gray-50 rounded-[1.5rem] mb-5 overflow-hidden relative">
-                <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition duration-500 z-10"></div>
-                <img src="${p.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 ease-out">
+        
+        if (isSearch) {
+            // Flipkart Style Horizontal Card
+            return `
+            <div onclick="openProductPage('${p.id}')" class="bg-white p-4 rounded-xl border border-gray-200 hover:shadow-lg transition-all flex flex-col sm:flex-row gap-6 cursor-pointer group relative overflow-hidden">
+                <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-4 right-4 z-30 bg-white/90 backdrop-blur-md p-2 rounded-full shadow-sm hover:scale-110 transition-all">
+                    <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-gray-400'}"></i>
+                </button>
                 
-                <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition duration-500 z-20 flex justify-between items-center">
-                    <span class="text-white text-[10px] font-black tracking-[0.2em] uppercase">Quick View</span>
-                    <i data-lucide="eye" class="w-4 h-4 text-white"></i>
+                <div class="w-full sm:w-56 h-56 flex-shrink-0 bg-gray-50 rounded-lg relative overflow-hidden flex items-center justify-center p-4">
+                    <img src="${p.img || (p.images && p.images[0])}" class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300">
                 </div>
-            </div>
-            <div class="px-2">
-                <div class="flex justify-between items-start mb-2">
-                    <p class="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] bg-purple-50 px-2 py-1 rounded-md">${p.brand}</p>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">${p.subCategory || p.category || ''}</p>
-                </div>
-                <h3 class="font-bold text-lg leading-tight mb-3 text-gray-900 line-clamp-1 group-hover:text-purple-600 transition duration-300">${p.name}</h3>
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-xl text-gray-900">${formatMoney(p.price)}</span>
-                    <div class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-purple-600 group-hover:border-purple-600 transition duration-300">
-                        <i data-lucide="shopping-bag" class="w-3 h-3 text-gray-400 group-hover:text-white transition duration-300"></i>
+                
+                <div class="flex-1 flex flex-col sm:flex-row justify-between py-2">
+                    <div class="flex-1 pr-0 sm:pr-6">
+                        <h3 class="font-bold text-lg text-blue-600 hover:underline mb-2 leading-tight">${p.name}</h3>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center">
+                                4.5 <i data-lucide="star" class="w-2.5 h-2.5 ml-0.5 fill-white"></i>
+                            </span>
+                            <span class="text-xs text-gray-500 font-medium">(1,234 Ratings & Reviews)</span>
+                        </div>
+                        <ul class="text-xs text-gray-600 space-y-1.5 mb-4 hidden sm:block">
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-gray-400 rounded-full"></div> Brand: <span class="font-bold">${p.brand}</span></li>
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-gray-400 rounded-full"></div> Category: ${p.category}</li>
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-gray-400 rounded-full"></div> Premium Quality Guarantee</li>
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-gray-400 rounded-full"></div> 7 Days Replacement Policy</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="w-full sm:w-48 flex flex-col items-start sm:items-end sm:border-l border-gray-100 pt-4 sm:pt-0 sm:pl-6">
+                        <div class="flex items-end sm:flex-col flex-row gap-3 sm:gap-0">
+                            <span class="font-black text-2xl text-gray-900">${formatMoney(p.price)}</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-sm text-gray-500 line-through">${formatMoney(p.price * 1.2)}</span>
+                                <span class="text-xs font-bold text-green-600">20% off</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-3 hidden sm:block">Free delivery by Tomorrow</p>
+                        <p class="text-xs text-green-600 font-bold mt-1 hidden sm:block">Bank Offer Available</p>
                     </div>
                 </div>
             </div>
-        </div>
-    `}).join('');
+            `;
+        } else {
+            // Original Default Grid Card
+            return `
+            <div onclick="openProductPage('${p.id}')" data-aos="fade-up" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1" class="bg-white p-5 rounded-[2rem] border border-gray-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(147,51,234,0.1)] transition-all duration-500 group cursor-pointer relative">
+                <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-8 right-8 z-30 bg-white/90 backdrop-blur-md p-2.5 rounded-full shadow-sm hover:scale-110 hover:shadow-md transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+                    <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-gray-400'}"></i>
+                </button>
+                
+                <div class="aspect-[4/5] bg-gray-50 rounded-[1.5rem] mb-5 overflow-hidden relative">
+                    <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition duration-500 z-10"></div>
+                    <img src="${p.img || (p.images && p.images[0])}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 ease-out">
+                    
+                    <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition duration-500 z-20 flex justify-between items-center">
+                        <span class="text-white text-[10px] font-black tracking-[0.2em] uppercase">Quick View</span>
+                        <i data-lucide="eye" class="w-4 h-4 text-white"></i>
+                    </div>
+                </div>
+                <div class="px-2">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] bg-purple-50 px-2 py-1 rounded-md">${p.brand}</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">${p.subCategory || p.category || ''}</p>
+                    </div>
+                    <h3 class="font-bold text-lg leading-tight mb-3 text-gray-900 line-clamp-1 group-hover:text-purple-600 transition duration-300">${p.name}</h3>
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-xl text-gray-900">${formatMoney(p.price)}</span>
+                        <div class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-purple-600 group-hover:border-purple-600 transition duration-300">
+                            <i data-lucide="shopping-bag" class="w-3 h-3 text-gray-400 group-hover:text-white transition duration-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+    }).join('');
+    
     if (window.lucide) lucide.createIcons();
-    if (window.VanillaTilt) {
+    if (window.VanillaTilt && !isSearch) {
         VanillaTilt.init(document.querySelectorAll("[data-tilt]"));
     }
     if (window.AOS) {
@@ -1027,25 +1150,25 @@ function renderProducts() {
     grid.innerHTML = products.slice(0, 4).map((p, i) => {
         const isWish = state.wishlist.includes(p.id);
         return `
-        <div onclick="openProductPage(${p.id})" data-aos="fade-up" data-aos-delay="${i * 150}" data-tilt data-tilt-max="8" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3" data-tilt-scale="1.03" class="backdrop-blur-xl bg-white/10 border border-white/20 hover:border-purple-400/50 p-5 rounded-3xl transition-all duration-500 group cursor-pointer relative shadow-2xl">
-            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-6 right-6 z-30 bg-black/40 backdrop-blur-md p-2.5 rounded-full hover:scale-110 hover:bg-black/60 transition shadow-lg">
-                <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-white'}"></i>
+        <div onclick="openProductPage(${p.id})" data-aos="fade-up" data-aos-delay="${i * 150}" data-tilt data-tilt-max="8" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3" data-tilt-scale="1.03" class="backdrop-blur-xl bg-white/10 border border-white/20 hover:border-purple-400/50 p-3 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-500 group cursor-pointer relative shadow-2xl">
+            <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-3 sm:top-6 right-3 sm:right-6 z-30 bg-black/40 backdrop-blur-md p-1.5 sm:p-2.5 rounded-full hover:scale-110 hover:bg-black/60 transition shadow-lg">
+                <i data-lucide="heart" class="w-3 sm:w-4 h-3 sm:h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-white'}"></i>
             </button>
-            <div class="aspect-square bg-black/20 rounded-2xl mb-6 overflow-hidden relative">
+            <div class="aspect-square bg-black/20 rounded-xl sm:rounded-2xl mb-3 sm:mb-6 overflow-hidden relative">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <img src="${p.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
                 
-                <div class="absolute bottom-4 left-4 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-500">
-                    <span class="bg-purple-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Bought</span>
+                <div class="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-500">
+                    <span class="bg-purple-600 text-white text-[8px] sm:text-[10px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-widest shadow-lg">Most Bought</span>
                 </div>
             </div>
             <div class="px-1">
-                <p class="text-[10px] font-black text-purple-300 uppercase mb-2 tracking-[0.2em]">${p.brand}</p>
-                <h3 class="font-bold text-xl leading-tight mb-3 text-white line-clamp-1 group-hover:text-purple-200 transition">${p.name}</h3>
-                <div class="flex items-center justify-between mt-4">
-                    <span class="font-black text-2xl text-white drop-shadow-md">${formatMoney(p.price)}</span>
-                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-purple-600 transition duration-300">
-                        <i data-lucide="arrow-right" class="w-4 h-4 text-white"></i>
+                <p class="text-[8px] sm:text-[10px] font-black text-purple-300 uppercase mb-1 sm:mb-2 tracking-[0.2em] truncate">${p.brand}</p>
+                <h3 class="font-bold text-sm sm:text-xl leading-tight mb-2 sm:mb-3 text-white line-clamp-1 group-hover:text-purple-200 transition">${p.name}</h3>
+                <div class="flex items-center justify-between mt-2 sm:mt-4">
+                    <span class="font-black text-lg sm:text-2xl text-white drop-shadow-md">${formatMoney(p.price)}</span>
+                    <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-purple-600 transition duration-300">
+                        <i data-lucide="arrow-right" class="w-3 h-3 sm:w-4 sm:h-4 text-white"></i>
                     </div>
                 </div>
             </div>
@@ -1408,7 +1531,7 @@ function viewUserBill(orderId) {
     // Full Invoice HTML
     content.innerHTML = `
         <div class="text-center mb-6">
-            <h1 class="text-2xl font-black text-purple-900 tracking-tighter mb-1">KICKS INDIA<span class="text-purple-500">.</span></h1>
+            <h1 class="text-2xl font-black text-purple-900 tracking-tighter mb-1">QUICKSHOPPY<span class="text-purple-500">.</span></h1>
             <p class="text-[10px] text-gray-400 uppercase tracking-widest">Official Tax Invoice</p>
         </div>
 
@@ -1454,7 +1577,7 @@ function viewUserBill(orderId) {
             <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase border ${statusColor}">
                 ${order.status === 'Delivered' ? 'Delivered & Paid' : 'Return Completed'}
             </span>
-            <p class="text-[10px] text-gray-400 mt-4">Thank you for shopping with Kicks India.</p>
+            <p class="text-[10px] text-gray-400 mt-4">Thank you for shopping with QUICKSHOPPY.</p>
         </div>
     `;
 
@@ -1568,7 +1691,7 @@ function showTrustGuide(type) {
         ];
     } else {
         title.innerText = "Lowest Price Guarantee";
-        voiceText = "This product is available at the lowest market price only at Kicks India.";
+        voiceText = "This product is available at the lowest market price only at QUICKSHOPPY.";
         steps = [
             { icon: 'trending-down', text: 'Best Price Found', color: 'text-pink-600' },
             { icon: 'award', text: 'Verified Quality', color: 'text-purple-600' }
@@ -1626,7 +1749,7 @@ async function openProductPage(id) {
 
     // 2. Vendor Shop Name
     const vendorEl = document.getElementById('pdp-vendor-shop-name');
-    if (vendorEl) vendorEl.innerText = product.shopName || "KICKS OFFICIAL STORE";
+    if (vendorEl) vendorEl.innerText = product.shopName || "QUICKSHOPPY OFFICIAL STORE";
 
     // 3. Stock Badge & Buttons
     const inStock = product.stock > 0;
@@ -2074,7 +2197,18 @@ function renderCart() {
         document.getElementById('summary-subtotal').innerText = formatMoney(subtotal);
         document.getElementById('summary-total').innerText = formatMoney(subtotal + 5);
         document.getElementById('checkout-subtotal').innerText = formatMoney(subtotal);
-        document.getElementById('checkout-final-amount').innerText = formatMoney(subtotal + 5);
+
+        // Update new breakdown display
+        const subtotalEl = document.getElementById('checkout-subtotal-display');
+        if (subtotalEl) subtotalEl.innerText = formatMoney(subtotal);
+
+        // Recalculate final if coupon already applied
+        if (state.appliedCoupon) {
+            const discount = state.appliedCoupon.discountAmount;
+            document.getElementById('checkout-final-amount').innerText = formatMoney(subtotal + 5 - discount);
+        } else {
+            document.getElementById('checkout-final-amount').innerText = formatMoney(subtotal + 5);
+        }
     }
 }
 
@@ -2083,6 +2217,80 @@ function removeFromCart(idx) {
     saveState();
     updateAllUI();
     renderCart();
+}
+
+// ==========================================
+// COUPON SYSTEM - JS LOGIC
+// ==========================================
+// Store applied coupon in state
+state.appliedCoupon = null;
+
+function applyCouponFromList(code) {
+    document.getElementById('coupon-input').value = code;
+    applyCoupon();
+}
+
+async function applyCoupon() {
+    const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+    const successEl = document.getElementById('coupon-success');
+    const errorEl = document.getElementById('coupon-error');
+    const msgEl = document.getElementById('coupon-msg');
+    const errMsgEl = document.getElementById('coupon-error-msg');
+    const discountRow = document.getElementById('coupon-discount-row');
+    const discountDisplay = document.getElementById('coupon-discount-display');
+
+    if (!code) { showToast('Enter a coupon code first'); return; }
+
+    const subtotal = state.cart.reduce((s, i) => s + i.price, 0);
+    successEl.classList.add('hidden');
+    errorEl.classList.add('hidden');
+
+    try {
+        const res = await fetch(`${API_URL}/coupon/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, cartTotal: subtotal, userEmail: state.user?.email })
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+            errMsgEl.innerText = data.error || 'Invalid coupon';
+            errorEl.classList.remove('hidden');
+            state.appliedCoupon = null;
+            return;
+        }
+
+        // Coupon valid!
+        state.appliedCoupon = data;
+        msgEl.innerText = `✅ ${data.message}`;
+        successEl.classList.remove('hidden');
+
+        // Show discount row
+        discountRow.style.display = 'flex';
+        discountDisplay.innerText = `-₹${data.discountAmount}`;
+
+        // Update total
+        document.getElementById('checkout-final-amount').innerText = formatMoney(subtotal + 5 - data.discountAmount);
+        document.getElementById('checkout-subtotal-display').innerText = formatMoney(subtotal);
+
+        showToast(`🎉 ${data.message}`);
+    } catch (e) {
+        errMsgEl.innerText = 'Server error, try again';
+        errorEl.classList.remove('hidden');
+    }
+}
+
+function removeCoupon() {
+    state.appliedCoupon = null;
+    document.getElementById('coupon-input').value = '';
+    document.getElementById('coupon-success').classList.add('hidden');
+    document.getElementById('coupon-error').classList.add('hidden');
+    document.getElementById('coupon-discount-row').style.display = 'none';
+
+    // Restore original total
+    const subtotal = state.cart.reduce((s, i) => s + i.price, 0);
+    document.getElementById('checkout-final-amount').innerText = formatMoney(subtotal + 5);
+    showToast('Coupon removed');
 }
 
 // index.js
@@ -2150,6 +2358,35 @@ async function openCheckout() {
         }
         if (window.lucide) lucide.createIcons();
 
+        // Fetch Available Coupons
+        try {
+            const subtotalAmt = state.cart.reduce((s, i) => s + i.price, 0);
+            const couponRes = await fetch(`${API_URL}/coupons/available`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cartTotal: subtotalAmt, userEmail: state.user?.email })
+            });
+            const availableCoupons = await couponRes.json();
+            
+            const container = document.getElementById('available-coupons-container');
+            const list = document.getElementById('available-coupons-list');
+            
+            if (availableCoupons && availableCoupons.length > 0) {
+                list.innerHTML = availableCoupons.map(c => `
+                    <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-300 transition">
+                        <div>
+                            <span class="font-black text-purple-700">${c.code}</span>
+                            <p class="text-[10px] text-gray-500">${c.discountPercent}% off (Up to ₹${c.maxDiscount})</p>
+                        </div>
+                        <button type="button" onclick="applyCouponFromList('${c.code}')" class="text-xs font-bold bg-purple-50 text-purple-700 px-3 py-1.5 rounded-md hover:bg-purple-100 transition">APPLY</button>
+                    </div>
+                `).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        } catch (e) { console.error("Error fetching coupons", e); }
+
     } catch (e) {
         console.error(e);
         showToast("Connection Failed");
@@ -2196,8 +2433,10 @@ async function processOrder(e) {
     }
     // --- VALIDATION END ---
 
-    // Calculate Total
-    const total = state.cart.reduce((s, i) => s + i.price, 0) + 5;
+    // Calculate Total (with coupon discount if applied)
+    const subtotalAmt = state.cart.reduce((s, i) => s + i.price, 0);
+    const couponDiscount = state.appliedCoupon ? state.appliedCoupon.discountAmount : 0;
+    const total = subtotalAmt + 5 - couponDiscount;
 
     // Gather Form Data
     const name = document.getElementById('checkout-name').value;
@@ -2245,6 +2484,16 @@ async function processOrder(e) {
         }
 
         state.cart = [];
+
+        // Mark coupon as used if one was applied
+        if (state.appliedCoupon && state.user?.email) {
+            fetch(`${API_URL}/coupon/mark-used`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: state.appliedCoupon.couponCode, userEmail: state.user.email })
+            });
+            state.appliedCoupon = null;
+        }
         await saveState();
 
         updateAllUI();
@@ -2878,7 +3127,7 @@ function getUserLocation() {
 }
 // B. Track Recently Viewed Items
 function addToRecent(product) {
-    let recent = JSON.parse(localStorage.getItem('kicks_recent')) || [];
+    let recent = JSON.parse(localStorage.getItem('quickshoppy_recent')) || [];
 
     // Remove if already exists to push to top
     recent = recent.filter(p => p.id !== product.id);
@@ -2894,7 +3143,7 @@ function addToRecent(product) {
     // Keep only last 6
     if (recent.length > 6) recent.pop();
 
-    localStorage.setItem('kicks_recent', JSON.stringify(recent));
+    localStorage.setItem('quickshoppy_recent', JSON.stringify(recent));
     renderRecentSection(); // Refresh UI
 }
 
@@ -2905,7 +3154,7 @@ function renderRecentSection() {
     const nameDisplay = document.getElementById('recent-user-name');
 
     // 1. Get History from LocalStorage
-    let recent = JSON.parse(localStorage.getItem('kicks_recent')) || [];
+    let recent = JSON.parse(localStorage.getItem('quickshoppy_recent')) || [];
 
     // --- FIX START: Filter out deleted products ---
     // Check karo ki recent item abhi bhi hamare active 'products' list mein hai ya nahi
@@ -2915,7 +3164,7 @@ function renderRecentSection() {
         // Agar kuch items delete ho gaye hain, to LocalStorage update kar do
         if (validRecent.length !== recent.length) {
             recent = validRecent;
-            localStorage.setItem('kicks_recent', JSON.stringify(recent));
+            localStorage.setItem('quickshoppy_recent', JSON.stringify(recent));
         }
     }
     // --- FIX END ---

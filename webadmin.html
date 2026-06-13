@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KICKS | Admin Portal (MongoDB)</title>
+    <title>QUICKSHOPPY | Admin Portal (MongoDB)</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -82,7 +82,7 @@
     <div id="auth-view" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-sm">
             <div class="text-center mb-10">
-                <h1 class="text-4xl font-black tracking-tighter mb-2">KICKS<span class="text-orange-600">IN</span></h1>
+                <h1 class="text-4xl font-black tracking-tighter mb-2">QUICKSHOPPY</h1>
                 <p class="text-gray-500 font-medium">Administrative Access Only (DB)</p>
             </div>
 
@@ -176,21 +176,28 @@
                 <button onclick="switchTab('returns')" id="btn-returns"
                     class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
                         data-lucide="rotate-ccw" class="mr-3 w-5 h-5"></i> Returns</button>
-            </nav>
 
-            <div class="p-4 border-t border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold overflow-hidden"
-                        id="admin-avatar">A</div>
-                    <div class="overflow-hidden">
-                        <p class="text-sm font-bold truncate" id="admin-name">Admin</p>
-                        <p class="text-xs text-gray-500 truncate" id="admin-email">admin@system.com</p>
+                <div class="border-t border-gray-100 my-4"></div>
+                <p class="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Marketing</p>
+                <button onclick="switchTab('coupons')" id="btn-coupons"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="tag" class="mr-3 w-5 h-5"></i> Coupons</button>
+
+                <!-- Admin Profile + Sign Out inside nav - always scrollable to -->
+                <div class="mt-6 pt-4 border-t border-gray-100">
+                    <div class="flex items-center gap-3 mb-3 px-1">
+                        <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold overflow-hidden shrink-0"
+                            id="admin-avatar">A</div>
+                        <div class="overflow-hidden">
+                            <p class="text-sm font-bold truncate" id="admin-name">Admin</p>
+                            <p class="text-xs text-gray-500 truncate" id="admin-email">admin@system.com</p>
+                        </div>
                     </div>
+                    <button onclick="handleLogout()"
+                        class="w-full py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 flex items-center justify-center gap-2 transition"><i
+                            data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
                 </div>
-                <button onclick="handleLogout()"
-                    class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-50 flex items-center justify-center gap-2"><i
-                        data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
-            </div>
+            </nav>
         </aside>
 
         <div class="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden">
@@ -198,7 +205,7 @@
                 class="h-16 bg-white border-b border-gray-200 flex items-center px-4 justify-between md:hidden flex-shrink-0">
                 <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><i
                         data-lucide="menu"></i></button>
-                <span class="font-black tracking-tighter text-xl">KICKS<span class="text-orange-600">IN</span></span>
+                <span class="font-black tracking-tighter text-xl">QUICKSHOPPY</span>
                 <div class="w-8"></div>
             </header>
 
@@ -225,6 +232,85 @@
                                         </tr>
                                     </thead>
                                     <tbody id="log-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COUPON MANAGEMENT VIEW -->
+                    <div id="view-coupons" class="view-section hidden">
+                        <div class="flex justify-between items-center mb-8">
+                            <div>
+                                <h2 class="text-3xl font-black">Coupon Management</h2>
+                                <p class="text-gray-500 text-sm">Create and manage discount coupons</p>
+                            </div>
+                        </div>
+
+                        <!-- Create Coupon Form -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
+                            <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 text-blue-600"></i> Create New Coupon</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Code</label>
+                                    <input id="new-coupon-code" type="text" placeholder="e.g. QUICK20"
+                                        class="w-full mt-1 p-3 border border-gray-200 rounded-lg text-sm font-bold uppercase">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Discount %</label>
+                                    <input id="new-coupon-discount" type="number" placeholder="e.g. 20" min="1" max="90"
+                                        class="w-full mt-1 p-3 border border-gray-200 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Max Discount ₹</label>
+                                    <input id="new-coupon-max-discount" type="number" placeholder="e.g. 500" value="500"
+                                        class="w-full mt-1 p-3 border border-gray-200 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Min Order ₹</label>
+                                    <input id="new-coupon-min-order" type="number" placeholder="e.g. 200" value="0"
+                                        class="w-full mt-1 p-3 border border-gray-200 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Max Uses</label>
+                                    <input id="new-coupon-max-uses" type="number" placeholder="e.g. 100" value="100"
+                                        class="w-full mt-1 p-3 border border-gray-200 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Expiry Date</label>
+                                    <input id="new-coupon-expiry" type="date"
+                                        class="w-full mt-1 p-3 border border-gray-200 rounded-lg text-sm">
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mt-4">
+                                <button id="btn-submit-coupon" onclick="createCoupon()"
+                                    class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition flex items-center gap-2">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Create Coupon
+                                </button>
+                                <button id="btn-cancel-coupon" onclick="cancelCouponEdit()"
+                                    class="hidden px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-300 transition flex items-center gap-2">
+                                    <i data-lucide="x" class="w-4 h-4"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Coupon List -->
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left whitespace-nowrap min-w-[900px]">
+                                    <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-bold border-b">
+                                        <tr>
+                                            <th class="px-6 py-4">Code</th>
+                                            <th class="px-6 py-4">Discount</th>
+                                            <th class="px-6 py-4">Min Order</th>
+                                            <th class="px-6 py-4">Uses</th>
+                                            <th class="px-6 py-4">Expiry</th>
+                                            <th class="px-6 py-4">Status</th>
+                                            <th class="px-6 py-4 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="coupons-table-body" class="divide-y divide-gray-100">
+                                        <tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">Loading...</td></tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -313,7 +399,8 @@
                                 </div>
                                 Dispatch Manager
                             </h2>
-                            <button onclick="loadDispatchManager()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
+                            <button onclick="loadDispatchManager()"
+                                class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full">
                                 <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
                             </button>
                         </div>
@@ -339,7 +426,8 @@
                     <div id="view-returns" class="view-section hidden">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-3xl font-black text-gray-900 flex items-center gap-3">
-                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                                <div
+                                    class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
                                     <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
                                 </div>
                                 Returns & Reverse Logistics
@@ -617,7 +705,7 @@
         const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
             ? 'http://localhost:5000/api'
             : '/api';
-        const DB_SESSION = 'kicks_admin_session';
+        const DB_SESSION = 'quickshoppy_admin_session';
 
         let currentUser = null;
         let allDrivers = [];
@@ -674,7 +762,7 @@
                 const avatarEl = document.getElementById('admin-avatar');
 
                 if (nameEl) nameEl.innerText = user.name || 'Admin';
-                if (emailEl) emailEl.innerText = user.email || 'admin@kicks.in';
+                if (emailEl) emailEl.innerText = user.email || 'admin@quickshoppy.in';
 
                 if (avatarEl) {
                     if (user.picture) {
@@ -822,6 +910,110 @@
             } catch (e) { alert("Server Error"); }
         }
 
+        // ==========================================
+        // COUPON MANAGEMENT FUNCTIONS
+        // ==========================================
+        let allCouponsData = [];
+        let editingCouponId = null;
+
+        async function loadCoupons() {
+            const tbody = document.getElementById('coupons-table-body');
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">Loading...</td></tr>`;
+            try {
+                const res = await fetch(`${API_URL}/coupons`, { headers: { Authorization: `Bearer ${currentUser.token}` } });
+                allCouponsData = await res.json();
+                const coupons = allCouponsData;
+                if (!coupons.length) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">No coupons created yet.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = coupons.map(c => {
+                    const isExpired = new Date() > new Date(c.expiryDate);
+                    const statusBadge = !c.isActive ? `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">Inactive</span>`
+                        : isExpired ? `<span class="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded-full">Expired</span>`
+                        : `<span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Active</span>`;
+                    return `<tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-black text-blue-700 font-mono">${c.code}</td>
+                        <td class="px-6 py-4"><span class="font-bold">${c.discountPercent}%</span> off <span class="text-gray-400 text-xs">(max ₹${c.maxDiscount})</span></td>
+                        <td class="px-6 py-4">₹${c.minOrderAmount}</td>
+                        <td class="px-6 py-4">${c.usedBy.length} / ${c.maxUses}</td>
+                        <td class="px-6 py-4">${new Date(c.expiryDate).toLocaleDateString('en-IN')}</td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="editCoupon('${c._id}')" class="text-blue-500 hover:text-blue-700 font-bold text-xs px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition mr-2">Edit</button>
+                            <button onclick="deleteCoupon('${c._id}')" class="text-red-500 hover:text-red-700 font-bold text-xs px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition">Delete</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                if (window.lucide) lucide.createIcons();
+            } catch (e) { tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-500">Error loading coupons</td></tr>`; }
+        }
+
+        function editCoupon(id) {
+            const coupon = allCouponsData.find(c => c._id === id);
+            if (!coupon) return;
+            
+            editingCouponId = id;
+            document.getElementById('new-coupon-code').value = coupon.code;
+            document.getElementById('new-coupon-discount').value = coupon.discountPercent;
+            document.getElementById('new-coupon-max-discount').value = coupon.maxDiscount;
+            document.getElementById('new-coupon-min-order').value = coupon.minOrderAmount;
+            document.getElementById('new-coupon-max-uses').value = coupon.maxUses;
+            document.getElementById('new-coupon-expiry').value = coupon.expiryDate.split('T')[0];
+            
+            document.getElementById('btn-submit-coupon').innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Update Coupon';
+            document.getElementById('btn-cancel-coupon').classList.remove('hidden');
+            window.scrollTo({ top: document.getElementById('view-coupons').offsetTop, behavior: 'smooth' });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function cancelCouponEdit() {
+            editingCouponId = null;
+            ['new-coupon-code','new-coupon-discount','new-coupon-expiry'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('new-coupon-max-discount').value = '500';
+            document.getElementById('new-coupon-min-order').value = '0';
+            document.getElementById('new-coupon-max-uses').value = '100';
+            document.getElementById('btn-submit-coupon').innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Create Coupon';
+            document.getElementById('btn-cancel-coupon').classList.add('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function createCoupon() {
+            const code = document.getElementById('new-coupon-code').value.trim().toUpperCase();
+            const discountPercent = +document.getElementById('new-coupon-discount').value;
+            const maxDiscount = +document.getElementById('new-coupon-max-discount').value;
+            const minOrderAmount = +document.getElementById('new-coupon-min-order').value;
+            const maxUses = +document.getElementById('new-coupon-max-uses').value;
+            const expiryDate = document.getElementById('new-coupon-expiry').value;
+
+            if (!code || !discountPercent || !expiryDate) { alert('Fill Code, Discount % and Expiry Date'); return; }
+
+            try {
+                const url = editingCouponId ? `${API_URL}/coupons/${editingCouponId}` : `${API_URL}/coupons`;
+                const method = editingCouponId ? 'PUT' : 'POST';
+                
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentUser.token}` },
+                    body: JSON.stringify({ code, discountPercent, maxDiscount, minOrderAmount, maxUses, expiryDate })
+                });
+                const data = await res.json();
+                if (data.error) { alert(data.error); return; }
+                
+                alert(`✅ Coupon "${code}" ${editingCouponId ? 'updated' : 'created'}!`);
+                cancelCouponEdit();
+                loadCoupons();
+            } catch (e) { alert('Server Error'); }
+        }
+
+        async function deleteCoupon(id) {
+            if (!confirm('Delete this coupon?')) return;
+            try {
+                await fetch(`${API_URL}/coupons/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${currentUser.token}` } });
+                loadCoupons();
+            } catch (e) { alert('Delete failed'); }
+        }
+
         function handleLogout() {
             document.body.innerHTML = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;font-weight:bold;color:#4b5563;"><svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>SIGNING OUT...</div>';
             localStorage.removeItem(DB_SESSION);
@@ -880,6 +1072,9 @@
                     break;
                 case 'returns':
                     loadReturns();
+                    break;
+                case 'coupons':
+                    loadCoupons();
                     break;
             }
 
@@ -1340,7 +1535,7 @@
                 }
 
                 document.getElementById('vendor-list-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Vendors...</p></td></tr>`;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
 
                 const res = await fetch(`${API_URL}/vendors`, {
                     method: 'GET',
@@ -1387,7 +1582,7 @@
                 <td class="p-6">${vendor.email}</td>
                 <td class="p-6">${vendor.joined || 'N/A'}</td>
                 <td class="p-6 text-center">
-                    <button onclick="editVendor('${vendor._id}')" 
+                    <button onclick="openVendorModal('${vendor._id}')" 
                             class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-200 mr-2">
                         Edit
                     </button>
@@ -1675,7 +1870,7 @@
                 if (!currentUser || !currentUser.token) return;
 
                 document.getElementById('delivery-apps-container').innerHTML = `<div class="p-8 text-center col-span-full w-full"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Applications...</p></div>`;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
 
                 const res = await fetch(`${API_URL}/users`, {
                     method: 'GET',
@@ -1867,6 +2062,54 @@
             }
         }
 
+        function editApplication(email) {
+            const app = allDrivers.find(d => d.email === email);
+            if (!app) return;
+
+            document.getElementById('edit-app-orig-email').value = app.email;
+            document.getElementById('edit-app-name').value = app.name || '';
+            document.getElementById('edit-app-phone').value = app.phone || app.mobile || '';
+            document.getElementById('edit-app-vehicle').value = app.vehicleNo || app.vehicle || '';
+
+            document.getElementById('edit-app-modal').classList.remove('hidden');
+        }
+
+        async function saveEditedApp() {
+            const email = document.getElementById('edit-app-orig-email').value;
+            const name = document.getElementById('edit-app-name').value;
+            const phone = document.getElementById('edit-app-phone').value;
+            const vehicle = document.getElementById('edit-app-vehicle').value;
+
+            try {
+                const res = await fetch(`${API_URL}/users/${encodeURIComponent(email)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        phone: phone,
+                        mobile: phone,
+                        vehicleNo: vehicle,
+                        vehicle: vehicle
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Application updated successfully', 'success');
+                    document.getElementById('edit-app-modal').classList.add('hidden');
+                    loadJobApplications();
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Failed to update application', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Server Connection Error', 'error');
+            }
+        }
+
         async function blockDriver(email) {
             if (!confirm('Block this driver?')) return;
 
@@ -1931,7 +2174,7 @@
                 if (!currentUser || !currentUser.token) return;
 
                 document.getElementById('active-drivers-list').innerHTML = `<div class="p-8 text-center col-span-full w-full"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Fleet...</p></div>`;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
 
                 // Users route protected hai, Orders public hai
                 const [usersRes, ordersRes] = await Promise.all([
@@ -2143,7 +2386,7 @@
             try {
                 const res = await fetch(`${API_URL}/users/update/${encodeURIComponent(email)}`, {
                     method: 'PUT',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${currentUser.token}`
                     },
@@ -2599,7 +2842,7 @@
                 // Status ko 'Return Cancelled' set karein
                 const res = await fetch(`${API_URL}/update-order-status`, {
                     method: 'PUT',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${currentUser.token}`
                     },
@@ -2690,7 +2933,7 @@
                 billContent.innerHTML = `
                 <div class="max-w-2xl mx-auto">
                     <div class="text-center mb-8">
-                        <h1 class="text-2xl font-black">KICKS INVOICE</h1>
+                        <h1 class="text-2xl font-black">QUICKSHOPPY INVOICE</h1>
                         <p class="text-gray-600">Order #${order.id || order._id?.substr(-6)}</p>
                     </div>
                     
@@ -2867,7 +3110,7 @@
                 if (!currentUser || !currentUser.token) return;
 
                 document.getElementById('returns-table-body').innerHTML = `<tr><td colspan="4" class="p-8 text-center"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="text-gray-500 font-bold tracking-widest uppercase text-xs">Loading Returns...</p></td></tr>`;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
 
                 const res = await fetch(`${API_URL}/returns`, {
                     method: 'GET',

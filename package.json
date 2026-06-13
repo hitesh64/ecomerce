@@ -1,7 +1,7 @@
 {
   "name": "shoesreal",
   "version": "1.0.0",
-  "description": "Kicks Store Backend",
+  "description": "QUICKSHOPPY Store Backend",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

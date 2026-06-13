@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KICKS INDIA | The Violet Store</title>
+    <title>QUICKSHOPPY | The Violet Store</title>
     <link rel="preload" as="image" href="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80"
         fetchpriority="high">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -653,13 +653,15 @@
                     <i data-lucide="truck" class="mr-4 w-5 h-5 text-purple-500"></i> Delivery
                 </a>
             </div>
-        </nav>
 
-        <div class="p-6 border-t border-purple-50" id="sidebar-logout-btn" style="display:none;">
-            <button onclick="logout()"
-                class="flex items-center w-full text-red-500 hover:bg-red-50 p-3 rounded-xl font-bold transition"><i
-                    data-lucide="log-out" class="mr-3 w-5 h-5"></i> Log Out</button>
-        </div>
+            <!-- Logout Button inside nav - always scrollable to -->
+            <div id="sidebar-logout-btn" class="pt-4 mt-2 pb-10" style="display:none;">
+                <button onclick="logout()"
+                    class="flex items-center w-full bg-red-50 text-red-600 hover:bg-red-100 p-3 rounded-xl font-bold transition border border-red-100">
+                    <i data-lucide="log-out" class="mr-3 w-5 h-5"></i> Log Out
+                </button>
+            </div>
+        </nav>
     </aside>
 
 
@@ -1279,7 +1281,8 @@
                         <div class="h-1 w-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mt-6"></div>
                     </div>
 
-                    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[400px]">
+                    <div id="product-grid"
+                        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 min-h-[400px]">
                         <div class="bg-white/5 rounded-3xl p-4 h-[350px] border border-white/10 animate-pulse">
                             <div class="bg-white/10 w-full h-48 rounded-2xl mb-4"></div>
                             <div class="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
@@ -1714,7 +1717,7 @@
 
         <!-- --- PRODUCT DETAILS VIEW --- -->
         <div id="view-product" class="section-view container mx-auto px-6 py-8">
-            <button onclick="window.history.back() || switchView('listing')"
+            <button onclick="navigate('listing')"
                 class="mb-8 flex items-center text-gray-500 hover:text-purple-600 transition font-medium">
                 <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Back to Collection
             </button>
@@ -1980,11 +1983,11 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-white border-t border-gray-100 pt-20 pb-10 mt-20 relative overflow-hidden">
+    <footer id="main-footer" class="bg-white border-t border-gray-100 pt-20 pb-10 mt-20 relative overflow-hidden">
         <div class="container mx-auto px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                 <div class="col-span-1 md:col-span-2">
-                    <h2 class="text-3xl font-black tracking-tighter mb-6 brand-font text-purple-950">KICKS<span
+                    <h2 class="text-3xl font-black tracking-tighter mb-6 brand-font text-purple-950">QUICKSHOPPY<span
                             class="text-purple-600">.</span></h2>
                     <p class="text-gray-500 max-w-sm leading-relaxed text-sm">
                         Engineered for the streets. We provide the highest quality footwear with a focus on future
@@ -2050,9 +2053,54 @@
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                        <div class="flex justify-between font-black text-xl text-purple-900"><span>Total Pay</span><span
-                                id="checkout-final-amount">₹0</span></div>
+                    <!-- COUPON SECTION -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest">Coupon / Promo Code</h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="coupon-input" placeholder="Enter coupon code (e.g. QUICK20)"
+                                class="flex-1 p-3 rounded-xl uppercase text-sm font-bold tracking-wider placeholder-gray-400 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal">
+                            <button type="button" onclick="applyCoupon()"
+                                class="px-4 py-3 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 transition shrink-0">Apply</button>
+                        </div>
+                        <!-- Success Message -->
+                        <div id="coupon-success" class="hidden flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                            <div class="flex items-center gap-2 text-green-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span class="text-sm font-bold" id="coupon-msg">20% off applied!</span>
+                            </div>
+                            <button type="button" onclick="removeCoupon()" class="text-red-400 hover:text-red-600 text-xs font-bold">✕ Remove</button>
+                        </div>
+                        <!-- Error Message -->
+                        <div id="coupon-error" class="hidden bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+                            <span class="text-sm font-bold text-red-600" id="coupon-error-msg">Invalid coupon</span>
+                        </div>
+                        
+                        <!-- Available Coupons List -->
+                        <div id="available-coupons-container" class="hidden mt-4 space-y-2">
+                            <h4 class="text-xs font-bold text-gray-500 uppercase">Available for you</h4>
+                            <div id="available-coupons-list" class="flex flex-col gap-2">
+                                <!-- Coupons will be injected here via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 space-y-2">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>Subtotal</span>
+                            <span id="checkout-subtotal-display">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-green-600 font-bold" id="coupon-discount-row" style="display:none!important">
+                            <span>Coupon Discount</span>
+                            <span id="coupon-discount-display">-₹0</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>Delivery</span>
+                            <span>₹5</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-2 flex justify-between font-black text-xl text-purple-900">
+                            <span>Total Pay</span>
+                            <span id="checkout-final-amount">₹0</span>
+                        </div>
                         <div class="hidden" id="checkout-subtotal"></div>
                     </div>
                     <button type="submit"

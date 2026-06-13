@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendor Dashboard | Kicks India</title>
+    <title>Vendor Dashboard | QUICKSHOPPY</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -335,21 +335,24 @@
                     class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-pen-ruler w-5 text-center"></i> Stationery
                 </button>
-            </div>
-
-            <div class="p-4 border-t border-gray-100 shrink-0">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm"
-                        id="sbAvatar">S</div>
-                    <div class="overflow-hidden">
-                        <p class="text-sm font-bold text-gray-900 truncate" id="sbShopName">Shop Name</p>
-                        <p class="text-xs text-gray-500 truncate" id="sbEmail">Email</p>
+                
+                <!-- Moved Profile and Logout INSIDE the scrollable area -->
+                <div class="mt-8 pt-4 border-t border-gray-100 pb-4">
+                    <div class="flex items-center gap-3 mb-4 px-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm shrink-0"
+                            id="sbAvatar">S</div>
+                        <div class="overflow-hidden">
+                            <p class="text-sm font-bold text-gray-900 truncate" id="sbShopName">Shop Name</p>
+                            <p class="text-[10px] text-gray-500 truncate" id="sbEmail">Email</p>
+                        </div>
+                    </div>
+                    <div class="px-3 pb-8">
+                        <button onclick="logout()"
+                            class="w-full py-4 bg-red-500 text-white rounded-xl text-base font-black shadow-lg hover:bg-red-600 hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-3 transition-all duration-200">
+                            <i class="fa-solid fa-right-from-bracket text-lg"></i> SIGN OUT
+                        </button>
                     </div>
                 </div>
-                <button onclick="logout()"
-                    class="w-full py-2 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
-                </button>
             </div>
         </aside>
 
@@ -592,7 +595,7 @@
         const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
             ? 'http://localhost:5000/api'
             : '/api';
-        const KEY_SESSION = 'kicks_vendor_session';
+        const KEY_SESSION = 'quickshoppy_vendor_session';
         let currentSessionUser = null;
         let myProductsCache = [];
 
