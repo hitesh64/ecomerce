@@ -1049,7 +1049,7 @@ function renderListingGrid() {
     if (isSearch) {
         grid.className = "flex flex-col gap-4"; // Flipkart-style list
     } else {
-        grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"; // Regular grid
+        grid.className = "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8"; // Regular grid (2 cols on mobile)
     }
 
     grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full text-center py-12 text-gray-400">No products found.</div>` : filtered.map(p => {
@@ -1101,30 +1101,30 @@ function renderListingGrid() {
         } else {
             // Original Default Grid Card
             return `
-            <div onclick="openProductPage('${p.id}')" data-aos="fade-up" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1" class="bg-white p-5 rounded-[2rem] border border-gray-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(147,51,234,0.1)] transition-all duration-500 group cursor-pointer relative">
-                <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-8 right-8 z-30 bg-white/90 backdrop-blur-md p-2.5 rounded-full shadow-sm hover:scale-110 hover:shadow-md transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+            <div onclick="openProductPage('${p.id}')" data-aos="fade-up" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1" class="bg-white p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] border border-gray-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(147,51,234,0.1)] transition-all duration-500 group cursor-pointer relative flex flex-col h-full">
+                <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-4 sm:top-8 right-4 sm:right-8 z-30 bg-white/90 backdrop-blur-md p-2 sm:p-2.5 rounded-full shadow-sm hover:scale-110 hover:shadow-md transition-all duration-300 sm:opacity-0 sm:group-hover:opacity-100 translate-y-0 sm:translate-y-2 sm:group-hover:translate-y-0">
                     <i data-lucide="heart" class="w-4 h-4 ${isWish ? 'fill-pink-500 text-pink-500' : 'text-gray-400'}"></i>
                 </button>
                 
-                <div class="aspect-[4/5] bg-gray-50 rounded-[1.5rem] mb-5 overflow-hidden relative">
+                <div class="aspect-[4/5] bg-gray-50 rounded-xl sm:rounded-[1.5rem] mb-3 sm:mb-5 overflow-hidden relative">
                     <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition duration-500 z-10"></div>
                     <img src="${p.img || (p.images && p.images[0])}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 ease-out">
                     
-                    <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition duration-500 z-20 flex justify-between items-center">
+                    <div class="absolute bottom-0 left-0 w-full p-2 sm:p-4 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition duration-500 z-20 flex justify-between items-center hidden sm:flex">
                         <span class="text-white text-[10px] font-black tracking-[0.2em] uppercase">Quick View</span>
                         <i data-lucide="eye" class="w-4 h-4 text-white"></i>
                     </div>
                 </div>
-                <div class="px-2">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] bg-purple-50 px-2 py-1 rounded-md">${p.brand}</p>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">${p.subCategory || p.category || ''}</p>
+                <div class="px-1 sm:px-2 flex-1 flex flex-col">
+                    <div class="flex flex-wrap justify-between items-start mb-1 sm:mb-2 gap-1">
+                        <p class="text-[8px] sm:text-[10px] font-black text-purple-600 uppercase tracking-widest sm:tracking-[0.2em] bg-purple-50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md line-clamp-1">${p.brand}</p>
+                        <p class="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5 sm:mt-1 hidden sm:block">${p.subCategory || p.category || ''}</p>
                     </div>
-                    <h3 class="font-bold text-lg leading-tight mb-3 text-gray-900 line-clamp-1 group-hover:text-purple-600 transition duration-300">${p.name}</h3>
-                    <div class="flex items-center justify-between">
-                        <span class="font-black text-xl text-gray-900">${formatMoney(p.price)}</span>
-                        <div class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-purple-600 group-hover:border-purple-600 transition duration-300">
-                            <i data-lucide="shopping-bag" class="w-3 h-3 text-gray-400 group-hover:text-white transition duration-300"></i>
+                    <h3 class="font-bold text-xs sm:text-lg leading-tight mb-2 sm:mb-3 text-gray-900 line-clamp-2 group-hover:text-purple-600 transition duration-300 flex-1">${p.name}</h3>
+                    <div class="flex items-center justify-between mt-auto">
+                        <span class="font-black text-sm sm:text-xl text-gray-900">${formatMoney(p.price)}</span>
+                        <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-purple-600 group-hover:border-purple-600 transition duration-300">
+                            <i data-lucide="shopping-bag" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400 group-hover:text-white transition duration-300"></i>
                         </div>
                     </div>
                 </div>
@@ -3479,5 +3479,23 @@ function initHomeSlideshowLogic() {
             }
 
         }, 4000); // Change every 4 seconds
+    }
+}
+
+// Mobile Filters Toggle
+window.toggleMobileFilters = function() {
+    const sidebar = document.getElementById('filter-sidebar');
+    const overlay = document.getElementById('mobile-filter-overlay');
+    
+    if (sidebar.classList.contains('-translate-x-full')) {
+        // Open
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    } else {
+        // Close
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
     }
 }

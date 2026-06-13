@@ -1617,14 +1617,25 @@
             </div>
 
             <div class="flex flex-col lg:flex-row gap-12">
-                <aside class="w-full lg:w-64 flex-shrink-0">
-                    <div class="sticky top-28 space-y-8 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                <!-- Mobile Filter Overlay -->
+                <div id="mobile-filter-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden lg:hidden backdrop-blur-sm transition-opacity" onclick="toggleMobileFilters()"></div>
+
+                <!-- Filter Sidebar -->
+                <aside id="filter-sidebar" class="fixed inset-y-0 left-0 w-72 sm:w-80 bg-white z-[70] transform -translate-x-full transition-transform duration-300 lg:relative lg:translate-x-0 lg:w-64 lg:z-0 flex-shrink-0 overflow-y-auto lg:overflow-visible shadow-2xl lg:shadow-none">
+                    <div class="p-6 lg:p-0 lg:sticky lg:top-28 lg:bg-white lg:rounded-3xl lg:border lg:border-gray-100 lg:shadow-sm space-y-8">
+                        
+                        <!-- Mobile Header -->
+                        <div class="flex justify-between items-center mb-6 lg:hidden border-b border-gray-100 pb-4">
+                            <h2 class="font-black text-xl text-purple-900 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-purple-600"></i> Filters</h2>
+                            <button onclick="toggleMobileFilters()" class="p-2 text-gray-500 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                        </div>
+
                         <div>
                             <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider mb-4">Features / Tags
                             </h3>
                             <div id="filter-categories" class="space-y-3"></div>
                         </div>
-                        <div class="w-full h-px bg-gray-100"></div>
+                        <div class="w-full h-px bg-gray-100 hidden lg:block"></div>
                         <div>
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider">Brands</h3>
@@ -1633,16 +1644,21 @@
                             </div>
                             <div id="filter-brands" class="space-y-3"></div>
                         </div>
-                        <button onclick="clearSearch(); openListing('all', '')"
-                            class="w-full py-2 text-xs text-red-500 font-bold uppercase border border-red-100 rounded-lg hover:bg-red-50 transition">Reset
+                        <button onclick="clearSearch(); openListing('all', ''); toggleMobileFilters();"
+                            class="w-full py-3 lg:py-2 text-sm lg:text-xs text-red-500 font-bold uppercase border border-red-100 rounded-xl lg:rounded-lg hover:bg-red-50 transition mt-8 lg:mt-0">Reset
                             All Filters</button>
                     </div>
                 </aside>
 
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
-                        <h2 class="text-4xl font-black text-purple-950 brand-font uppercase" id="listing-title">
-                            Collection</h2>
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleMobileFilters()" class="lg:hidden p-2.5 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition shadow-sm">
+                                <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+                            </button>
+                            <h2 class="text-3xl sm:text-4xl font-black text-purple-950 brand-font uppercase" id="listing-title">
+                                Collection</h2>
+                        </div>
                         <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full"
                             id="listing-count">0 Items</span>
                     </div>
