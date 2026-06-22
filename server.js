@@ -54,9 +54,14 @@ const verifyToken = (roles = []) => {
 
         const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
 
+        if (!token || token === 'undefined' || token === 'null') {
+            console.log(`❌ Blocked: Token missing or undefined. Path: ${req.path}`);
+            return res.status(401).json({ message: "Session Expired. Please Login Again." });
+        }
+
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
-                console.log("❌ Blocked: Invalid Token:", err.message);
+                console.log(`❌ Blocked: Invalid Token on ${req.method} ${req.originalUrl}:`, err.message);
                 return res.status(401).json({ message: "Session Expired. Please Login Again." });
             }
 
@@ -966,6 +971,16 @@ app.get('/api/orders/:email', async (req, res) => {
     } catch (e) { res.status(500).json(e); }
 });
 
+app.get('/api/vendor/orders/:email', verifyToken(['vendor', 'admin']), async (req, res) => {
+    try {
+        const vendorEmail = req.params.email.trim();
+        const orders = await Order.find({ "items.vendorEmail": { $regex: new RegExp(`^${vendorEmail}$`, 'i') } }).sort({ _id: -1 });
+        res.json(orders);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // CREATE ORDER (FIXED RACE CONDITION)
 app.post('/api/orders', async (req, res) => {
     try {
@@ -1007,8 +1022,22 @@ app.post('/api/orders', async (req, res) => {
             }
 
             orderData.items = verifiedItems;
-            orderData.total = verifiedTotal + 5; // Platform Fee
+            const couponDiscount = orderData.couponDiscount || 0;
+            orderData.subtotal = verifiedTotal;
+            orderData.platformFee = 5;
+            orderData.total = verifiedTotal + 5 - couponDiscount;
             orderData.price = verifiedTotal;
+
+            // --- PROFIT & PAYOUT LOGIC (STORED IN DB) ---
+            let totalVendorPay = 0;
+            for (const item of verifiedItems) {
+                totalVendorPay += (item.price > 25 ? item.price - 25 : 0);
+            }
+            orderData.vendorPay = totalVendorPay;
+            orderData.deliveryBoyPay = 10; // Flat delivery payout per order
+            
+            // Admin Net Profit = What customer paid - Vendor share - Delivery Boy share
+            orderData.adminProfit = orderData.total - orderData.vendorPay - orderData.deliveryBoyPay;
         }
 
         const newOrder = new Order(orderData);
@@ -1087,6 +1116,17 @@ app.post('/api/orders/cancel', async (req, res) => {
                 );
             }
 
+            // Restore Coupon Logic (Limit and User Access)
+            if (order.couponCode && order.email) {
+                await Coupon.findOneAndUpdate(
+                    { code: order.couponCode.toUpperCase() },
+                    { 
+                        $pull: { usedBy: { $in: [order.email, order.email.toLowerCase()] } },
+                        $inc: { usedCount: -1 }
+                    }
+                );
+            }
+
             order.status = newStatus;
             await order.save();
             res.json({ success: true, message: `Order ${newStatus} & Stock Updated` });
@@ -1100,8 +1140,24 @@ app.post('/api/orders/cancel', async (req, res) => {
 });
 app.delete('/api/orders/:id', verifyToken(['admin']), async (req, res) => {
     try {
-        if (mongoose.Types.ObjectId.isValid(req.params.id)) await Order.findByIdAndDelete(req.params.id);
-        else await Order.findOneAndDelete({ id: req.params.id });
+        let order;
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) order = await Order.findById(req.params.id);
+        else order = await Order.findOne({ id: req.params.id });
+
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+
+        // If this order used a coupon, remove user's email from coupon usage list so they can reuse it
+        if (order.couponCode && order.email) {
+            await Coupon.findOneAndUpdate(
+                { code: order.couponCode.toUpperCase() },
+                { 
+                    $pull: { usedBy: { $in: [order.email, order.email.toLowerCase()] } },
+                    $inc: { usedCount: -1 }
+                }
+            );
+        }
+
+        await Order.findByIdAndDelete(order._id);
         res.json({ success: true });
     } catch (e) { res.status(500).json(e); }
 });
@@ -1124,7 +1180,7 @@ app.post('/api/admin/verify-payment', verifyToken(['admin']), async (req, res) =
         const deliveryDone = ['Delivered', 'Return Requested', 'Return Approved', 'Return Assigned', 'Pickup Assigned', 'Return Picked Up', 'Return Completed', 'Returned'];
         if (deliveryDone.includes(order.status) && !order.isDeliveryVerified) {
             order.isDeliveryVerified = true;
-            amountToAdd += 20;
+            amountToAdd += 10;
             isUpdated = true;
         }
 
@@ -1132,7 +1188,7 @@ app.post('/api/admin/verify-payment', verifyToken(['admin']), async (req, res) =
         if (returnDone.includes(order.status) && !order.isReturnVerified) {
             order.isReturnVerified = true;
             order.status = 'Returned';
-            amountToAdd += 20;
+            amountToAdd += 10;
             isUpdated = true;
         }
 

@@ -965,7 +965,7 @@ function loadCategoryInView(category) {
         if (imgContainer) imgContainer.classList.remove('border-purple-500', 'border-2');
         const textSpan = item.querySelector('span');
         if (textSpan) textSpan.classList.remove('text-purple-600', 'font-bold');
-        
+
         if (textSpan && textSpan.innerText.trim().toLowerCase() === category.toLowerCase()) {
             item.classList.add('bg-purple-50', 'border-r-4', 'border-purple-600');
             if (imgContainer) imgContainer.classList.add('border-purple-500', 'border-2');
@@ -1054,7 +1054,7 @@ function renderListingGrid() {
 
     grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full text-center py-12 text-gray-400">No products found.</div>` : filtered.map(p => {
         const isWish = state.wishlist.includes(p.id);
-        
+
         if (isSearch) {
             // Flipkart Style Horizontal Card
             return `
@@ -1132,7 +1132,7 @@ function renderListingGrid() {
             `;
         }
     }).join('');
-    
+
     if (window.lucide) lucide.createIcons();
     if (window.VanillaTilt && !isSearch) {
         VanillaTilt.init(document.querySelectorAll("[data-tilt]"));
@@ -1145,7 +1145,16 @@ function renderListingGrid() {
 function renderProducts() {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
-    if (products.length === 0) { grid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-10">Loading products...</div>'; return; }
+    if (products.length === 0) { 
+        // Maintain layout during fetch to prevent CLS
+        grid.innerHTML = Array(4).fill(0).map(() => `
+        <div class="backdrop-blur-xl bg-white/10 border border-white/20 p-3 sm:p-5 rounded-2xl sm:rounded-3xl animate-pulse shadow-2xl">
+            <div class="bg-white/10 w-full aspect-square rounded-xl sm:rounded-2xl mb-3 sm:mb-6"></div>
+            <div class="bg-white/10 w-3/4 h-3 sm:h-5 rounded-md mb-2 sm:mb-3"></div>
+            <div class="bg-white/10 w-1/2 h-4 sm:h-6 rounded-md mt-2 sm:mt-4"></div>
+        </div>`).join('');
+        return; 
+    }
 
     grid.innerHTML = products.slice(0, 4).map((p, i) => {
         const isWish = state.wishlist.includes(p.id);
@@ -1561,12 +1570,17 @@ function viewUserBill(orderId) {
         <div class="space-y-2 pt-2">
             <div class="flex justify-between text-xs text-gray-500">
                 <span>Subtotal</span>
-                <span>₹${order.total - 5}</span>
+                <span>₹${order.subtotal || (order.items ? order.items.reduce((s, i) => s + (i.price || 0), 0) : (order.total - 5))}</span>
             </div>
             <div class="flex justify-between text-xs text-gray-500">
                 <span>Platform Fee</span>
-                <span>₹5.00</span>
+                <span>₹${order.platformFee || 5}</span>
             </div>
+            ${order.couponCode ? `
+            <div class="flex justify-between text-xs text-green-600 font-bold">
+                <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3 h-3"></i> Coupon (${order.couponCode})</span>
+                <span>-₹${order.couponDiscount}</span>
+            </div>` : ''}
             <div class="flex justify-between text-lg font-black text-purple-900 pt-3 border-t border-gray-200 mt-2">
                 <span>Total Paid</span>
                 <span>₹${order.total}</span>
@@ -1714,6 +1728,24 @@ function showTrustGuide(type) {
     speakGuide(voiceText);
 }
 
+function openSizeGuide(category) {
+    const modal = document.getElementById('guide-modal');
+    const content = document.getElementById('guide-content');
+    const title = document.getElementById('guide-title');
+    title.innerText = "Size Guide - " + (category || "Standard");
+    let chartHtml = "";
+    if (category === 'Footwear' || category === 'Shoes') {
+        chartHtml = `<div class="overflow-x-auto rounded-xl border border-gray-100 mb-4"><table class="w-full text-center text-xs"><thead class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider"><tr><th class="py-3 px-2">UK/India</th><th class="py-3 px-2">US</th><th class="py-3 px-2">EU</th><th class="py-3 px-2">Foot (cm)</th></tr></thead><tbody class="divide-y divide-gray-100 font-medium text-gray-700"><tr><td class="py-3 font-bold">6</td><td>7</td><td>40</td><td>25.4</td></tr><tr><td class="py-3 font-bold">7</td><td>8</td><td>41</td><td>26.2</td></tr><tr><td class="py-3 font-bold">8</td><td>9</td><td>42</td><td>27.1</td></tr><tr><td class="py-3 font-bold">9</td><td>10</td><td>43</td><td>27.9</td></tr><tr><td class="py-3 font-bold">10</td><td>11</td><td>44</td><td>28.8</td></tr></tbody></table></div><div class="flex items-center gap-3 bg-blue-50 p-3 rounded-xl border border-blue-100"><i data-lucide="info" class="w-5 h-5 text-blue-500 shrink-0"></i><p class="text-[10px] text-gray-600 italic">Measure your foot from heel to toe to find the right fit. If you're between sizes, we recommend sizing up.</p></div>`;
+    } else if (category === 'Clothing' || category === 'Apparel' || category === 'Shirts' || category === 'T-Shirts') {
+        chartHtml = `<div class="overflow-x-auto rounded-xl border border-gray-100 mb-4"><table class="w-full text-center text-xs"><thead class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider"><tr><th class="py-3 px-2">Size</th><th class="py-3 px-2">Chest (in)</th><th class="py-3 px-2">Length (in)</th></tr></thead><tbody class="divide-y divide-gray-100 font-medium text-gray-700"><tr><td class="py-3 font-bold">S</td><td>38</td><td>27</td></tr><tr><td class="py-3 font-bold">M</td><td>40</td><td>28</td></tr><tr><td class="py-3 font-bold">L</td><td>42</td><td>29</td></tr><tr><td class="py-3 font-bold">XL</td><td>44</td><td>30</td></tr><tr><td class="py-3 font-bold">XXL</td><td>46</td><td>31</td></tr></tbody></table></div><div class="flex items-center gap-3 bg-blue-50 p-3 rounded-xl border border-blue-100"><i data-lucide="info" class="w-5 h-5 text-blue-500 shrink-0"></i><p class="text-[10px] text-gray-600 italic">Measurements are taken laid flat. Measure around the fullest part of your chest.</p></div>`;
+    } else {
+        chartHtml = `<div class="text-center py-8"><i data-lucide="ruler" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i><p class="text-gray-500 font-bold text-sm uppercase tracking-widest">Universal Sizing</p><p class="text-xs text-gray-400 mt-2">This product uses standard universal sizing. Please check the product description for detailed dimensions.</p></div>`;
+    }
+    content.innerHTML = chartHtml;
+    modal.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+}
+
 function closeGuide() {
     document.getElementById('guide-modal').classList.add('hidden');
     window.speechSynthesis.cancel();
@@ -1781,12 +1813,29 @@ async function openProductPage(id) {
     }
 
     // 5. Sizes Logic
-    const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['Standard'];
+    const sizeSection = document.getElementById('size-selector-container');
     const sizeContainer = document.getElementById('pdp-sizes');
-    if (sizeContainer) {
-        sizeContainer.innerHTML = availableSizes.map(s => `
-            <button type="button" onclick="selectSize(this, '${s}')" class="size-btn py-3 rounded-lg border border-gray-200 font-bold text-gray-500 hover:border-purple-600 hover:text-purple-600 transition bg-white">${s}</button>
-        `).join('');
+    const sizeGuideLink = document.getElementById('pdp-size-guide-link');
+
+    if (sizeGuideLink) {
+        sizeGuideLink.onclick = (e) => {
+            e.preventDefault();
+            openSizeGuide(product.category);
+        };
+    }
+
+    const hasValidSizes = product.sizes && product.sizes.length > 0 && !(product.sizes.length === 1 && product.sizes[0] === 'Standard');
+
+    if (hasValidSizes) {
+        if (sizeSection) sizeSection.classList.remove('hidden');
+        if (sizeContainer) {
+            sizeContainer.innerHTML = product.sizes.map(s => `
+                <button type="button" onclick="selectSize(this, '${s}')" class="size-btn py-3 rounded-lg border border-gray-200 font-bold text-gray-500 hover:border-purple-600 hover:text-purple-600 transition bg-white">${s}</button>
+            `).join('');
+        }
+    } else {
+        if (sizeSection) sizeSection.classList.add('hidden');
+        state.selectedSize = 'Standard';
     }
 
     // 6. Accurate Rating & Reviews
@@ -2367,10 +2416,10 @@ async function openCheckout() {
                 body: JSON.stringify({ cartTotal: subtotalAmt, userEmail: state.user?.email })
             });
             const availableCoupons = await couponRes.json();
-            
+
             const container = document.getElementById('available-coupons-container');
             const list = document.getElementById('available-coupons-list');
-            
+
             if (availableCoupons && availableCoupons.length > 0) {
                 list.innerHTML = availableCoupons.map(c => `
                     <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-300 transition">
@@ -2455,6 +2504,10 @@ async function processOrder(e) {
         address: fullAddress,
         payment: paymentMode,
         items: [...state.cart],
+        subtotal: subtotalAmt,
+        platformFee: 5,
+        couponCode: state.appliedCoupon ? state.appliedCoupon.couponCode : null,
+        couponDiscount: couponDiscount,
         total: total,
         status: 'Placed',
         date: new Date().toLocaleDateString('en-IN')
@@ -2623,7 +2676,11 @@ function renderOrders() {
             <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-lg relative overflow-hidden group hover:shadow-xl transition mb-6">
                 <div class="flex justify-between items-start mb-4 border-b border-gray-50 pb-3">
                     <div><p class="font-bold text-sm text-gray-900">#${o.id}</p><p class="text-xs text-gray-500">${o.date}</p></div>
-                    <div class="text-right"><span class="font-bold block text-gray-900">${formatMoney(o.total)}</span><span class="text-xs font-bold uppercase ${statusColor}">${displayStatus}</span></div>
+                    <div class="text-right">
+                        <span class="font-bold block text-gray-900">${formatMoney(o.total)}</span>
+                        ${o.couponCode ? '<span class="text-[9px] text-green-600 font-bold block mb-1 uppercase tracking-widest"><i data-lucide="tag" class="w-2.5 h-2.5 inline pb-[1px]"></i> Saved ₹' + o.couponDiscount + '</span>' : ''}
+                        <span class="text-xs font-bold uppercase ${statusColor}">${displayStatus}</span>
+                    </div>
                 </div>
                 ${otpHtml}
                 <div class="space-y-3 mb-2">
@@ -2690,22 +2747,26 @@ function refreshTracking(orderId) {
         {
             title: isReturn ? 'Return Request Approved' : 'Order Placed',
             time: order.date,
-            active: true
+            active: true,
+            icon: isReturn ? 'clipboard-check' : 'shopping-bag'
         },
         {
             title: isReturn ? 'Driver Assigned' : 'Processing',
             time: activeStep >= 1 ? 'Completed' : 'Pending',
-            active: activeStep >= 1
+            active: activeStep >= 1,
+            icon: isReturn ? 'user-check' : 'package'
         },
         {
             title: isReturn ? 'Agent Out for Pickup' : 'Out for Delivery',
             time: activeStep >= 2 ? (activeStep >= 3 ? 'Completed' : 'Agent is on the way') : 'Pending',
-            active: activeStep >= 2
+            active: activeStep >= 2,
+            icon: 'truck'
         },
         {
             title: isReturn ? 'Return Collected' : 'Delivered',
             time: activeStep >= 3 ? 'Success' : 'Pending',
-            active: activeStep >= 3
+            active: activeStep >= 3,
+            icon: isReturn ? 'rotate-ccw' : 'check-circle'
         }
     ];
 
@@ -2713,29 +2774,52 @@ function refreshTracking(orderId) {
     document.getElementById('tracking-timeline').innerHTML = steps.map((step, index) => {
         const isLast = index === steps.length - 1;
 
-        // Colors
-        let dotColor = 'bg-white border-gray-200';
-        let lineColor = 'border-gray-200';
+        // Styles
+        let iconBg = 'bg-gray-50 text-gray-300 border-2 border-gray-100';
+        let lineClass = 'border-gray-100 border-dashed';
         let textColor = 'text-gray-400';
+        let timeColor = 'bg-gray-50 text-gray-400 border-gray-100';
+        let checkMark = '';
 
         if (step.active) {
-            dotColor = 'bg-purple-600 border-purple-600 shadow-[0_0_10px_rgba(147,51,234,0.5)]';
-            lineColor = 'border-purple-600';
-            textColor = 'text-purple-900';
-
+            iconBg = 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-200 border-2 border-transparent';
+            lineClass = 'border-purple-500 border-solid';
+            textColor = 'text-gray-900';
+            timeColor = 'bg-purple-50 text-purple-700 border-purple-100';
+            checkMark = '<div class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-[2px] border-2 border-white shadow-sm"><i data-lucide="check" class="w-2.5 h-2.5"></i></div>';
+            
             // Pulse animation for the current active step
             if (!steps[index + 1]?.active && activeStep !== 3) {
-                dotColor += ' animate-pulse';
+                iconBg += ' animate-pulse shadow-purple-300';
+                checkMark = ''; // no checkmark if it's the current pulsing step
             }
         }
 
         return `
-        <div class="relative pl-8 pb-8 border-l-2 ${isLast ? 'border-transparent' : lineColor} transition-colors duration-500">
-            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 ${dotColor} z-10 box-content"></div>
-            <h4 class="font-bold text-sm ${textColor}">${step.title}</h4>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">${step.time}</p>
+        <div class="relative pl-16 pb-10 group">
+            <!-- Line connecting steps -->
+            ${!isLast ? `<div class="absolute left-[23px] top-12 bottom-[-8px] w-0.5 border-l-2 ${lineClass} transition-all duration-700"></div>` : ''}
+            
+            <!-- Icon Badge -->
+            <div class="absolute left-0 top-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${iconBg} z-10 ${step.active ? 'scale-110' : 'scale-100'}">
+                <i data-lucide="${step.icon}" class="w-5 h-5"></i>
+                ${step.active && steps[index + 1]?.active ? checkMark : ''}
+                ${isLast && activeStep === 3 ? checkMark : ''}
+            </div>
+            
+            <!-- Content -->
+            <div class="pt-1 transition-transform duration-300 group-hover:translate-x-1">
+                <h4 class="font-black text-base tracking-tight ${textColor} transition-colors duration-300">${step.title}</h4>
+                <div class="flex items-center gap-2 mt-1.5">
+                    <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${timeColor} transition-colors duration-300">${step.time}</span>
+                </div>
+            </div>
         </div>
-    `}).join('');
+        `;
+    }).join('');
+
+    // Re-render lucide icons
+    if (window.lucide) lucide.createIcons();
 }
 function closeTracking() {
     document.getElementById('tracking-modal').classList.add('hidden');
@@ -2800,12 +2884,6 @@ async function submitReturnRequest(e) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(reqData)
-            });
-
-            await fetch(`${API_URL}/orders/${orderId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'Return Requested' })
             });
 
             showToast("Return Request Sent!");
@@ -3483,10 +3561,10 @@ function initHomeSlideshowLogic() {
 }
 
 // Mobile Filters Toggle
-window.toggleMobileFilters = function() {
+window.toggleMobileFilters = function () {
     const sidebar = document.getElementById('filter-sidebar');
     const overlay = document.getElementById('mobile-filter-overlay');
-    
+
     if (sidebar.classList.contains('-translate-x-full')) {
         // Open
         sidebar.classList.remove('-translate-x-full');
@@ -3499,3 +3577,28 @@ window.toggleMobileFilters = function() {
         document.body.classList.remove('overflow-hidden');
     }
 }
+
+// --- Go To Review Function ---
+async function goToReview(id) {
+    await openProductPage(id);
+    
+    // Wait for the DOM and animations to finish rendering the PDP
+    setTimeout(() => {
+        const reviewBox = document.getElementById('pdp-write-review-container');
+        if (reviewBox) {
+            reviewBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight the box briefly
+            reviewBox.classList.add('ring-4', 'ring-purple-400', 'transition-all', 'duration-500');
+            setTimeout(() => {
+                reviewBox.classList.remove('ring-4', 'ring-purple-400');
+            }, 1500);
+            
+            const textInput = document.getElementById('review-text');
+            if (textInput) {
+                textInput.focus();
+            }
+        }
+    }, 600);
+}
+

@@ -239,8 +239,12 @@
 
             <div class="flex-1 overflow-y-auto py-4 space-y-1 px-3 custom-scroll">
                 <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Management</p>
-                <button onclick="switchDashTab('inventory')" id="btn-inventory"
+                <button onclick="switchDashTab('dashboard-home')" id="btn-dashboard-home"
                     class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-bold bg-blue-50 text-blue-600 transition">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard Overview
+                </button>
+                <button onclick="switchDashTab('inventory')" id="btn-inventory"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                     <i class="fa-solid fa-boxes-stacked w-5"></i> Inventory
                 </button>
 
@@ -251,89 +255,9 @@
 
                 <p class="px-3 mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Add New Product
                 </p>
-                <button onclick="preloadCategory('Mens Fashion')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-user-tie w-5 text-center text-blue-500"></i> Men's Fashion
-                </button>
-                <button onclick="preloadCategory('Womens Fashion')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-person-dress w-5 text-center text-pink-500"></i> Women's Fashion
-                </button>
-                <button onclick="preloadCategory('Fashion')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-shirt w-5 text-center"></i> Fashion
-                </button>
-                <button onclick="preloadCategory('Electronics')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-plug w-5 text-center"></i> Electronics
-                </button>
-                <button onclick="preloadCategory('Mobiles')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-mobile-screen w-5 text-center"></i> Mobiles
-                </button>
-                <button onclick="preloadCategory('Laptops')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-laptop w-5 text-center"></i> Laptops
-                </button>
-                <button onclick="preloadCategory('Appliances')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-blender w-5 text-center"></i> Appliances
-                </button>
-                <button onclick="preloadCategory('Furniture')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-chair w-5 text-center"></i> Furniture
-                </button>
-                <button onclick="preloadCategory('Beauty')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-spray-can-sparkles w-5 text-center"></i> Beauty
-                </button>
-                <button onclick="preloadCategory('Grocery')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-carrot w-5 text-center"></i> Grocery
-                </button>
-                <button onclick="preloadCategory('Toys')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-gamepad w-5 text-center"></i> Toys
-                </button>
-                <button onclick="preloadCategory('Sports')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-baseball w-5 text-center"></i> Sports
-                </button>
-                <button onclick="preloadCategory('Footwear')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-shoe-prints w-5 text-center"></i> Footwear
-                </button>
-                <button onclick="preloadCategory('Watches')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-clock w-5 text-center"></i> Watches
-                </button>
-                <button onclick="preloadCategory('Jewellery')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-gem w-5 text-center"></i> Jewellery
-                </button>
-                <button onclick="preloadCategory('Bags')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-suitcase w-5 text-center"></i> Bags
-                </button>
-                <button onclick="preloadCategory('Kitchen')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-utensils w-5 text-center"></i> Kitchen
-                </button>
-                <button onclick="preloadCategory('Baby Care')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-baby w-5 text-center"></i> Baby Care
-                </button>
-                <button onclick="preloadCategory('Automotive')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-car w-5 text-center"></i> Automotive
-                </button>
-                <button onclick="preloadCategory('Books')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-book w-5 text-center"></i> Books
-                </button>
-                <button onclick="preloadCategory('Stationery')"
-                    class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-pen-ruler w-5 text-center"></i> Stationery
+                <button onclick="switchDashTab('select-category')" id="btn-select-category"
+                    class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-bold bg-pink-50 text-pink-600 transition hover:bg-pink-100">
+                    <i class="fa-solid fa-plus w-5"></i> Add New Product
                 </button>
                 
                 <!-- Moved Profile and Logout INSIDE the scrollable area -->
@@ -367,8 +291,95 @@
             </header>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
+            
+                <div id="view-dashboard-home" class="max-w-6xl mx-auto">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-black text-gray-900 tracking-tight">Dashboard Overview</h2>
+                        <p class="text-sm text-gray-500">Welcome back, monitor your shop's performance.</p>
+                    </div>
 
-                <div id="view-inventory" class="max-w-6xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Total Revenue -->
+                        <div onclick="openHistoryModal('revenue')" class="cursor-pointer bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group hover:-translate-y-1 transition duration-300">
+                            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-indigo-100 font-bold uppercase text-xs tracking-wider">Total Revenue</h3>
+                                    <i class="fa-solid fa-wallet text-2xl text-indigo-200"></i>
+                                </div>
+                                <h2 class="text-4xl font-black" id="dashTotalRevenue">₹0</h2>
+                                <p class="text-xs text-indigo-100 mt-2 font-medium">Gross earnings overall</p>
+                            </div>
+                        </div>
+
+                        <!-- Received Payments -->
+                        <div onclick="openHistoryModal('received')" class="cursor-pointer bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group hover:-translate-y-1 transition duration-300">
+                            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-emerald-100 font-bold uppercase text-xs tracking-wider">Received</h3>
+                                    <i class="fa-solid fa-money-bill-wave text-2xl text-emerald-200"></i>
+                                </div>
+                                <h2 class="text-4xl font-black" id="dashReceived">₹0</h2>
+                                <p class="text-xs text-emerald-100 mt-2 font-medium">From delivered orders</p>
+                            </div>
+                        </div>
+
+                        <!-- Pending Payments -->
+                        <div onclick="openHistoryModal('pending')" class="cursor-pointer bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group hover:-translate-y-1 transition duration-300">
+                            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-amber-100 font-bold uppercase text-xs tracking-wider">Pending</h3>
+                                    <i class="fa-solid fa-hourglass-half text-2xl text-amber-200"></i>
+                                </div>
+                                <h2 class="text-4xl font-black" id="dashPending">₹0</h2>
+                                <p class="text-xs text-amber-100 mt-2 font-medium">Orders in transit/processing</p>
+                            </div>
+                        </div>
+
+                        <!-- Cancelled Orders -->
+                        <div onclick="openHistoryModal('cancelled')" class="cursor-pointer bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group hover:-translate-y-1 transition duration-300">
+                            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-rose-100 font-bold uppercase text-xs tracking-wider">Cancelled</h3>
+                                    <i class="fa-solid fa-ban text-2xl text-rose-200"></i>
+                                </div>
+                                <h2 class="text-4xl font-black" id="dashCancelled">0</h2>
+                                <p class="text-xs text-rose-100 mt-2 font-medium">Total cancelled items</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h3 class="font-bold text-gray-800">Recent Transactions</h3>
+                            <button onclick="fetchDashboardData()" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left whitespace-nowrap">
+                                <thead class="bg-white text-xs uppercase font-bold text-gray-400 border-b border-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-4">Order ID</th>
+                                        <th class="px-6 py-4">Customer</th>
+                                        <th class="px-6 py-4">Items</th>
+                                        <th class="px-6 py-4">Earnings</th>
+                                        <th class="px-6 py-4">Status</th>
+                                        <th class="px-6 py-4">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashRecentOrdersBody" class="divide-y divide-gray-50 text-gray-600">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-8 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading recent data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-inventory" class="hidden max-w-6xl mx-auto">
                     <div class="flex justify-between items-end mb-6">
                         <div>
                             <h2 class="text-2xl font-black text-gray-900">Live Inventory</h2>
@@ -455,6 +466,16 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+                
+                <div id="view-select-category" class="hidden max-w-6xl mx-auto">
+                    <div class="mb-8 text-center md:text-left">
+                        <h2 class="text-3xl font-black text-gray-900 tracking-tight">Select Category</h2>
+                        <p class="text-sm text-gray-500">Choose the best category for your new product</p>
+                    </div>
+                    <div id="categoryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Filled by JS -->
                     </div>
                 </div>
 
@@ -574,6 +595,8 @@
                             class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <div class="space-y-2 overflow-y-auto">
+                    <button onclick="switchDashTab('dashboard-home')"
+                        class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Dashboard Overview</button>
                     <button onclick="switchDashTab('inventory')"
                         class="w-full text-left p-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100">Inventory</button>
                     <button onclick="switchDashTab('profile')"
@@ -582,12 +605,43 @@
 
                     <p class="px-3 mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Add Product
                     </p>
-                    <div id="mobileCategoryContainer" class="space-y-1"></div>
+                    <button onclick="switchDashTab('select-category'); document.getElementById('mobileMenu').classList.add('hidden')"
+                        class="w-full text-left p-3 rounded-lg font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 transition">
+                        <i class="fa-solid fa-plus mr-2"></i> Add New Product
+                    </button>
 
                     <div class="mt-auto border-t pt-4">
                         <button onclick="logout()" class="w-full text-left p-3 text-red-600 font-bold">Logout</button>
                     </div>
             </aside>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 z-[60] bg-black/60 hidden backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
+                <h2 id="historyModalTitle" class="text-xl font-black text-gray-900">History Details</h2>
+                <button onclick="closeHistoryModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scroll flex-1">
+                <table class="w-full text-sm text-left whitespace-nowrap">
+                    <thead class="bg-white text-xs uppercase font-bold text-gray-400 border-b border-gray-100">
+                        <tr>
+                            <th class="px-4 py-3">Order ID</th>
+                            <th class="px-4 py-3">Customer</th>
+                            <th class="px-4 py-3">Items</th>
+                            <th class="px-4 py-3">Earnings</th>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyModalBody" class="divide-y divide-gray-50 text-gray-600">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -598,6 +652,7 @@
         const KEY_SESSION = 'quickshoppy_vendor_session';
         let currentSessionUser = null;
         let myProductsCache = [];
+        let dashboardOrdersCache = [];
 
         // --- 1. EXPANDED CATEGORY DATA (19 CATEGORIES) ---
         const categoryMap = {
@@ -1055,6 +1110,171 @@
                 btn.disabled = false;
             }
         }
+        async function fetchDashboardData() {
+            if (!currentSessionUser) return;
+            try {
+                const res = await fetch(`${API_URL}/vendor/orders/${currentSessionUser.email}`, {
+                    headers: { 'Authorization': `Bearer ${currentSessionUser.token}` }
+                });
+                if (!res.ok) throw new Error("Failed to fetch dashboard data");
+                const orders = await res.json();
+                dashboardOrdersCache = orders;
+                
+                let totalRevenue = 0;
+                let received = 0;
+                let pending = 0;
+                let cancelledCount = 0;
+                let recentTransactionsHtml = '';
+                let recentTransactionsCount = 0;
+
+                orders.forEach(order => {
+                    let orderEarnings = 0;
+                    let vendorItemsCount = 0;
+                    
+                    // Sum only items belonging to this vendor
+                    order.items.forEach(item => {
+                        if (item.vendorEmail === currentSessionUser.email) {
+                            // Deduct the ₹25 platform fee so vendor sees original product price
+                            const vendorPrice = item.price > 25 ? item.price - 25 : item.price;
+                            orderEarnings += vendorPrice;
+                            vendorItemsCount++;
+                        }
+                    });
+
+                    if (vendorItemsCount > 0) {
+                        const status = order.status || 'Pending';
+                        
+                        // If Cancelled, Rejected or any Return stage, do NOT add to Revenue
+                        if (status === 'Cancelled' || status === 'Rejected' || status.includes('Return')) {
+                            cancelledCount += vendorItemsCount;
+                        } else {
+                            totalRevenue += orderEarnings;
+                            
+                            // Check if received or pending
+                            if (status === 'Delivered') {
+                                received += orderEarnings;
+                            } else {
+                                pending += orderEarnings;
+                            }
+                        }
+
+                        // Build Recent Transactions (Top 10)
+                        if (recentTransactionsCount < 10) {
+                            let statusBadge = 'bg-gray-100 text-gray-700';
+                            if (status === 'Delivered') statusBadge = 'bg-emerald-100 text-emerald-700';
+                            else if (status === 'Pending' || status === 'Dispatched') statusBadge = 'bg-amber-100 text-amber-700';
+                            else if (status === 'Cancelled' || status === 'Rejected' || status.includes('Return')) statusBadge = 'bg-rose-100 text-rose-700';
+                            
+                            const dateStr = order.date || new Date(order.timestamp).toLocaleDateString();
+
+                            recentTransactionsHtml += `
+                                <tr class="hover:bg-gray-50 transition group">
+                                    <td class="px-6 py-4 font-mono font-bold text-gray-900">#${order.id || order._id.substring(0, 8)}</td>
+                                    <td class="px-6 py-4 font-medium">${order.customerName || 'Customer'}</td>
+                                    <td class="px-6 py-4 text-xs font-bold text-gray-500">${vendorItemsCount} items</td>
+                                    <td class="px-6 py-4 font-black text-gray-900">₹${orderEarnings}</td>
+                                    <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${statusBadge}">${status}</span></td>
+                                    <td class="px-6 py-4 text-xs font-bold text-gray-400">${dateStr}</td>
+                                </tr>
+                            `;
+                            recentTransactionsCount++;
+                        }
+                    }
+                });
+
+                // Update DOM
+                document.getElementById('dashTotalRevenue').textContent = `₹${totalRevenue}`;
+                document.getElementById('dashReceived').textContent = `₹${received}`;
+                document.getElementById('dashPending').textContent = `₹${pending}`;
+                document.getElementById('dashCancelled').textContent = cancelledCount;
+
+                const tbody = document.getElementById('dashRecentOrdersBody');
+                if (recentTransactionsHtml) {
+                    tbody.innerHTML = recentTransactionsHtml;
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400 font-medium">No transactions found yet.</td></tr>`;
+                }
+
+            } catch (err) {
+                console.error("Dashboard error:", err);
+                const tbody = document.getElementById('dashRecentOrdersBody');
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-red-500 font-medium"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error: Server not responding or needs restart (${err.message})</td></tr>`;
+                }
+            }
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+
+        function openHistoryModal(type) {
+            if (!dashboardOrdersCache || dashboardOrdersCache.length === 0) return;
+            const modal = document.getElementById('historyModal');
+            const tbody = document.getElementById('historyModalBody');
+            const title = document.getElementById('historyModalTitle');
+            
+            let filteredHtml = '';
+            
+            if (type === 'revenue') title.textContent = 'History: Total Revenue';
+            if (type === 'received') title.textContent = 'History: Received Payments';
+            if (type === 'pending') title.textContent = 'History: Pending Payments';
+            if (type === 'cancelled') title.textContent = 'History: Cancelled Orders';
+
+            dashboardOrdersCache.forEach(order => {
+                let orderEarnings = 0;
+                let vendorItemsCount = 0;
+                
+                order.items.forEach(item => {
+                    if (item.vendorEmail === currentSessionUser.email) {
+                        const vendorPrice = item.price > 25 ? item.price - 25 : item.price;
+                        orderEarnings += vendorPrice;
+                        vendorItemsCount++;
+                    }
+                });
+
+                if (vendorItemsCount > 0) {
+                    const status = order.status || 'Pending';
+                    const isCancelledOrReturn = status === 'Cancelled' || status === 'Rejected' || status.includes('Return');
+                    
+                    let includeOrder = false;
+                    
+                    if (type === 'revenue' && !isCancelledOrReturn) includeOrder = true;
+                    if (type === 'received' && status === 'Delivered') includeOrder = true;
+                    if (type === 'pending' && status !== 'Delivered' && !isCancelledOrReturn) includeOrder = true;
+                    if (type === 'cancelled' && isCancelledOrReturn) includeOrder = true;
+
+                    if (includeOrder) {
+                        let statusBadge = 'bg-gray-100 text-gray-700';
+                        if (status === 'Delivered') statusBadge = 'bg-emerald-100 text-emerald-700';
+                        else if (status === 'Pending' || status === 'Dispatched') statusBadge = 'bg-amber-100 text-amber-700';
+                        else if (isCancelledOrReturn) statusBadge = 'bg-rose-100 text-rose-700';
+                        
+                        const dateStr = order.date || new Date(order.timestamp).toLocaleDateString();
+
+                        filteredHtml += `
+                            <tr class="hover:bg-gray-50 border-b transition">
+                                <td class="px-4 py-3 font-mono font-bold text-gray-900">#${order.id || order._id.substring(0, 8)}</td>
+                                <td class="px-4 py-3 font-medium">${order.customerName || 'Customer'}</td>
+                                <td class="px-4 py-3 text-xs font-bold text-gray-500">${vendorItemsCount} items</td>
+                                <td class="px-4 py-3 font-black text-gray-900">₹${orderEarnings}</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${statusBadge}">${status}</span></td>
+                                <td class="px-4 py-3 text-xs font-bold text-gray-400">${dateStr}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            });
+
+            if (filteredHtml === '') {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500 font-medium">No records found for this category.</td></tr>`;
+            } else {
+                tbody.innerHTML = filteredHtml;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
         async function fetchProducts() {
             try {
                 const res = await fetch(`${API_URL}/my-products/${currentSessionUser.email}`);
@@ -1232,11 +1452,14 @@
             document.getElementById('sbEmail').textContent = currentSessionUser.email;
             document.getElementById('sbAvatar').textContent = currentSessionUser.shopName ? currentSessionUser.shopName[0].toUpperCase() : 'U';
             switchView('dashboard');
-            switchDashTab('inventory');
+            switchDashTab('dashboard-home');
+            fetchDashboardData();
             fetchProducts();
         }
 
         function switchDashTab(tab) {
+            if(document.getElementById('view-dashboard-home')) document.getElementById('view-dashboard-home').classList.add('hidden');
+            if(document.getElementById('view-select-category')) document.getElementById('view-select-category').classList.add('hidden');
             document.getElementById('view-inventory').classList.add('hidden');
             document.getElementById('view-add-product').classList.add('hidden');
             document.getElementById('view-profile').classList.add('hidden'); // Hide profile view
@@ -1279,38 +1502,28 @@
             } else { document.getElementById('imagePlaceholder').classList.remove('hidden'); container.classList.add('hidden'); }
         }
 
-        // 2. Function to render mobile categories
-        function renderMobileMenu() {
-            const container = document.getElementById('mobileCategoryContainer');
-            if (!container) return;
-
-            container.innerHTML = ''; // Clear existing content
-
-            // Loop through all categories in categoryMap
+        function renderCategoryGrid() {
+            const grid = document.getElementById('categoryGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
             Object.keys(categoryMap).forEach(cat => {
-                const icon = categoryIcons[cat] || "fa-tag"; // Default icon if missing
-
-                container.innerHTML += `
-            <button onclick="handleMobileCategoryClick('${cat}')" 
-                class="w-full text-left p-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 pl-6 flex items-center gap-3 transition">
-                <i class="fa-solid ${icon} w-5 text-center text-blue-500"></i> ${cat}
-            </button>
-        `;
+                const icon = categoryIcons[cat] || "fa-tag text-gray-400";
+                // Strip existing text colors from icon class to apply hover effects properly
+                const cleanIcon = icon.replace(/text-\w+-\d+/g, '').trim();
+                
+                grid.innerHTML += `
+                    <button onclick="preloadCategory('${cat}')" class="flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 hover:border-pink-200 transition duration-300 group">
+                        <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4 group-hover:bg-pink-50 transition">
+                            <i class="fa-solid ${cleanIcon} text-2xl text-gray-400 group-hover:text-pink-500 transition"></i>
+                        </div>
+                        <span class="font-bold text-sm text-gray-700 text-center">${cat}</span>
+                    </button>
+                `;
             });
         }
 
-        // 3. Helper to handle click and close menu
-        function handleMobileCategoryClick(cat) {
-            preloadCategory(cat);
-            // Close the mobile menu after clicking
-            document.getElementById('mobileMenu').classList.add('hidden');
-        }
-
-        // 4. Call this function when page loads
-        // इसे अपने existing DOMContentLoaded event listener के अंदर जोड़ें
         window.addEventListener('DOMContentLoaded', () => {
-            // ... aapka purana code ...
-            renderMobileMenu(); // <--- यह लाइन जोड़ें
+            renderCategoryGrid();
         });
     </script>
 </body>

@@ -159,6 +159,9 @@
                 <button onclick="switchTab('vendors')" id="btn-vendors"
                     class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
                         data-lucide="store" class="mr-3 w-5 h-5"></i> Vendors</button>
+                <button onclick="switchTab('revenue')" id="btn-revenue"
+                    class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-600 font-medium transition"><i
+                        data-lucide="wallet" class="mr-3 w-5 h-5"></i> Revenue & Profit</button>
 
                 <div class="border-t border-gray-100 my-4"></div>
 
@@ -212,6 +215,74 @@
             <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-gray-50">
                 <div class="p-4 md:p-8 max-w-7xl mx-auto min-h-[calc(100vh-100px)]">
 
+                    <div id="view-revenue" class="view-section hidden">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                            <div>
+                                <h2 class="text-3xl font-black text-gray-900 mb-2 tracking-tight">Admin Net Profit</h2>
+                                <p class="text-gray-500 text-sm font-medium">Exact revenue after paying Vendors &amp;
+                                    Delivery Agents.</p>
+                            </div>
+                            <button onclick="loadRevenueStats()"
+                                class="bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 px-4 py-2 flex items-center gap-2 rounded-xl text-sm font-bold shadow-sm transition shrink-0"><i
+                                    data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div
+                                class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 shadow-[0_8px_30px_rgb(16,185,129,0.2)] text-white relative overflow-hidden group">
+                                <div
+                                    class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500">
+                                </div>
+                                <div class="relative z-10">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <p class="text-emerald-100 font-bold uppercase tracking-widest text-xs">Total
+                                            Net Profit</p><i data-lucide="wallet" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <h3 id="rev-total-profit" class="text-4xl font-black mb-1">&#8377;0</h3>
+                                    <p class="text-emerald-100 text-[10px] font-bold">MONEY IN YOUR POCKET</p>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
+                                <div class="flex justify-between items-start mb-4">
+                                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Total Orders
+                                    </p><i data-lucide="package" class="w-6 h-6 text-blue-500"></i>
+                                </div>
+                                <h3 id="rev-total-orders" class="text-3xl font-black text-gray-800 mb-1">0</h3>
+                                <p class="text-gray-400 text-[10px] font-bold uppercase">SUCCESSFUL ORDERS</p>
+                            </div>
+                            <div
+                                class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
+                                <div class="flex justify-between items-start mb-4">
+                                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Units Sold</p>
+                                    <i data-lucide="shopping-bag" class="w-6 h-6 text-purple-500"></i>
+                                </div>
+                                <h3 id="rev-units" class="text-3xl font-black text-gray-800 mb-1">0</h3>
+                                <p class="text-gray-400 text-[10px] font-bold uppercase">PROFITABLE ITEMS DELIVERED</p>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-xl"><i
+                                data-lucide="trending-up" class="w-5 h-5 text-green-500"></i> Product Profit Breakdown
+                        </h3>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-12">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
+                                    <thead
+                                        class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest border-b border-gray-100">
+                                        <tr>
+                                            <th class="px-6 py-4">Product</th>
+                                            <th class="px-6 py-4">Status</th>
+                                            <th class="px-6 py-4">Customer Paid</th>
+                                            <th class="px-6 py-4">Delivery Boy</th>
+                                            <th class="px-6 py-4">Shop Owner</th>
+                                            <th class="px-6 py-4 text-right">Admin Profit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rev-table-body" class="divide-y divide-gray-50"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="view-dashboard" class="view-section">
                         <h2 class="text-3xl font-black text-gray-900 mb-2">Product Approvals</h2>
                         <p class="text-gray-500 text-sm mb-6">Review product and shop owner details before approving.
@@ -248,7 +319,8 @@
 
                         <!-- Create Coupon Form -->
                         <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
-                            <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 text-blue-600"></i> Create New Coupon</h3>
+                            <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2"><i
+                                    data-lucide="plus-circle" class="w-5 h-5 text-blue-600"></i> Create New Coupon</h3>
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="text-xs font-bold text-gray-500 uppercase">Code</label>
@@ -309,7 +381,9 @@
                                         </tr>
                                     </thead>
                                     <tbody id="coupons-table-body" class="divide-y divide-gray-100">
-                                        <tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">Loading...</td></tr>
+                                        <tr>
+                                            <td colspan="7" class="px-6 py-8 text-center text-gray-400">Loading...</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -931,7 +1005,7 @@
                     const isExpired = new Date() > new Date(c.expiryDate);
                     const statusBadge = !c.isActive ? `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-full">Inactive</span>`
                         : isExpired ? `<span class="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded-full">Expired</span>`
-                        : `<span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Active</span>`;
+                            : `<span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Active</span>`;
                     return `<tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 font-black text-blue-700 font-mono">${c.code}</td>
                         <td class="px-6 py-4"><span class="font-bold">${c.discountPercent}%</span> off <span class="text-gray-400 text-xs">(max ₹${c.maxDiscount})</span></td>
@@ -952,7 +1026,7 @@
         function editCoupon(id) {
             const coupon = allCouponsData.find(c => c._id === id);
             if (!coupon) return;
-            
+
             editingCouponId = id;
             document.getElementById('new-coupon-code').value = coupon.code;
             document.getElementById('new-coupon-discount').value = coupon.discountPercent;
@@ -960,7 +1034,7 @@
             document.getElementById('new-coupon-min-order').value = coupon.minOrderAmount;
             document.getElementById('new-coupon-max-uses').value = coupon.maxUses;
             document.getElementById('new-coupon-expiry').value = coupon.expiryDate.split('T')[0];
-            
+
             document.getElementById('btn-submit-coupon').innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Update Coupon';
             document.getElementById('btn-cancel-coupon').classList.remove('hidden');
             window.scrollTo({ top: document.getElementById('view-coupons').offsetTop, behavior: 'smooth' });
@@ -969,7 +1043,7 @@
 
         function cancelCouponEdit() {
             editingCouponId = null;
-            ['new-coupon-code','new-coupon-discount','new-coupon-expiry'].forEach(id => document.getElementById(id).value = '');
+            ['new-coupon-code', 'new-coupon-discount', 'new-coupon-expiry'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('new-coupon-max-discount').value = '500';
             document.getElementById('new-coupon-min-order').value = '0';
             document.getElementById('new-coupon-max-uses').value = '100';
@@ -991,7 +1065,7 @@
             try {
                 const url = editingCouponId ? `${API_URL}/coupons/${editingCouponId}` : `${API_URL}/coupons`;
                 const method = editingCouponId ? 'PUT' : 'POST';
-                
+
                 const res = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentUser.token}` },
@@ -999,7 +1073,7 @@
                 });
                 const data = await res.json();
                 if (data.error) { alert(data.error); return; }
-                
+
                 alert(`✅ Coupon "${code}" ${editingCouponId ? 'updated' : 'created'}!`);
                 cancelCouponEdit();
                 loadCoupons();
@@ -1036,6 +1110,106 @@
         }
 
         // --- TAB SWITCHING ---
+
+        async function loadRevenueStats() {
+            try {
+                if (!currentUser || !currentUser.token) return;
+                var tbody = document.getElementById('rev-table-body');
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2"></i><p class="font-bold text-xs uppercase tracking-widest">Calculating Profits...</p></td></tr>';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                var res = await fetch(API_URL + '/orders');
+                var orders = await res.json();
+
+                var netAdminProfit = 0;
+                var totalValidOrders = 0;
+                var totalUnitsSold = 0;
+                var rowsHtml = '';
+
+                // Sort orders: newest first
+                orders.reverse();
+
+                orders.forEach(function (order) {
+                    var s = order.status || 'Pending';
+                    var isCancelled = (s === 'Cancelled' || s === 'Rejected' || s.indexOf('Return') !== -1);
+
+                    var itemCount = (order.items && order.items.length > 0) ? order.items.length : 1;
+                    var platformFeePerItem = Math.round(5 / itemCount);
+                    var couponDiscountPerItem = (order.couponDiscount || 0) / itemCount;
+
+                    if (order.items && order.items.length > 0) {
+                        order.items.forEach(function (item) {
+                            var itemPrice = item.price || 0;
+                            var deliveryBoyPay = 0;
+                            var vendorPay = 0;
+                            var adminProfit = 0;
+                            var isLegacy = typeof order.adminProfit === 'undefined';
+
+                            if (!isCancelled) {
+                                if (isLegacy) {
+                                    var legacyCustomerPaid = itemPrice + platformFeePerItem - couponDiscountPerItem;
+                                    vendorPay = itemPrice > 25 ? itemPrice - 25 : 0;
+                                    deliveryBoyPay = Math.round(20 / itemCount);
+                                    adminProfit = legacyCustomerPaid - vendorPay - deliveryBoyPay;
+                                } else {
+                                    adminProfit = order.adminProfit / itemCount;
+                                    vendorPay = (order.vendorPay || 0) / itemCount;
+                                    deliveryBoyPay = (order.deliveryBoyPay || 0) / itemCount;
+                                }
+                                netAdminProfit += adminProfit;
+                                totalUnitsSold += 1;
+                            }
+
+                            // Status badge
+                            var statusColor = 'bg-blue-100 text-blue-800';
+                            if (s === 'Delivered') statusColor = 'bg-green-100 text-green-800';
+                            else if (isCancelled) statusColor = 'bg-red-100 text-red-800';
+                            else if (s === 'Assigned' || s === 'Out for Delivery') statusColor = 'bg-yellow-100 text-yellow-800';
+
+                            var img = item.img || item.image || 'https://via.placeholder.com/40';
+
+                            // The user requested EXACTLY the actual bill pay to be shown here instead of the per-item calculation
+                            var displayPaid = order.total || 0;
+
+                            rowsHtml += '<tr class="hover:bg-gray-50 transition-colors' + (isCancelled ? ' opacity-50' : '') + '">' +
+                                '<td class="px-6 py-4"><div class="flex items-center gap-3">' +
+                                '<img src="' + img + '" class="w-10 h-10 rounded-lg object-cover border border-gray-100 bg-white shadow-sm">' +
+                                '<div><p class="font-bold text-gray-800 text-sm">' + item.name + '</p>' +
+                                '<p class="text-[10px] text-gray-400">#' + (order.id || '') + '</p></div>' +
+                                '</div></td>' +
+                                '<td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[10px] font-black uppercase ' + statusColor + '">' + s + '</span></td>' +
+                                '<td class="px-6 py-4"><span class="font-bold text-gray-800 text-sm">\u20b9' + Math.round(displayPaid) + '</span><span class="text-[9px] text-gray-400 block">Total Order Bill</span>' + 
+                                (order.couponCode ? '<span class="text-[9px] text-green-600 font-bold block mt-1 uppercase tracking-widest bg-green-50 px-1 py-0.5 rounded inline-block">\uD83C\uDFF7 -\u20b9' + order.couponDiscount + '</span>' : '') +
+                                '</td>' +
+                                '<td class="px-6 py-4">' + (isCancelled ? '<span class="text-xs text-gray-300">-</span>' : '<span class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-1 rounded">\u20b9' + Math.round(deliveryBoyPay) + '</span>') + '</td>' +
+                                '<td class="px-6 py-4">' + (isCancelled ? '<span class="text-xs text-gray-300">-</span>' : '<span class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded">\u20b9' + Math.round(vendorPay) + '</span>') + '</td>' +
+                                '<td class="px-6 py-4 text-right">' + (isCancelled ? '<span class="text-xs font-bold text-red-400 line-through">\u20b90</span>' : '<span class="text-green-600 font-black text-sm">\u20b9' + Math.round(adminProfit) + '</span>') + '</td>' +
+                                '</tr>';
+                        });
+                    }
+
+                    if (!isCancelled) {
+                        totalValidOrders += 1;
+                    }
+                });
+
+                document.getElementById('rev-total-profit').innerText = '\u20b9' + netAdminProfit;
+                document.getElementById('rev-total-orders').innerText = totalValidOrders;
+                document.getElementById('rev-units').innerText = totalUnitsSold;
+
+                if (rowsHtml === '') {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400 font-bold">No sales data found yet.</td></tr>';
+                } else {
+                    tbody.innerHTML = rowsHtml;
+                }
+
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.error('Revenue Load Error:', e);
+                var tb = document.getElementById('rev-table-body');
+                if (tb) tb.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Failed to load data.</td></tr>';
+            }
+        }
         function switchTab(tabName) {
             // Hide all sections
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -1055,6 +1229,9 @@
 
             // Load data for this tab
             switch (tabName) {
+                case 'revenue':
+                    loadRevenueStats();
+                    break;
                 case 'dashboard':
                     loadDashboardData();
                     break;
@@ -2239,7 +2416,7 @@
                 ).length;
 
                 // 3. WALLET CALCULATION
-                const calculatedEarnings = totalCompleted * 20;
+                const calculatedEarnings = totalCompleted * 10;
 
                 // 4. SHIFT DATA DISPLAY LOGIC (NEW)
                 // Check if shift data exists, otherwise show 'Not Booked'
@@ -2568,13 +2745,13 @@
 
                 historyOrdersCache.forEach(o => {
                     // Delivery Pay
-                    if (o.isDeliveryVerified) totalVerified += 20;
-                    else if (o.status === 'Delivered') totalPending += 20;
+                    if (o.isDeliveryVerified) totalVerified += 10;
+                    else if (o.status === 'Delivered') totalPending += 10;
 
                     // Return Pay
-                    if (o.isReturnVerified) totalVerified += 20;
+                    if (o.isReturnVerified) totalVerified += 10;
                     else if (['Returned', 'Return Completed'].includes(o.status) && !o.isReturnVerified) {
-                        totalPending += 20;
+                        totalPending += 10;
                     }
                 });
 
@@ -2649,7 +2826,7 @@
                 // Filter Data
                 let filtered = [];
                 if (type === 'delivery') {
-                    filtered = historyOrdersCache.filter(o => o.isDeliveryVerified === true || o.status === 'Delivered');
+                    filtered = historyOrdersCache.filter(o => o.isDeliveryVerified || ['Delivered', 'Returned', 'Return Completed', 'Return Picked Up', 'Pickup Assigned', 'Return Assigned', 'Return Approved', 'Return Requested', 'Return Rejected', 'Return Cancelled'].includes(o.status));
                 } else {
                     filtered = historyOrdersCache.filter(o => o.isReturnVerified === true || (o.status && o.status.includes('Return')));
                 }
@@ -2679,7 +2856,7 @@
                     <td class="p-4"><p class="font-mono text-xs font-bold">#${order.id || String(order._id).substr(-6)}</p><p class="text-[10px] text-gray-400">${order.date || ''}</p></td>
                     <td class="p-4"><p class="font-bold text-sm">${order.customerName || 'Unknown'}</p><p class="text-xs text-gray-500">${order.address || ''}</p></td>
                     <td class="p-4">${badge}<p class="text-[10px] mt-1">${order.status}</p></td>
-                    <td class="p-4 text-right"><span class="font-bold text-sm ${isPaid ? 'text-green-600' : 'text-gray-400'}">₹20</span></td>
+                    <td class="p-4 text-right"><span class="font-bold text-sm ${isPaid ? 'text-green-600' : 'text-gray-400'}">₹10</span></td>
                 </tr>
             `;
                 }).join('');
@@ -2752,7 +2929,7 @@
                         actionButtons = `
             <button onclick="verifyAndPay('${order._id || order.id}')" 
                     class="w-full mb-2 px-3 py-3 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 shadow-md flex items-center justify-center gap-2">
-                <i data-lucide="wallet" class="w-4 h-4"></i> ${btnText} (₹20)
+                <i data-lucide="wallet" class="w-4 h-4"></i> ${btnText} (₹10)
             </button>
         `;
                     } else {
@@ -2807,7 +2984,8 @@
                         <img src="${firstImage}" class="w-10 h-10 object-cover rounded-lg border bg-white">
                         <div>
                             <p class="font-bold text-sm">#${order.id || order._id?.substr(-6)}</p>
-                            <p class="text-xs text-gray-500">₹${order.total || order.price}</p>
+                            <p class="text-xs text-gray-500 font-bold">₹${order.total || order.price}</p>
+                            ${order.couponCode ? `<p class="text-[9px] text-green-600 font-bold uppercase tracking-widest mt-1"><i data-lucide="tag" class="w-2.5 h-2.5 inline pb-[1px]"></i> -₹${order.couponDiscount}</p>` : ''}
                         </div>
                     </div>
                 </td>
@@ -2824,7 +3002,7 @@
                     ` : ''}
                 </td>
                 <td class="p-4">
-                    <div class="w-32 mx-auto">
+                    <div class="w-full min-w-[160px] max-w-[180px] mx-auto flex flex-col justify-center">
                          ${actionButtons}
                          ${billButton}
                     </div>
@@ -2864,7 +3042,7 @@
             }
         }
         async function verifyAndPay(orderId) {
-            if (!confirm("Verify this delivery and credit ₹20 to the driver's wallet?")) return;
+            if (!confirm("Verify this delivery and credit ₹10 to the driver's wallet?")) return;
 
             try {
                 const res = await fetch(`${API_URL}/admin/verify-payment`, {
@@ -2965,12 +3143,17 @@
                     <div class="bg-gray-900 text-white p-6 rounded-xl">
                         <div class="flex justify-between text-sm mb-2">
                             <span>Subtotal</span>
-                            <span>₹${order.price || (order.total - 5) || 0}</span>
+                            <span>₹${order.subtotal || (order.items ? order.items.reduce((s, i) => s + (i.price || 0), 0) : (order.total - 5))}</span>
                         </div>
                         <div class="flex justify-between text-sm mb-2">
                             <span>Platform Fee</span>
-                            <span>₹5</span>
+                            <span>₹${order.platformFee || 5}</span>
                         </div>
+                        ${order.couponCode ? `
+                        <div class="flex justify-between text-sm mb-2 text-green-400">
+                            <span>Coupon (${order.couponCode})</span>
+                            <span>-₹${order.couponDiscount}</span>
+                        </div>` : ''}
                         <div class="h-px bg-gray-700 my-3"></div>
                         <div class="flex justify-between text-xl font-black">
                             <span>Total Amount</span>
